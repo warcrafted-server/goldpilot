@@ -2,9 +2,9 @@
 
 Addon de economía para **World of Warcraft: Forever**: te dice qué te conviene hacer para ganar oro (recolectar, vender, fabricar o conservar), explica por qué y distingue siempre los precios observados, las ventas confirmadas y las estimaciones. Pensado para recolectores y comerciantes, útil para cualquier jugador. Interfaz en inglés y castellano.
 
-Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; el botón del minimapa abre la ayuda con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo.
+Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gp bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ayuda con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo.
 
-> **Estado: fase de diseño (0.0.1).** Aún no hay código. Este repositorio contiene la propuesta del producto, la arquitectura y la investigación de la API del cliente.
+> **Estado: desarrollo (0.0.8).** La primera versión publicable será la 0.1.0; las versiones actuales son internas.
 
 ## Documentación
 

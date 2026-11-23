@@ -19,6 +19,23 @@ local function command(input)
         addon.Log:info(string.format(addon.L.VERSION, addon.version))
     elseif subcommand == "minimap" then
         if addon.Minimap then addon.Minimap:toggle() end
+    elseif subcommand == "bags" or subcommand == "bolsas" then
+        local nowOk, now = pcall(time)
+        if not nowOk or not tonumber(now) then now = 0 end
+        local houseKey = addon.AuctionHouse.houseKey()
+        local db = GoldPilotDB or {}
+        local cut = db.houses and db.houses[houseKey] and db.houses[houseKey].cut
+        local values = addon.Advisor.bagsValue(addon.Bags:scan(), function(itemID)
+            local value = addon.Valuation.value(db, houseKey, itemID, now)
+            return {
+                vendorPrice = value.vendor and value.vendor.price,
+                ahPrice = value.ref and value.ref.price,
+                class = value.ref and value.ref.class,
+                cut = cut,
+            }
+        end)
+        addon.Log:info(string.format(addon.L.BAGS_SUMMARY, addon.Theme.money(values.vendor),
+            addon.Theme.money(values.auction), addon.Theme.money(values.best), values.withoutPrice))
     else
         addon.Log:info(addon.L.HELP)
     end

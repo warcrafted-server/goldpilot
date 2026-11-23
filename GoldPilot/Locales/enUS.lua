@@ -1,6 +1,6 @@
 local _, addon = ...
 addon.LocaleRegister("enUS", {
-    HELP = "Commands: /gp help, /gp version, /gp diag, /gp minimap",
+    HELP = "Commands: /gp help, /gp version, /gp diag, /gp minimap, /gp bags",
     MINIMAP_TITLE = "GoldPilot",
     MINIMAP_LEFT = "Left-click: help / version",
     MINIMAP_RIGHT = "Right-click: run diagnostics",
@@ -13,4 +13,18 @@ addon.LocaleRegister("enUS", {
     DIAG_PROFS = "Diagnostic: profession window opened.",
     DIAG_AUCTION_EVENT = "Diagnostic auction event: ",
     AH_DONE = "Auction house: %d items read",
+    AGE_MINUTES = "%d min ago",
+    AGE_HOURS = "%d h ago",
+    AGE_DAYS = "%d d ago",
+    BAGS_SUMMARY = "Bags: vendor %s; auction net %s; best mix %s; without price %d",
+    TOOLTIP_VENDOR = "Vendor: %s %s",
+    TOOLTIP_NO_VENDOR = "no vendor value",
+    TOOLTIP_AUCTION_LINE = "Auction: %s %s, %s; recommend %s",
+    TOOLTIP_NO_AUCTION = "Auction: no observed price",
+    TOOLTIP_STALE = "old data",
+    TOOLTIP_AUCTION = "Auction",
+    TOOLTIP_SELLER = "Vendor",
+    TOOLTIP_DETAILS = "Observed min: %s; quantity: %d",
+    TOOLTIP_DETAILS_NONE = "No observed minimum or quantity",
+    TOOLTIP_CUT_ASSUMED = "Assumed 5% auction cut",
 })

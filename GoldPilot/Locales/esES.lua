@@ -1,6 +1,6 @@
 local _, addon = ...
 addon.LocaleRegister("esES", {
-    HELP = "Comandos: /gp help, /gp version, /gp diag, /gp minimap",
+    HELP = "Comandos: /gp help, /gp version, /gp diag, /gp minimap, /gp bags",
     MINIMAP_TITLE = "GoldPilot",
     MINIMAP_LEFT = "Clic izquierdo: ayuda / versión",
     MINIMAP_RIGHT = "Clic derecho: ejecutar diagnóstico",
@@ -13,4 +13,18 @@ addon.LocaleRegister("esES", {
     DIAG_PROFS = "Diagnóstico: ventana de profesión abierta.",
     DIAG_AUCTION_EVENT = "Evento de subasta diagnosticado: ",
     AH_DONE = "Subasta: %d objetos leídos",
+    AGE_MINUTES = "hace %d min",
+    AGE_HOURS = "hace %d h",
+    AGE_DAYS = "hace %d d",
+    BAGS_SUMMARY = "Bolsas: vendedor %s; subasta neta %s; mejor combinación %s; sin precio %d",
+    TOOLTIP_VENDOR = "Vendedor: %s %s",
+    TOOLTIP_NO_VENDOR = "sin valor de vendedor",
+    TOOLTIP_AUCTION_LINE = "Subasta: %s %s, %s; recomendado: %s",
+    TOOLTIP_NO_AUCTION = "Subasta: sin precio observado",
+    TOOLTIP_STALE = "dato antiguo",
+    TOOLTIP_AUCTION = "Subasta",
+    TOOLTIP_SELLER = "Vendedor",
+    TOOLTIP_DETAILS = "Mínimo observado: %s; cantidad: %d",
+    TOOLTIP_DETAILS_NONE = "Sin mínimo ni cantidad observados",
+    TOOLTIP_CUT_ASSUMED = "Comisión supuesta del 5 %",
 })

@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.0.8] - 2026-11-23
+
+### Añadido
+- Asesor de vendedor/subasta, tema, tooltip y valor de bolsas
+
 ## [0.0.7] - 2026-11-23
 
 ### Añadido
