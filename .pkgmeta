@@ -1,0 +1,15 @@
+package-as: GoldPilot
+
+ignore:
+  - docs
+  - tools
+  - tests
+  - GoldPilotDev.toc
+  - .agents
+  - .claude
+  - .agentrelay
+  - .github
+  - CLAUDE.md
+  - AGENTS.md
+  - TODO.md
+  - VERSION
