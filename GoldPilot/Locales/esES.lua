@@ -12,4 +12,5 @@ addon.LocaleRegister("esES", {
     DIAG_LOOT = "Diagnóstico: botín observado.",
     DIAG_PROFS = "Diagnóstico: ventana de profesión abierta.",
     DIAG_AUCTION_EVENT = "Evento de subasta diagnosticado: ",
+    AH_DONE = "Subasta: %d objetos leídos",
 })

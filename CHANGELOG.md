@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.0.7] - 2026-11-23
+
+### Añadido
+- Colectores de bolsas y subasta con cola dirigida
+
 ## [0.0.6] - 2026-11-23
 
 ### Añadido
