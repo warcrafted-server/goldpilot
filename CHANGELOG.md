@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.0.6] - 2026-11-23
+
+### Añadido
+- Almacén de precios observados (resumen p50, historial diario y semanal empaquetado, poda) y elección del precio de referencia con clase de dato
+
 ## [0.0.5] - 2026-11-23
 
 ### Añadido
