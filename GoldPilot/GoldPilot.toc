@@ -1,0 +1,22 @@
+## Interface: 16001
+## Title: GoldPilot Forever
+## Notes: Asesoría económica y de subastas para WoW Forever.
+## Author: WarCrafted
+## Version: 0.0.5
+## IconTexture: Interface/AddOns/GoldPilot/Media/Icon
+## SavedVariables: GoldPilotDB
+## SavedVariablesPerCharacter: GoldPilotCharDB
+## OptionalDeps: Auctionator, TradeSkillMaster, GoldPilot_Market, TomTom
+Locales/Locale.lua
+Locales/enUS.lua
+Locales/esES.lua
+Core/Compat.lua
+Core/Log.lua
+Core/Events.lua
+Core/Modules.lua
+Core/Diag.lua
+Core/Migrations.lua
+Core/Init.lua
+Data/Generated/Items.lua
+Data/Generated/NodeSeeds.lua
+UI/Minimap.lua

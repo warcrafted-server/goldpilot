@@ -2,6 +2,8 @@
 
 Addon de economía para **World of Warcraft: Forever**: te dice qué te conviene hacer para ganar oro (recolectar, vender, fabricar o conservar), explica por qué y distingue siempre los precios observados, las ventas confirmadas y las estimaciones. Pensado para recolectores y comerciantes, útil para cualquier jugador. Interfaz en inglés y castellano.
 
+Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; el botón del minimapa abre la ayuda con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo.
+
 > **Estado: fase de diseño (0.0.1).** Aún no hay código. Este repositorio contiene la propuesta del producto, la arquitectura y la investigación de la API del cliente.
 
 ## Documentación
@@ -20,6 +22,10 @@ Addon de economía para **World of Warcraft: Forever**: te dice qué te conviene
 ## Instalación y uso
 
 Todavía no hay versión instalable. La primera versión publicable será la 0.1.0 (ver roadmap en la propuesta).
+
+## Desarrollo
+
+La copia de pruebas del juego es un junction `AddOns\GoldPilotDev` que apunta a la raíz del repo, con su propio `GoldPilotDev.toc` (generado con `python tools/toc_dev.py`, ignorado por git; vuelve a ejecutarlo si cambia la lista de archivos del TOC). Convive con la copia publicada de CurseForge (`AddOns\GoldPilot`), pero solo una de las dos debe estar activa a la vez porque comparten SavedVariables. Montarla o desmontarla exige el juego cerrado. Pruebas: `python tests/run.py`.
 
 ## Créditos y licencia
 
