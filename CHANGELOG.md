@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.1.0] - 2026-11-23
+
+### Añadido
+- Primera versión usable: tooltips con precio de vendedor y observación de subasta, antigüedad y recomendación; consultas dirigidas al abrir la subasta; valoración de bolsas y comandos de diagnóstico y minimapa.
+
 ## [0.0.8] - 2026-11-23
 
 ### Añadido

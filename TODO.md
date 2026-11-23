@@ -10,15 +10,17 @@
 - [ ] PocketBank: acordar una API pública mínima (existencias por personaje) para que GoldPilot no duplique datos, y que PocketBank pueda mostrar valores de GoldPilot.
 - [ ] wowdata: importar los nodos observados por GoldPilot (`importar_obs.py`) para sustituir las semillas de Classic.
 
-## Alta: antes de la 0.1.0
+## Alta: 0.1.0
 
-- [ ] Esqueleto del addon (núcleo, traducciones, pruebas, empaquetado, `.pkgmeta`).
-- [ ] Diagnóstico `/gp diag` en juego: subasta, correo, botín, profesiones, Auctionator/TSM, identificación de la casa.
-- [ ] Generador de datos desde `wowdata` (precio de vendedor, pila, vinculación).
+- [ ] Comprobar la versión 0.1.0 en juego (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
+- [ ] Crear el proyecto de CurseForge y añadir `X-Curse-Project-ID` al TOC cuando exista.
 
 ## Media
 
-- [ ] Roadmap 0.1.0 a 0.6.0 según la propuesta.
+- [ ] 0.2.0: asistente de venta y libro de operaciones.
+- [ ] 0.3.0: sesiones y asesor de recolección.
+- [ ] Integrar fuentes de precios Auctionator/TSM.
+- [ ] Crear la ventana principal.
 - [ ] Probar la API web de Blizzard para Forever (rutas, frecuencia, términos de uso).
 
 ## Descartado

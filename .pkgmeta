@@ -1,10 +1,16 @@
 package-as: GoldPilot
 
+manual-changelog:
+  filename: docs/RELEASE_NOTES.md
+  markup-type: markdown
+
+# El empaquetado real no se ha probado.
+move-folders:
+  GoldPilot/GoldPilot: GoldPilot
+
 ignore:
   - docs
   - tools
-  - tests
-  - GoldPilotDev.toc
   - .agents
   - .claude
   - .agentrelay
@@ -13,3 +19,9 @@ ignore:
   - AGENTS.md
   - TODO.md
   - VERSION
+  - README.en.md
+  - .luacheckrc
+  - .gitignore
+  - GoldPilotDev.toc
+  - tests
+  - .pkgmeta
