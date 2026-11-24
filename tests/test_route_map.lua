@@ -17,6 +17,10 @@ local function stops(count)
     return list
 end
 
+local function near(a, b, epsilon)
+    return math.abs(a - b) <= (epsilon or 1e-9)
+end
+
 return {
     ["route map sin mapa del mundo no da error y no esta disponible"] = function(addon)
         addon.RoutePlan.active = { mapID = 1, route = { stops = stops(3), points = 3 } }
@@ -77,6 +81,41 @@ return {
         assert(#map.lines == lines and #map.dots == dots)
         mock.combat = false
     end,
+    ["route map resalta la parada siguiente y restaura el resto"] = function(addon, mock)
+        mapFrame(mock, 7)
+        local plan = { mapID = 7, route = { stops = stops(3), points = 3 } }
+        addon.RoutePlan.active = plan
+        addon.RouteFollow.plan = plan
+        addon.RouteFollow.next = 2
+        assert(addon.RouteMap:refresh())
+        local map = addon.RouteMap
+        assert(map.dots[2].texture == "Interface/COMMON/Indicator-Green")
+        assert(map.dots[2].width == 10 and map.dots[2].height == 10)
+        assert(map.dots[1].texture == "Interface/COMMON/Indicator-Yellow")
+        assert(map.dots[1].width == 7 and map.dots[1].height == 7)
+        addon.RouteFollow.next = 1
+        assert(addon.RouteMap:refresh())
+        assert(map.dots[1].texture == "Interface/COMMON/Indicator-Green" and map.dots[1].width == 10)
+        assert(map.dots[2].texture == "Interface/COMMON/Indicator-Yellow" and map.dots[2].width == 7)
+        addon.RoutePlan:clear()
+        assert(addon.RouteFollow.plan == nil)
+    end,
+    ["route map sin textura de indicador usa el color como respaldo"] = function(addon, mock)
+        mapFrame(mock, 7)
+        local plan = { mapID = 7, route = { stops = stops(3), points = 3 } }
+        addon.RoutePlan.active = plan
+        addon.RouteFollow.plan = plan
+        assert(addon.RouteMap:refresh())
+        local map = addon.RouteMap
+        for _, dot in ipairs(map.dots) do
+            dot.SetTexture = nil
+            dot.color = nil
+        end
+        addon.RouteFollow.next = 2
+        assert(addon.RouteMap:refresh())
+        assert(map.dots[2].color[1] == 0.3 and map.dots[1].color[1] == 1)
+        addon.RoutePlan:clear()
+    end,
     ["route plan lee el mapa, el nombre y el aspecto del juego"] = function(addon, mock)
         C_Map = {
             GetBestMapForUnit = function(unit) if unit == "player" then return 7 end end,
@@ -127,6 +166,11 @@ return {
         assert(herbs.route and herbs.stats.own == 3)
         local ores = addon.RoutePlan.compute(7, "ore")
         assert(ores.route and ores.stats.own == 3)
+        local calls, normal = 0, addon.Visits.factor
+        addon.Visits.factor = function() calls = calls + 1; return 2 end
+        local boosted = addon.RoutePlan.compute(7, "ore")
+        addon.Visits.factor = normal
+        assert(calls == 3 and boosted.route and near(boosted.route.weight, ores.route.weight * 2, 1e-6))
         mock.items[1000].subclass = 7
         local mixed = addon.RoutePlan.compute(7, "herb")
         assert(mixed.route == nil and mixed.stats.own == 0)

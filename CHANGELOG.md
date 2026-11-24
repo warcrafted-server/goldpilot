@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.15.0] - 2026-11-24
+
+### Añadido
+- Seguimiento de la ruta de recolección: la siguiente parada se resalta en el mapa y se marca en TomTom, y las visitas con y sin nodo ajustan el peso de los puntos.
+
 ## [0.14.0] - 2026-11-24
 
 ### Añadido

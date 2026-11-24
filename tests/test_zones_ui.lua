@@ -108,16 +108,22 @@ return {
         end
         ui:refresh()
         assert(calls == 0 and addon.RoutePlan.active == nil)
+        GoldPilotDB.routeVisits = { [20] = {
+            [addon.Visits.cell(nil, 0.1, 0.1)] = { v = 2, h = 1, t = 1 } } }
         ui.routeButton.scripts.OnClick(ui.routeButton)
         assert(calls == 1 and addon.RoutePlan.active == plan)
+        assert(addon.RouteFollow.plan == plan and addon.RouteFollow.next == 1)
         assert(ui.routeButton:GetText() == addon.L.ZONES_CLEAR_ROUTE)
         local text = detailText(ui.widgets.detail)
         assert(text:find(addon.L.ZONES_ROUTE, 1, true))
         assert(text:find(string.format(addon.L.ZONES_ROUTE_STOPS, 3), 1, true))
         assert(text:find(string.format(addon.L.ZONES_ROUTE_YARDS, 1200), 1, true))
+        assert(text:find(string.format(addon.L.ZONES_ROUTE_NEXT, 1, 3), 1, true))
+        assert(text:find(string.format(addon.L.ZONES_ROUTE_VISITS, 1, 2), 1, true))
         assert(text:find(addon.L.ZONES_ROUTE_NOTE, 1, true))
         ui.routeButton.scripts.OnClick(ui.routeButton)
         assert(calls == 1 and addon.RoutePlan.active == nil)
+        assert(addon.RouteFollow.plan == nil)
         assert(ui.routeButton:GetText() == addon.L.ZONES_CREATE_ROUTE)
         addon.RoutePlan.compute = function(mapID, kind)
             calls = calls + 1

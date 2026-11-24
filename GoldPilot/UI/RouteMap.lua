@@ -78,13 +78,22 @@ local function dotAt(self, index)
     if dot then return dot end
     local ok, created = pcall(self.frame.CreateTexture, self.frame, nil, "ARTWORK")
     if not ok or not created then return nil end
-    if created.SetTexture and pcall(created.SetTexture, created, "Interface/COMMON/Indicator-Yellow") then
-        -- La textura del indicador ya es amarilla y visible.
-    elseif created.SetColorTexture then
-        pcall(created.SetColorTexture, created, 1, 0.82, 0.2, 0.9)
-    end
     self.dots[index] = created
     return created
+end
+
+local function paintDot(dot, marker)
+    local texture = marker and "Interface/COMMON/Indicator-Green" or "Interface/COMMON/Indicator-Yellow"
+    if dot.SetTexture then
+        if pcall(dot.SetTexture, dot, texture) then return end
+    end
+    if dot.SetColorTexture then
+        if marker then
+            pcall(dot.SetColorTexture, dot, 0.3, 0.95, 0.4, 1)
+        else
+            pcall(dot.SetColorTexture, dot, 1, 0.82, 0.2, 0.9)
+        end
+    end
 end
 
 local function labelAt(self, index)
@@ -109,6 +118,8 @@ function RouteMap:draw(plan)
     local width, height = canvasSize(self)
     local stops = plan.route.stops or {}
     local count = #stops
+    local follow = addon.RouteFollow
+    local nextIndex = follow and follow.plan == plan and tonumber(follow.next) or nil
     for index = 1, count do
         local from, pointTo = stops[index], stops[index % count + 1]
         local line = lineAt(self, index)
@@ -125,7 +136,10 @@ function RouteMap:draw(plan)
 
         local dot = dotAt(self, index)
         if dot then
-            if dot.SetSize then pcall(dot.SetSize, dot, 14 / multiplier, 14 / multiplier) end
+            local marker = index == nextIndex
+            paintDot(dot, marker)
+            local size = marker and 20 or 14
+            if dot.SetSize then pcall(dot.SetSize, dot, size / multiplier, size / multiplier) end
             if dot.SetPoint then pcall(dot.SetPoint, dot, "CENTER", frame, "TOPLEFT", from.x * width, -from.y * height) end
             if dot.Show then dot:Show() end
             local label = labelAt(self, index)

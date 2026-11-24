@@ -23,6 +23,38 @@ local function classify(key)
     return nil
 end
 
+local function sortedKeys(t)
+    local keys = {}
+    for key in pairs(t or {}) do keys[#keys + 1] = key end
+    table.sort(keys, function(a, b)
+        local an, bn = tonumber(a), tonumber(b)
+        if an and bn and an ~= bn then return an < bn end
+        if an and not bn then return true end
+        if bn and not an then return false end
+        return tostring(a) < tostring(b)
+    end)
+    return keys
+end
+
+function RoutePlan.kindOf(objectID, items)
+    objectID = tonumber(objectID)
+    if objectID and objectID > 0 and objectID == math.floor(objectID) then
+        local known = addon.Routes.kinds()[objectID]
+        if known and known.kind then return known.kind end
+        local plan = RoutePlan.active
+        local mapID = plan and tonumber(plan.mapID) or nil
+        local spots = mapID and addon.DataNodeSpots and addon.DataNodeSpots[mapID] or nil
+        local seed = spots and (spots[objectID] or spots[tostring(objectID)]) or nil
+        if type(seed) == "table" and (seed.kind == "herb" or seed.kind == "ore") then return seed.kind end
+    end
+    if type(items) ~= "table" then return nil end
+    for _, key in ipairs(sortedKeys(items)) do
+        local kind = classify(key)
+        if kind then return kind end
+    end
+    return nil
+end
+
 function RoutePlan.currentMap()
     local ok, value = addon.Compat.call("C_Map.GetBestMapForUnit", "player")
     value = ok and tonumber(value) or nil
@@ -64,6 +96,9 @@ function RoutePlan.compute(mapID, kind)
         skills = skills,
         classify = classify,
         aspect = aspect,
+        factor = function(x, y)
+            return addon.Visits.factor(db, mapID, kind, x, y)
+        end,
     })
     local route = addon.Routes.build(points, { aspect = aspect })
     local yards
@@ -74,11 +109,15 @@ end
 function RoutePlan:show(plan)
     self.active = plan
     if addon.RouteMap and addon.RouteMap.refresh then addon.RouteMap:refresh() end
+    if plan and plan.route and addon.RouteFollow and addon.RouteFollow.start then
+        addon.RouteFollow:start(plan)
+    end
     return plan
 end
 
 function RoutePlan:clear()
     self.active = nil
+    if addon.RouteFollow and addon.RouteFollow.stop then addon.RouteFollow:stop() end
     if addon.RouteMap and addon.RouteMap.refresh then addon.RouteMap:refresh() end
     return true
 end

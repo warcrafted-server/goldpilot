@@ -6,7 +6,11 @@ local function schedule(delay)
         local combatOK, combat = addon.Compat.call("InCombatLockdown")
         if combatOK and combat then schedule(30); return end
         local ok, current = addon.Compat.call("time")
-        if ok and tonumber(current) then addon.Prices.prune(GoldPilotDB or {}, tonumber(current)) end
+        if ok and tonumber(current) then
+            current = tonumber(current)
+            addon.Prices.prune(GoldPilotDB or {}, current)
+            addon.Visits.prune(GoldPilotDB or {}, current)
+        end
     end)
 end
 

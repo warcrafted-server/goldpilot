@@ -122,3 +122,12 @@
 - [ ] La ruta sigue alineada al hacer zoom en el mapa del mundo.
 - [ ] Nada se crea ni se redibuja en combate.
 - [ ] Sin puntos con precio, crear ruta avisa y no da errores.
+
+## 0.15.0
+
+- [ ] La ruta avanza de parada al llegar y la siguiente se resalta en verde.
+- [ ] TomTom marca una sola parada y la mueve al cambiar la siguiente; la casilla de Ajustes la activa y la desactiva.
+- [ ] Quitar ruta limpia el punto de TomTom.
+- [ ] Tras visitar paradas con y sin nodo, `/reload` y revisar que `GoldPilotDB.routeVisits` guarda visitas y aciertos.
+- [ ] En vuelo o muerto no se registran visitas.
+- [ ] Nada se crea ni se redibuja en combate; el punto de TomTom se marca al salir.

@@ -241,7 +241,7 @@ function Routes.build(points, opts)
         if type(point) == "table" then
             local x, y, weight = tonumber(point.x), tonumber(point.y), tonumber(point.weight)
             if x and y and weight then
-                list[#list + 1] = { x = x, y = y, weight = weight, object = point.object }
+                list[#list + 1] = { x = x, y = y, weight = weight, object = point.object, kind = point.kind }
             end
         end
     end
@@ -303,13 +303,14 @@ function Routes.build(points, opts)
         for _, other in ipairs(neighbor[best]) do
             if free[other] then members[#members + 1] = other end
         end
-        local total, xsum, ysum, count, objects = 0, 0, 0, 0, {}
+        local total, xsum, ysum, count, objects, grouped = 0, 0, 0, 0, {}, {}
         for _, other in ipairs(members) do
             local point = list[other]
             total = total + point.weight
             xsum, ysum = xsum + point.weight * point.X, ysum + point.weight * point.Y
             count = count + 1
             if point.object ~= nil then objects[point.object] = (objects[point.object] or 0) + 1 end
+            grouped[#grouped + 1] = { x = point.x, y = point.y, object = point.object, kind = point.kind }
         end
         local cx, cy
         if total > 0 then
@@ -321,7 +322,7 @@ function Routes.build(points, opts)
             end
         end
         stops[#stops + 1] = { x = cx, y = cy * aspect, weight = total, count = count, objects = objects,
-            X = cx, Y = cy }
+            X = cx, Y = cy, points = grouped }
         for _, other in ipairs(members) do free[other] = false end
         for _, other in ipairs(members) do
             for _, target in ipairs(neighbor[other]) do
@@ -423,7 +424,7 @@ function Routes.build(points, opts)
     for _, index in ipairs(order) do
         local stop = stops[index]
         output[#output + 1] = { x = stop.x, y = stop.y, weight = stop.weight, count = stop.count,
-            objects = stop.objects }
+            objects = stop.objects, points = stop.points }
         weight, count = weight + stop.weight, count + stop.count
     end
     return { stops = output, length = measured(order), weight = weight, points = count }

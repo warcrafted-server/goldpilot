@@ -198,6 +198,23 @@ return {
         end
         assert(#route.stops == 4 and route.points == 4)
     end,
+    ["build guarda los puntos agrupados de cada parada"] = function(addon)
+        local centers = { 0.1, 0.5, 0.9 }
+        local points = {}
+        for _, center in ipairs(centers) do
+            points[#points + 1] = { x = center, y = 0.1, weight = 10, object = 100, kind = "herb" }
+            points[#points + 1] = { x = center + 0.001, y = 0.1, weight = 5, object = 200, kind = "ore" }
+        end
+        local route = addon.Routes.build(points, { aspect = 2 })
+        assert(route and #route.stops == 3)
+        for index, stop in ipairs(route.stops) do
+            assert(#stop.points == 2)
+            assert(stop.points[1].x == centers[index] and stop.points[1].y == 0.1)
+            assert(stop.points[1].object == 100 and stop.points[1].kind == "herb")
+            assert(stop.points[2].x == centers[index] + 0.001 and stop.points[2].object == 200)
+            assert(stop.points[2].kind == "ore")
+        end
+    end,
     ["build devuelve nil con menos de tres paradas y tolera entradas vacías"] = function(addon)
         assert(addon.Routes.build(nil) == nil)
         assert(addon.Routes.build({}) == nil)

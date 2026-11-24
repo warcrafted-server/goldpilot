@@ -81,6 +81,12 @@ function ZonesUI:routeLines(lines, mapID)
         addLine(lines, string.format(L.ZONES_ROUTE_STOPS, #plan.route.stops))
         addLine(lines, string.format(L.ZONES_ROUTE_POINTS, tonumber(plan.route.points) or 0))
         if plan.yards then addLine(lines, string.format(L.ZONES_ROUTE_YARDS, plan.yards)) end
+        local follow = addon.RouteFollow
+        if follow and follow.plan == plan and follow.next then
+            addLine(lines, string.format(L.ZONES_ROUTE_NEXT, follow.next, #plan.route.stops))
+        end
+        local visits, hits = addon.Visits.totals(GoldPilotDB or {}, plan.mapID, plan.kind)
+        if visits > 0 then addLine(lines, string.format(L.ZONES_ROUTE_VISITS, hits, visits)) end
         addLine(lines, string.format(L.ZONES_ROUTE_OWN, (plan.stats and plan.stats.own) or 0,
             (plan.stats and plan.stats.seed) or 0))
         addLine(lines, string.format(L.ZONES_ROUTE_SKIP, (plan.stats and plan.stats.skill) or 0,

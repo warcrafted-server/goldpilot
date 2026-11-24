@@ -20,8 +20,8 @@ GoldPilot/                 Carpeta del addon (lo que se instala en Interface/Add
   Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations
   Locales/                 Locale.lua, enUS.lua, esES.lua
   Data/                    Semillas de nodos generadas desde wowdata (y la local opcional en Local/)
-  Store/                   Almacén de precios, historial, libro de operaciones (lógica pura)
-  State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, RoutePlan, Location
+  Store/                   Almacén de precios, historial, libro de operaciones y visitas de la ruta (lógica pura)
+  State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, RoutePlan, RouteFollow, Location
   Engine/                  Valoración, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
   Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan
   UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión, mapa y rutas
@@ -79,6 +79,7 @@ GoldPilotDB = {
             -- últimas 50 sesiones de recolección, resumidas
   nodes = { [mapID] = { [objectID] = { n=, first=t, last=t,
             spots={ {x=, y=, n=, t=}, ... } } } },  -- x, y = coordenada del mapa * 10000
+  routeVisits = { [mapID] = { ["<tipo>:<celda>"] = { v=, h=, t= } } },  -- visitas y aciertos de la ruta
   diag = { ... },
 }
 ```
@@ -116,7 +117,7 @@ Proveedores puros `proveedor(State, Store, Data, Settings) -> oportunidades`, co
 
 Puntuación: `beneficio esperado × confianza × liquidez × peso del perfil`, con todos los pesos y constantes en `Engine/Weights.lua`. Proveedores previstos: vender lo que tienes (subasta frente a vendedor), recolectar en la mejor zona para tu habilidad, liquidar objetos lentos, fabricar (cuando exista), comprar reactivos baratos para tus recetas (solo con datos `OBS` o `EXT` recientes).
 
-`Engine/Routes.lua` (puro) reúne los puntos propios y los de la semilla local, descarta los que no tienen precio o no puede recoger la habilidad, los agrupa en paradas y ordena y poda el recorrido. `State/RoutePlan.lua` lo une al juego: lee el mapa actual, su nombre, el aspecto y el ancho en yardas, valora los puntos con las sesiones y guarda el plan activo (sin SavedVariables).
+`Engine/Routes.lua` (puro) reúne los puntos propios y los de la semilla local, descarta los que no tienen precio o no puede recoger la habilidad, los agrupa en paradas y ordena y poda el recorrido; cada parada conserva sus puntos agrupados. `State/RoutePlan.lua` lo une al juego: lee el mapa actual, su nombre, el aspecto y el ancho en yardas, valora los puntos con las sesiones y con el factor de visitas, y guarda el plan activo (sin SavedVariables). `State/RouteFollow.lua` sigue el plan: consulta la posición cada 2 s, resalta y marca la siguiente parada, y registra las visitas con y sin nodo en `GoldPilotDB.routeVisits` para que `Store/Visits.lua` (puro) ajuste el peso de los puntos.
 
 ## 8. Interfaz (`UI/`)
 

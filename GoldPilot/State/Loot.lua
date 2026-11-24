@@ -160,6 +160,9 @@ local function readLoot()
     for _, node in ipairs(nodes) do
         GoldPilotDB = GoldPilotDB or {}
         addon.Nodes.record(GoldPilotDB, map, node.objectID, x, y, current, node.items)
+        if type(Loot.onNode) == "function" then
+            pcall(Loot.onNode, map, x, y, node.objectID, node.items, current)
+        end
     end
     GoldPilotCharDB = GoldPilotCharDB or {}
     if GoldPilotCharDB.session and addon.Sessions.expired(GoldPilotCharDB.session, current) then

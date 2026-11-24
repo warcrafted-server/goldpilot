@@ -11,6 +11,7 @@ local function settings()
     GoldPilotDB = GoldPilotDB or {}
     GoldPilotDB.settings = GoldPilotDB.settings or {}
     if GoldPilotDB.settings.tooltip == nil then GoldPilotDB.settings.tooltip = true end
+    if GoldPilotDB.settings.routeWaypoint == nil then GoldPilotDB.settings.routeWaypoint = true end
     GoldPilotDB.settings.minimap = GoldPilotDB.settings.minimap or { hidden = false }
     if GoldPilotDB.settings.minimap.hidden == nil then GoldPilotDB.settings.minimap.hidden = false end
     GoldPilotCharDB = GoldPilotCharDB or {}
@@ -120,6 +121,15 @@ local function buildWindow()
                     else dbSettings.hud = checked end
                 end)
             page.hudCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -350)
+            page.waypointCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_WAYPOINT,
+                dbSettings.routeWaypoint ~= false, function(checked)
+                    if inCombat() then return end
+                    dbSettings.routeWaypoint = checked
+                    if addon.RouteFollow and addon.RouteFollow.setWaypoint then
+                        addon.RouteFollow:setWaypoint(checked)
+                    end
+                end)
+            page.waypointCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -386)
         else
             page.minimapCheckbox:SetChecked(not dbSettings.minimap.hidden)
             page.tooltipCheckbox:SetChecked(dbSettings.tooltip ~= false)
@@ -128,6 +138,7 @@ local function buildWindow()
             end
             page.scanCheckbox:SetChecked(dbSettings.fullScan ~= false)
             page.hudCheckbox:SetChecked(dbSettings.hud ~= false)
+            page.waypointCheckbox:SetChecked(dbSettings.routeWaypoint ~= false)
         end
     end)
     for _, tab in ipairs(Main.registeredTabs) do

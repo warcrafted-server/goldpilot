@@ -171,6 +171,19 @@ return {
         local money = GoldPilotDB.nodes[1][513]
         assert(money.n == 1 and money.gathers == nil and money.items == nil)
     end,
+    ["Loot avisa del nodo recién registrado"] = function(addon, mock)
+        setupLoot(addon, mock)
+        local calls = {}
+        addon.Loot.onNode = function(map, x, y, objectID, items, current)
+            calls[#calls + 1] = { map = map, x = x, y = y, objectID = objectID, items = items,
+                current = current }
+        end
+        mock.loot = { itemSlot("GameObject-0-1-2-3-510", 2, 100) }
+        mock.fire("LOOT_READY")
+        assert(#calls == 1)
+        assert(calls[1].map == 1 and calls[1].x == 0.5 and calls[1].y == 0.5)
+        assert(calls[1].objectID == 510 and calls[1].items[100] == 2 and calls[1].current == clock)
+    end,
     ["Loot duplicado no suma y el desuello del mismo GUID añade su objeto"] = function(addon, mock)
         setupLoot(addon, mock)
         local notified = 0
