@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.7.0] - 2026-11-24
+
+### Añadido
+- Precio de vendedor obtenido del cliente, con carga diferida cuando faltan datos.
+- Inventario por variante de equipo, cantidades ligadas y valoración separada de unidades libres.
+
+### Corregido
+- Los objetos ligados no reciben consejo de subasta ni se encolan para consulta.
+
 ## [Sin publicar]
 
 ## [0.6.2] - 2026-11-24

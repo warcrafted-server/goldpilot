@@ -29,4 +29,28 @@ return {
         assert(built.rows[2].qtySellable == 1 and built.rows[2].cutAssumed)
         assert(built.rows[3].action == "none")
     end,
+    ["inventory separa variantes, reserva libres y valora ligados solo al vendedor"] = function(addon)
+        addon.DataItems = { [100] = "20;1;0;4;0" }
+        local db = { chars = { A = {
+            bags = { ["100:1"] = 3, ["100:2"] = 2 },
+            bound = { ["100:1"] = 1, ["100:2"] = 2 },
+        } }, reserved = { [100] = 9, ["100:1"] = 1 }, prices = { h = {
+            ["100:1"] = { last = { t = 1000, p50 = 100, min = 100, qty = 1 } },
+        } } }
+        local built = addon.Inventory.build(db, "h", nil, 1100)
+        assert(#built.rows == 2)
+        local first = built.rows[1].key == "100:1" and built.rows[1] or built.rows[2]
+        local second = built.rows[1].key == "100:2" and built.rows[1] or built.rows[2]
+        assert(first.qtyBound == 1 and first.qtyReserved == 1 and first.qtyAuction == 1)
+        assert(first.valueAuction == 95 and first.valueVendor == 40 and first.valueBest == 115)
+        assert(second.qtyBound == 2 and second.action == "vendor" and second.valueAuction == 0)
+        assert(second.qtyReserved == 0 and second.valueBest == 40)
+    end,
+    ["inventory acepta datos antiguos sin bound y objetos ausentes de DataItems con vendedor"] = function(addon)
+        addon.DataItems = {}
+        addon.Valuation.registerVendor(function(key) if addon.ItemKey.itemID(key) == 2973 then return 452 end end)
+        local built = addon.Inventory.build({ chars = { Player = { bags = { [2973] = 2 } } } }, "h", nil, 100)
+        assert(#built.rows == 1 and built.rows[1].qtyBound == 0)
+        assert(built.rows[1].vendorUnit == 452 and built.rows[1].valueVendor == 904)
+    end,
 }

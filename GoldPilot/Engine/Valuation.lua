@@ -37,12 +37,33 @@ function Valuation.choose(candidates, now, maxAge)
     return { price = chosen.price, class = chosen.class, src = chosen.src, t = chosen.t, age = chosen.age, inputs = valid }
 end
 
-function Valuation.vendor(itemID)
-    local value = addon.DataItems and addon.DataItems[itemID]
+local vendorProvider
+function Valuation.registerVendor(fn)
+    if type(fn) == "function" then vendorProvider = fn end
+end
+
+function Valuation.vendor(key)
+    if vendorProvider then
+        local ok, price = pcall(vendorProvider, key)
+        price = ok and tonumber(price) or nil
+        if price and price > 0 then return { price = price, class = "GAME" } end
+    end
+    local itemID = addon.ItemKey.itemID(key)
+    local value = itemID and addon.DataItems and addon.DataItems[itemID]
     if not value then return nil end
     local price = tonumber(string.match(value, "^([^;]+)"))
     if not price or price == 0 then return nil end
     return { price = price, class = "GAME" }
+end
+
+function Valuation.known(key)
+    local itemID = addon.ItemKey.itemID(key)
+    if itemID and addon.DataItems and addon.DataItems[itemID] then return true end
+    if vendorProvider then
+        local ok, price = pcall(vendorProvider, key)
+        return ok and price ~= nil
+    end
+    return false
 end
 
 function Valuation.stack(itemID)
@@ -71,7 +92,6 @@ end
 
 function Valuation.value(db, houseKey, itemKey, now, maxAge)
     local ref, why = Valuation.reference(db, houseKey, itemKey, now, maxAge)
-    local itemID = type(itemKey) == "number" and itemKey or type(itemKey) == "string" and tonumber(string.match(itemKey, "^(%d+)")) or nil
     if ref then why = nil end
-    return { ref = ref, why = why, vendor = itemID and Valuation.vendor(itemID) or nil }
+    return { ref = ref, why = why, vendor = Valuation.vendor(itemKey) }
 end

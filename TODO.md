@@ -18,8 +18,6 @@
 
 ## Alta: precios por variante (ver el plan, pasos A y B)
 
-- [ ] El inventario aún no distingue variantes de equipo en bolsas y banco
-
 - [ ] `DataItems` no incluye objetos que existen en el juego (2973, 9747): revisar el origen en wowdata; además `tools/generar_desde_wowdata.py` apunta a una ruta antigua (ahora `Projectes/Wow/wowdata`).
 - [ ] Libro: elegir entre el personaje actual y toda la cuenta (ahora es siempre toda la cuenta).
 

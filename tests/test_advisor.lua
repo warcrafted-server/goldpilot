@@ -19,6 +19,20 @@ return {
         assert(summary.items == 3 and summary.withoutPrice == 1)
         assert(summary.vendor == 35 and summary.auction == 38 and summary.best == 53)
     end,
+    ["bagsValue valora ligados al vendedor y libres con recomendación"] = function(addon)
+        local auction = addon.Advisor.bagsValue({ [1] = 3 }, function()
+            return { vendorPrice = 100, ahPrice = 200, cut = 0.05 }
+        end, { [1] = 1 })
+        assert(auction.vendor == 300 and auction.auction == 380 and auction.best == 480)
+        local vendor = addon.Advisor.bagsValue({ [2] = 3 }, function()
+            return { vendorPrice = 50, ahPrice = 30, cut = 0.05 }
+        end, { [2] = 1 })
+        assert(vendor.vendor == 150 and vendor.auction == 56 and vendor.best == 150)
+        local allBound = addon.Advisor.bagsValue({ [1] = 2 }, function()
+            return { vendorPrice = 100, ahPrice = 200, cut = 0.05 }
+        end, { [1] = 2 })
+        assert(allBound.best == 200 and allBound.auction == 0)
+    end,
     ["tema formatea dinero antiguedad e insignias"] = function(addon)
         assert(addon.Theme.money(12345) == "1g 23s 45c")
         assert(addon.Theme.age(7200) == "2 h ago")

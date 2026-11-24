@@ -20,7 +20,7 @@ function addon.Advisor.recommend(vendorPrice, ahPrice, cut, opts)
     return { action = "none", net = nil, vendor = nil, margin = 0, cutAssumed = assumed }
 end
 
-function addon.Advisor.bagsValue(bags, priceFor)
+function addon.Advisor.bagsValue(bags, priceFor, bound)
     local result = { vendor = 0, auction = 0, best = 0, items = 0, withoutPrice = 0 }
     for itemID, quantity in pairs(bags or {}) do
         quantity = tonumber(quantity) or 0
@@ -30,12 +30,19 @@ function addon.Advisor.bagsValue(bags, priceFor)
             local recommendation = addon.Advisor.recommend(
                 prices and prices.vendorPrice, prices and prices.ahPrice, prices and prices.cut
             )
-            local vendor = recommendation.vendor
-            local auction = recommendation.net
+            local boundQty = math.min(quantity, tonumber(bound and bound[itemID]) or 0)
+            local free = quantity - boundQty
+            local vendor, auction = recommendation.vendor, recommendation.net
             if vendor then result.vendor = result.vendor + vendor * quantity end
-            if auction then result.auction = result.auction + auction * quantity end
+            if auction then result.auction = result.auction + auction * free end
             if not vendor and not auction then result.withoutPrice = result.withoutPrice + 1 end
-            result.best = result.best + math.max(vendor or 0, auction or 0) * quantity
+            if free == 0 then
+                result.best = result.best + (vendor or 0) * boundQty
+            elseif recommendation.action == "auction" then
+                result.best = result.best + (vendor or 0) * boundQty + (auction or 0) * free
+            else
+                result.best = result.best + (vendor or 0) * quantity
+            end
         end
     end
     return result

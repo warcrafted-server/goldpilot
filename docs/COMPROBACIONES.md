@@ -1,7 +1,7 @@
-# Comprobaciones manuales en juego — 0.6.1
+# Comprobaciones manuales en juego — 0.7.0
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gp version` muestra `0.6.2`.
+- [ ] `/gp version` muestra `0.7.0`.
 - [ ] Abrir Inventario con `/gp` y con clic izquierdo en el minimapa.
 - [ ] Cambiar entre Personaje actual y Toda la cuenta.
 - [ ] Filtrar objetos por nombre y comprobar la lista.
@@ -60,3 +60,9 @@
 - [x] El tooltip de cada variante muestra su propio precio.
 - [ ] La poda del historial se ejecuta al entrar, fuera de combate.
 - [ ] Tras usar el almacén, el tamaño de SavedVariables permanece por debajo del presupuesto esperado.
+
+## 0.7.0
+
+- [ ] Los precios de vendedor se obtienen del cliente incluso para objetos ausentes de DataItems.
+- [ ] Las variantes de equipo aparecen por separado en bolsas y banco.
+- [ ] Los objetos ligados muestran su precio de vendedor y nunca recomiendan subasta.

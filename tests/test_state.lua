@@ -389,4 +389,49 @@ return {
         mock.fire("AUCTION_HOUSE_SHOW")
         assert(addon.AuctionHouse:status().current == 35 and addon.AuctionHouse:status().pending == 0)
     end,
+    ["la cola omite objetos totalmente ligados aunque estén seguidos"] = function(addon, mock)
+        setup()
+        NUM_TOTAL_EQUIPPED_BAG_SLOTS = 0
+        C_Container.GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end
+        C_Container.GetContainerItemInfo = function() return { itemID = 25, stackCount = 2, isBound = true } end
+        setNonGearFixtures(addon)
+        GoldPilotDB = { watch = { [25] = true } }
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(addon.AuctionHouse:status().current == nil and addon.AuctionHouse:status().pending == 0)
+        assert(#GoldPilotDB.ahLast.queued == 0)
+    end,
+    ["la cola ordena bolsas por cantidad y añade el banco una sola vez"] = function(addon, mock)
+        setup()
+        NUM_TOTAL_EQUIPPED_BAG_SLOTS = 2
+        C_Container.GetContainerNumSlots = function(bag) return bag == 0 and 5 or 0 end
+        C_Container.GetContainerItemInfo = function(_, slot)
+            return { itemID = 40 + slot, stackCount = slot }
+        end
+        setNonGearFixtures(addon)
+        for id = 41, 45 do addon.DataItems[id] = "1;1;0;7;0" end
+        GoldPilotDB = { chars = { Tester = { bank = { [35] = 8 } } } }
+        local originalScan, scans = addon.Bags.scan, 0
+        addon.Bags.scan = function(self) scans = scans + 1; return originalScan(self) end
+        addon.Modules:enableAll()
+        scans = 0
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(scans == 1)
+        local queued = GoldPilotDB.ahLast.queued
+        assert(queued[1] == 45 and queued[2] == 44 and queued[3] == 43 and queued[4] == 42 and queued[5] == 41)
+        assert(queued[6] == 35 and #queued == 6)
+        mock.fire("AUCTION_HOUSE_CLOSED")
+    end,
+    ["bags scan conserva clave de variante, ligado y enlace del cliente"] = function(addon)
+        setup()
+        addon.DataItems[100] = "1;1;0;4;0"
+        C_Container.GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end
+        C_Container.GetContainerItemInfo = function()
+            return { itemID = 100, stackCount = 2, isBound = true, hyperlink = "|Hitem:100::::::::::::1:222|h[Test]|h" }
+        end
+        GoldPilotDB = {}
+        local items, bound = addon.Bags:scan()
+        assert(items["100:222"] == 2 and bound["100:222"] == 2)
+        assert(GoldPilotDB.links["100:222"] == "item:100::::::::::::1:222")
+    end,
 }

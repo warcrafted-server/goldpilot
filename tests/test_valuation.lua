@@ -43,4 +43,31 @@ return {
         assert(result.ref and result.ref.price == 42)
         assert(result.vendor == nil and result.why == nil)
     end,
+    ["vendor prioriza proveedor y distingue cero de dato desconocido"] = function(addon)
+        addon.DataItems = { [77] = "12;1;0;0;0" }
+        addon.Valuation.registerVendor(function(key) assert(key == "77:9"); return 8 end)
+        assert(addon.Valuation.vendor("77:9").price == 8)
+        addon.Valuation.registerVendor(function() return 0 end)
+        assert(addon.Valuation.vendor(77).price == 12 and addon.Valuation.known("77:9"))
+        addon.DataItems = {}
+        assert(addon.Valuation.vendor(78) == nil and addon.Valuation.known(78))
+        addon.Valuation.registerVendor(function() return nil end)
+        assert(not addon.Valuation.known(78))
+    end,
+    ["item data cachea precio cero y GET_ITEM_INFO_RECEIVED lo refresca"] = function(addon, mock)
+        local price, requests = 0, 0
+        C_Item = {
+            GetItemInfo = function()
+                return "name", "item:79", 1, 1, 1, "class", "subclass", 1, "", 123, price
+            end,
+            RequestLoadItemDataByID = function() requests = requests + 1 end,
+        }
+        addon.Modules:enableAll()
+        assert(addon.Valuation.vendor(79) == nil and addon.Valuation.known(79))
+        assert(addon.ItemData.cache[79] == 0 and requests == 0)
+        price = 25
+        assert(addon.Valuation.vendor(79) == nil)
+        mock.fire("GET_ITEM_INFO_RECEIVED", 79, true)
+        assert(addon.Valuation.vendor(79).price == 25)
+    end,
 }

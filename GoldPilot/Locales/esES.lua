@@ -75,6 +75,7 @@ addon.LocaleRegister("esES", {
     INVENTORY_WITHOUT_PRICE = "Sin precio",
     INVENTORY_STALE = "Datos viejos",
     INVENTORY_TOTAL = "Total: %d · vendible: %d · reservado: %d",
+    INVENTORY_BOUND = "Ligados: %d",
     INVENTORY_BREAKDOWN = "%s — %s: %d",
     INVENTORY_BAGS = "Bolsas",
     INVENTORY_BANK = "Banco",

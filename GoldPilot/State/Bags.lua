@@ -10,21 +10,30 @@ local function characterBagIDs()
 end
 
 local function scanContainers(ids)
-    local items = {}
-    if not addon.Compat.has("C_Container.GetContainerNumSlots") then return items end
+    local items, bound = {}, {}
+    if not addon.Compat.has("C_Container.GetContainerNumSlots") then return items, bound end
     for _, bag in ipairs(ids) do
         local slotsOk, slots = addon.Compat.call("C_Container.GetContainerNumSlots", bag)
         if slotsOk and tonumber(slots) then
             for slot = 1, tonumber(slots) do
                 local infoOk, info = addon.Compat.call("C_Container.GetContainerItemInfo", bag, slot)
                 if infoOk and type(info) == "table" and tonumber(info.itemID) then
+                    local itemID = tonumber(info.itemID)
+                    local key = info.hyperlink and addon.ItemKey.fromLink(info.hyperlink, addon.ItemKey.isGear(itemID)) or nil
+                    key = key or itemID
                     local count = tonumber(info.stackCount) or 1
-                    items[tonumber(info.itemID)] = (items[tonumber(info.itemID)] or 0) + count
+                    items[key] = (items[key] or 0) + count
+                    if info.isBound then bound[key] = (bound[key] or 0) + count end
+                    if type(key) == "string" and string.find(key, ":", 1, true) then
+                        GoldPilotDB = GoldPilotDB or {}
+                        GoldPilotDB.links = GoldPilotDB.links or {}
+                        GoldPilotDB.links[key] = string.match(info.hyperlink, "(item:[^|%s]+)")
+                    end
                 end
             end
         end
     end
-    return items
+    return items, bound
 end
 
 function addon.Bags:scan()
@@ -54,11 +63,14 @@ local function save()
     local ok, seen = addon.Compat.call("time")
     local key = characterKey()
     local previous = GoldPilotDB.chars[key] or {}
+    local bags, bound = addon.Bags:scan()
     GoldPilotDB.chars[key] = {
         money = tonumber(money) or 0,
-        bags = addon.Bags:scan(),
+        bags = bags,
+        bound = bound,
         equipped = addon.Bags:scanEquipped(),
         bank = previous.bank,
+        bankBound = previous.bankBound,
         bankSeen = previous.bankSeen,
         seen = ok and tonumber(seen) or 0,
     }
@@ -77,10 +89,10 @@ local function scanBank()
     end
     local reagentBank = Enum and Enum.BagIndex and tonumber(Enum.BagIndex.Reagentbank) or -3
     ids[#ids + 1] = reagentBank
-    local items = scanContainers(ids)
+    local items, bound = scanContainers(ids)
     local char = GoldPilotDB.chars[key] or {}
     local ok, seen = addon.Compat.call("time")
-    char.bank, char.bankSeen = items, ok and tonumber(seen) or 0
+    char.bank, char.bankBound, char.bankSeen = items, bound, ok and tonumber(seen) or 0
     GoldPilotDB.chars[key] = char
 end
 
@@ -88,7 +100,6 @@ addon.Modules:register("bags", {
     requires = { "C_Container.GetContainerNumSlots" },
     onEnable = function()
         save()
-        addon.Events:subscribe("bags", "PLAYER_LOGIN", save)
         addon.Events:subscribe("bags", "BAG_UPDATE_DELAYED", save, 0.5)
         addon.Events:subscribe("bags", "BANKFRAME_OPENED", scanBank, 0.5)
         addon.Events:subscribe("bags", "PLAYER_EQUIPMENT_CHANGED", save, 0.5)

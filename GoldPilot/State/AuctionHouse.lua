@@ -26,8 +26,8 @@ AuctionHouse.houseKey = houseKey
 function AuctionHouse:isOpen() return isOpen end
 
 local function validItem(itemID)
-    itemID = tonumber(itemID)
-    return itemID and addon.DataItems and addon.DataItems[itemID] and itemID or nil
+    itemID = addon.ItemKey.itemID(itemID)
+    return itemID and addon.Valuation.known(itemID) and itemID or nil
 end
 
 local function contains(itemID)
@@ -248,6 +248,32 @@ local function buildQueue()
     queue, current, done, finished = {}, nil, 0, 0
     sessionActive = true
     local seen = {}
+    local totals, boundTotals = {}, {}
+    local function tradable(inventory, bound)
+        local result, localBound = {}, {}
+        for key, count in pairs(inventory or {}) do
+            local id = addon.ItemKey.itemID(key)
+            if id then
+                local quantity = tonumber(count) or 0
+                local boundQuantity = tonumber(bound and bound[key]) or 0
+                result[id] = (result[id] or 0) + quantity
+                localBound[id] = (localBound[id] or 0) + boundQuantity
+                totals[id] = (totals[id] or 0) + quantity
+                boundTotals[id] = (boundTotals[id] or 0) + boundQuantity
+            end
+        end
+        for id, count in pairs(result) do
+            result[id] = count - math.min(count, localBound[id] or 0)
+            if result[id] <= 0 then result[id] = nil end
+        end
+        return result
+    end
+    local liveBags, liveBound = addon.Bags:scan()
+    local bagQueue = tradable(liveBags, liveBound)
+    local chars = GoldPilotDB.chars or {}
+    local currentName = select(2, addon.Compat.call("UnitName", "player"))
+    local own = chars[currentName or "unknown"] or {}
+    local bankQueue = tradable(own.bank, own.bankBound)
     local function append(items, sortByCount)
         local list = {}
         for itemID, count in pairs(items or {}) do
@@ -265,17 +291,16 @@ local function buildQueue()
     local watch = {}
     for itemID in pairs(GoldPilotDB.watch or {}) do
         local valid = validItem(itemID)
-        if valid then watch[#watch + 1] = valid end
+        if valid and not (totals[valid] and totals[valid] > 0 and totals[valid] <= (boundTotals[valid] or 0)) then
+            watch[#watch + 1] = valid
+        end
     end
     table.sort(watch)
     for _, itemID in ipairs(watch) do
         if not seen[itemID] then queue[#queue + 1] = itemID; seen[itemID] = true end
     end
-    append(addon.Bags:scan(), true)
-    local chars = GoldPilotDB.chars or {}
-    local currentName = select(2, addon.Compat.call("UnitName", "player"))
-    local own = chars[currentName or "unknown"] or {}
-    append(own.bank, true)
+    append(bagQueue, true)
+    append(bankQueue, true)
     append(addon.Bags:scanEquipped(), false)
     local others, otherItems = {}, {}
     for name, char in pairs(chars) do
@@ -287,10 +312,20 @@ local function buildQueue()
         return sa > sb
     end)
     for _, entry in ipairs(others) do
-        for _, inventory in ipairs({ entry.char.bags or {}, entry.char.bank or {}, entry.char.equipped or {} }) do
-            for itemID, count in pairs(inventory) do
-                local id = tonumber(itemID)
-                if id then otherItems[id] = (otherItems[id] or 0) + (tonumber(count) or 0) end
+        local bagItems = tradable(entry.char.bags, entry.char.bound)
+        local bankItems = tradable(entry.char.bank, entry.char.bankBound)
+        for id, count in pairs(bagItems) do
+            otherItems[id] = (otherItems[id] or 0) + count
+        end
+        for id, count in pairs(bankItems) do
+            otherItems[id] = (otherItems[id] or 0) + count
+        end
+        for id, count in pairs(entry.char.equipped or {}) do
+            local itemID = addon.ItemKey.itemID(id)
+            if itemID then
+                local quantity = tonumber(count) or 0
+                otherItems[itemID] = (otherItems[itemID] or 0) + quantity
+                totals[itemID] = (totals[itemID] or 0) + quantity
             end
         end
     end

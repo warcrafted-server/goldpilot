@@ -117,6 +117,29 @@ return {
         addon.Tooltip:add(other, { id = 25, hyperlink = "item:25::::::::::::1:222" })
         assert(not find(other.lines, "Last seen") and not find(other.lines, "0g 0s 80c"))
     end,
+    ["tooltip ligado solo muestra vendedor y no aconseja ni encola subasta"] = function(addon, mock)
+        setup()
+        ITEM_SOULBOUND = "Soulbound"
+        addon.DataItems[25] = "7;1;0;0;0"
+        GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = {
+            [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 1 } },
+        } } }
+        addon.Modules:enableAll()
+        local frame = tooltip()
+        addon.Tooltip:add(frame, { id = 25, lines = { { leftText = "Soulbound" } } })
+        assert(#frame.lines == 4 and find(frame.lines, "Vendor:") and not find(frame.lines, "Auction") and not find(frame.lines, "Last seen"))
+        assert(addon.AuctionHouse:status().pending == 0)
+        addon.DataItems[25] = "0;1;0;0;0"
+        local noVendor = tooltip()
+        addon.Tooltip:add(noVendor, { id = 25, lines = { { leftText = "Soulbound" } } })
+        assert(#noVendor.lines == 0)
+        addon.DataItems = {}
+        GoldPilotDB = { houses = { Horde = {} } }
+        local unknown = tooltip()
+        addon.Tooltip:add(unknown, { id = 2973, lines = { { leftText = "Soulbound" } } })
+        assert(#unknown.lines == 0)
+        ITEM_SOULBOUND = nil
+    end,
     ["comando bags imprime el resumen"] = function(addon, mock)
         setup()
         C_Container = {

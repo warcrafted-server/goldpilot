@@ -35,6 +35,17 @@ local function fieldSettings()
         median = saved.median ~= false, advice = saved.advice ~= false }
 end
 
+local function isBound(data)
+    local labels = { "ITEM_SOULBOUND", "ITEM_BIND_ON_PICKUP", "ITEM_BIND_QUEST", "ITEM_ACCOUNTBOUND" }
+    for _, line in ipairs(data and data.lines or {}) do
+        for _, name in ipairs(labels) do
+            local label = _G[name]
+            if label and line.leftText == label then return true end
+        end
+    end
+    return false
+end
+
 function Tooltip:add(tooltip, data)
     if inCombat() then return end
     local settings = GoldPilotDB and GoldPilotDB.settings
@@ -51,12 +62,31 @@ function Tooltip:add(tooltip, data)
     local db = GoldPilotDB or {}
     local known = addon.DataItems and addon.DataItems[itemID]
     local observation = addon.Prices.get(db, houseKey, key)
-    if addon.AuctionHouse:isOpen() and (not observation or tonumber(now) - (tonumber(observation.t) or 0) >= 600) then
+    local bound = isBound(data)
+    if not bound and addon.AuctionHouse:isOpen() and (not observation or tonumber(now) - (tonumber(observation.t) or 0) >= 600) then
         addon.AuctionHouse:enqueue(itemID, true)
     end
-    if not known and not observation then return end
+    if not known and not observation and not addon.Valuation.known(key) then return end
     local value = addon.Valuation.value(db, houseKey, key, now)
     local vendor = value.vendor and value.vendor.price
+    if not observation and not vendor then return end
+    if bound then
+        if not vendor then return end
+        local lines = {}
+        local fields = fieldSettings()
+        if fields.vendor then lines[#lines + 1] = { addon.L.TOOLTIP_ROW_VENDOR, addon.Theme.money(vendor) } end
+        if fields.advice then lines[#lines + 1] = { addon.L.TOOLTIP_ROW_ADVICE, "|cffffcc40" .. addon.L.TOOLTIP_SELLER .. "|r" } end
+        if #lines == 0 then return end
+        tooltip:AddLine(" ")
+        if tooltip.AddDoubleLine then
+            tooltip:AddDoubleLine(addon.L.TOOLTIP_HEADER, "", 1, 0.82, 0.2, 1, 1, 1)
+            for _, entry in ipairs(lines) do tooltip:AddDoubleLine(entry[1], entry[2], 0.78, 0.72, 0.55, 1, 1, 1) end
+        else
+            tooltip:AddLine(addon.L.TOOLTIP_HEADER)
+            for _, entry in ipairs(lines) do tooltip:AddLine(entry[1] .. ": " .. entry[2]) end
+        end
+        return
+    end
     local ref = value.ref
     local stale = not ref and value.why and value.why.reason == "stale" and value.why.best
     local shown = ref or stale

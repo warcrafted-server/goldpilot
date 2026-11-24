@@ -23,18 +23,24 @@ local function currentCharacter()
     return ok and type(name) == "string" and name or "unknown"
 end
 
-local function itemName(itemID)
-    local ok, name = addon.Compat.call("C_Item.GetItemInfo", itemID)
-    if not ok then ok, name = addon.Compat.call("GetItemInfo", itemID) end
+local function itemLookup(key, itemID)
+    return type(key) == "string" and GoldPilotDB and GoldPilotDB.links and GoldPilotDB.links[key] or itemID
+end
+
+local function itemName(itemID, key)
+    local lookup = itemLookup(key, itemID)
+    local ok, name = addon.Compat.call("C_Item.GetItemInfo", lookup)
+    if not ok then ok, name = addon.Compat.call("GetItemInfo", lookup) end
     if ok and type(name) == "string" and name ~= "" then return name end
     addon.Compat.call("C_Item.RequestLoadItemDataByID", itemID)
     return "[" .. itemID .. "]"
 end
 
-local function itemIcon(itemID)
-    local ok, icon = addon.Compat.call("C_Item.GetItemIconByID", itemID)
+local function itemIcon(itemID, key)
+    local lookup = itemLookup(key, itemID)
+    local ok, icon = addon.Compat.call("C_Item.GetItemIconByID", lookup)
     if ok then return icon end
-    ok, _, _, _, _, _, _, _, _, icon = addon.Compat.call("GetItemInfo", itemID)
+    ok, _, _, _, _, _, _, _, _, icon = addon.Compat.call("GetItemInfo", lookup)
     return ok and icon or nil
 end
 
@@ -43,7 +49,7 @@ local function matches(name, filter)
 end
 
 local function formatRow(row)
-    local name = itemName(row.itemID)
+    local name = itemName(row.itemID, row.key)
     local right = row.unitBest and addon.Theme.money(row.valueBest) or addon.L.INVENTORY_NO_PRICE
     local color
     if row.stale then color = { 0.5, 0.5, 0.5 }
@@ -51,20 +57,21 @@ local function formatRow(row)
     elseif row.action == "vendor" then color = { 1, 0.8, 0.25 }
     else color = { 0.65, 0.65, 0.65 } end
     local star = row.watched and "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_1:14|t " or ""
-    return { itemID = row.itemID, text = star .. name .. " ×" .. row.qty,
-        right = right, icon = itemIcon(row.itemID), color = color, rightColor = color,
+    return { key = row.key, itemID = row.itemID, text = star .. name .. " ×" .. row.qty,
+        right = right, icon = itemIcon(row.itemID, row.key), color = color, rightColor = color,
         row = row, name = name }
 end
 
 local function detailLines(row, name)
     local lines = { { text = name, color = { 1, 0.82, 0.2 } },
         string.format(addon.L.INVENTORY_TOTAL, row.qty, row.qtySellable, row.qtyReserved) }
+    if row.qtyBound > 0 then lines[#lines + 1] = string.format(addon.L.INVENTORY_BOUND, row.qtyBound) end
     for _, part in ipairs(row.breakdown) do
         lines[#lines + 1] = string.format(addon.L.INVENTORY_BREAKDOWN, part.char,
             part.where == "bags" and addon.L.INVENTORY_BAGS or addon.L.INVENTORY_BANK, part.qty)
     end
     lines[#lines + 1] = string.format(addon.L.INVENTORY_VENDOR, row.vendorUnit and addon.Theme.money(row.vendorUnit) or addon.L.INVENTORY_NO_PRICE)
-    local observation = addon.Prices.get(GoldPilotDB or {}, addon.AuctionHouse.houseKey(), row.itemID)
+    local observation = addon.Prices.get(GoldPilotDB or {}, addon.AuctionHouse.houseKey(), row.key)
     if observation then
         lines[#lines + 1] = string.format(addon.L.INVENTORY_AUCTION, addon.Theme.money(observation.p50),
             addon.Theme.money(observation.min), observation.qty, addon.Theme.age(math.max(0, now() - observation.t)))
@@ -135,8 +142,9 @@ function InventoryUI:refresh()
     else self.page.emptyText:Hide() end
     if self.selected then
         local selectedName
-        for _, row in ipairs(shown) do if row.itemID == self.selected.itemID then selectedName = itemName(row.itemID); self.selected = row; break end end
-        if selectedName then self.widgets.detail:setLines(detailLines(self.selected, selectedName)) end
+        for _, row in ipairs(shown) do if row.key == self.selected.key then selectedName = itemName(row.itemID, row.key); self.selected = row; break end end
+        if selectedName then self.widgets.detail:setLines(detailLines(self.selected, selectedName))
+        else self.selected = nil end
     end
     self.scopeButton:SetText(self.account and addon.L.INVENTORY_SCOPE_ACCOUNT or addon.L.INVENTORY_SCOPE_CHARACTER)
     self.hideCheckbox:SetChecked(self.hideReserved)
@@ -227,13 +235,13 @@ function InventoryUI:build(page)
     self.reserveButton = makeButton(page, addon.L.INVENTORY_RESERVE, DETAIL_X + 8, function()
         GoldPilotDB.reserved = GoldPilotDB.reserved or {}
         if self.selected.reserved then
-            GoldPilotDB.reserved[self.selected.itemID] = nil
+            GoldPilotDB.reserved[self.selected.key] = nil
             self:refresh()
             return
         end
         local amount = IsShiftKeyDown and IsShiftKeyDown() and 1 or self.selected.qty
-        GoldPilotDB.reserved[self.selected.itemID] = math.min(self.selected.qty,
-            (tonumber(GoldPilotDB.reserved[self.selected.itemID]) or 0) + amount)
+        GoldPilotDB.reserved[self.selected.key] = math.min(self.selected.qty - self.selected.qtyBound,
+            (tonumber(GoldPilotDB.reserved[self.selected.key]) or 0) + amount)
         self:refresh()
     end)
     self.watchButton = makeButton(page, addon.L.INVENTORY_WATCH, DETAIL_X + 138, function()

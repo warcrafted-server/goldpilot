@@ -35,4 +35,19 @@ return {
         assert(ui.account == original)
         assert(not ui:refresh())
     end,
+    ["inventory reserva variante por clave y limpia selección al desaparecer"] = function(addon)
+        addon.DataItems = { [100] = "1;1;0;4;0" }
+        GoldPilotDB = { chars = { Player = { bags = { ["100:222"] = 2 } } }, links = {
+            ["100:222"] = "item:100::::::::::::1:222",
+        } }
+        addon.Main:show()
+        local ui = addon.InventoryUI
+        assert(ui.widgets.list.data[1].key == "100:222")
+        ui.widgets.list.rows[1].scripts.OnClick(ui.widgets.list.rows[1])
+        ui.reserveButton.scripts.OnClick(ui.reserveButton)
+        assert(GoldPilotDB.reserved["100:222"] == 2 and GoldPilotDB.reserved[100] == nil)
+        GoldPilotDB.chars.Player.bags["100:222"] = nil
+        ui:refresh()
+        assert(ui.selected == nil)
+    end,
 }
