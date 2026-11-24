@@ -9,6 +9,7 @@ import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "GoldPilot", "GoldPilot.toc")
+LOCAL = os.path.join(ROOT, "GoldPilot", "Data", "Local", "NodeSpots.lua")
 
 
 def main():
@@ -20,7 +21,11 @@ def main():
             elif line.startswith("## Version:"):
                 line = line.rstrip() + "-dev"
             elif line.strip() and not line.startswith("#"):
-                line = "GoldPilot\\" + line.strip().replace("/", "\\")
+                source = line.strip().replace("\\", "/")
+                out.append("GoldPilot\\" + line.strip().replace("/", "\\"))
+                if source == "Data/Generated/NodeSeeds.lua" and os.path.exists(LOCAL):
+                    out.append("GoldPilot\\Data\\Local\\NodeSpots.lua")
+                continue
             out.append(line)
     with open(os.path.join(ROOT, "GoldPilotDev.toc"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(out) + "\n")

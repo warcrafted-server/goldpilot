@@ -7,6 +7,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ADDON = os.path.join(ROOT, "GoldPilot")
+LOCAL = os.path.join(ADDON, "Data", "Local")
 ALLOWED = {"GoldPilot", "GoldPilotDB", "GoldPilotCharDB", "SLASH_GOLDPILOT1", "SLASH_GOLDPILOT2", "GoldPilotMainFrame"}
 
 
@@ -18,6 +19,12 @@ def read(path):
 def toc_files():
     return [l.strip().replace("\\", "/") for l in read(os.path.join(ADDON, "GoldPilot.toc")).splitlines()
             if l.strip() and not l.startswith("#")]
+
+
+def lua_files():
+    # La semilla local se genera aparte y solo la carga el TOC de desarrollo.
+    return sorted(p for p in glob.glob(os.path.join(ADDON, "**", "*.lua"), recursive=True)
+                  if not os.path.abspath(p).startswith(LOCAL + os.sep))
 
 
 def main():
@@ -34,10 +41,10 @@ def main():
         return 1
 
     lua = LuaRuntime(unpack_returned_tuples=True)
-    for path in glob.glob(os.path.join(ADDON, "**", "*.lua"), recursive=True):
+    for path in lua_files():
         lua.compile(read(path))
     listed = set(toc_files())
-    for path in glob.glob(os.path.join(ADDON, "**", "*.lua"), recursive=True):
+    for path in lua_files():
         rel = os.path.relpath(path, ADDON).replace("\\", "/")
         if rel not in listed:
             print("Archivo Lua fuera del TOC: " + rel, file=sys.stderr)

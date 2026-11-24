@@ -25,4 +25,5 @@ CLAUDE.md
 .claude/
 dist/
 GoldPilotDev.toc
+GoldPilot/Data/Local/
 __pycache__/

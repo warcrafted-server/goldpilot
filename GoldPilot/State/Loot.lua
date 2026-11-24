@@ -125,7 +125,7 @@ local function readLoot()
         end
     end
 
-    local coin, items, nodeIDs = 0, {}, {}
+    local coin, items, nodes = 0, {}, {}
     for _, guid in ipairs(sequence) do
         local entry = found[guid]
         local memory = seen[guid]
@@ -136,11 +136,13 @@ local function readLoot()
             order[#order + 1] = guid
             if #order > 500 then seen[table.remove(order, 1)] = nil end
         end
+        local gained = {}
         for itemKey, amount in pairs(entry.items) do
             local previous = tonumber(memory[itemKey]) or 0
             if amount > previous then
                 memory[itemKey] = amount
                 items[itemKey] = (items[itemKey] or 0) + amount - previous
+                gained[itemKey] = amount - previous
             end
         end
         local previous = tonumber(memory.coin) or 0
@@ -148,21 +150,23 @@ local function readLoot()
             memory.coin = entry.coin
             coin = coin + entry.coin - previous
         end
-        if fresh and entry.kind == "GameObject" and not fishing then nodeIDs[#nodeIDs + 1] = entry.objectID end
+        if fresh and entry.kind == "GameObject" and not fishing then
+            nodes[#nodes + 1] = { objectID = entry.objectID, items = gained }
+        end
     end
     if next(items) == nil and coin == 0 then return end
 
     local map, x, y = position()
-    for _, objectID in ipairs(nodeIDs) do
+    for _, node in ipairs(nodes) do
         GoldPilotDB = GoldPilotDB or {}
-        addon.Nodes.record(GoldPilotDB, map, objectID, x, y, current)
+        addon.Nodes.record(GoldPilotDB, map, node.objectID, x, y, current, node.items)
     end
     GoldPilotCharDB = GoldPilotCharDB or {}
     if GoldPilotCharDB.session and addon.Sessions.expired(GoldPilotCharDB.session, current) then
         Loot:finish(current)
     end
     GoldPilotCharDB.session = addon.Sessions.add(GoldPilotCharDB.session, {
-        char = character, mapID = map, coin = coin, items = items, node = #nodeIDs > 0,
+        char = character, mapID = map, coin = coin, items = items, node = #nodes > 0,
     }, current)
     schedule()
     if type(Loot.onLoot) == "function" then pcall(Loot.onLoot, GoldPilotCharDB.session) end

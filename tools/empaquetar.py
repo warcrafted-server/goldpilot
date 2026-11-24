@@ -7,6 +7,7 @@ import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ADDON = os.path.join(ROOT, "GoldPilot")
+LOCAL = os.path.join(ADDON, "Data", "Local")
 
 def main():
     version = open(os.path.join(ROOT, "VERSION"), encoding="utf-8").read().strip()
@@ -19,7 +20,7 @@ def main():
     target = os.path.join(dist, "GoldPilot-" + version + ".zip")
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as archive:
         for base, dirs, files in os.walk(ADDON):
-            dirs.sort()
+            dirs[:] = sorted(d for d in dirs if os.path.join(base, d) != LOCAL)
             for name in sorted(files):
                 path = os.path.join(base, name)
                 archive.write(path, os.path.relpath(path, ROOT).replace("\\", "/"))

@@ -149,6 +149,28 @@ return {
         for _, spot in ipairs(many.spots) do if spot.t < oldest then oldest = spot.t end end
         assert(oldest == 11)
     end,
+    ["cada nodo fresco guarda solo el botín nuevo de su GUID"] = function(addon, mock)
+        setupLoot(addon, mock)
+        mock.loot = {
+            itemSlot("GameObject-0-1-2-3-510", 2, 100),
+            itemSlot("GameObject-0-1-2-3-511", 3, 200),
+        }
+        mock.fire("LOOT_READY")
+        local first = GoldPilotDB.nodes[1][510]
+        local second = GoldPilotDB.nodes[1][511]
+        assert(first.n == 1 and first.gathers == 1 and first.items[100] == 2 and first.items[200] == nil)
+        assert(second.n == 1 and second.gathers == 1 and second.items[200] == 3 and second.items[100] == nil)
+        mock.fire("LOOT_READY")
+        assert(first.gathers == 1 and first.items[100] == 2 and second.gathers == 1)
+        mock.loot = { itemSlot("GameObject-0-1-2-3-512", 1, 300) }
+        mock.fire("LOOT_READY")
+        local third = GoldPilotDB.nodes[1][512]
+        assert(third.gathers == 1 and third.items[300] == 1 and third.items[100] == nil)
+        mock.loot = { moneySlot("GameObject-0-1-2-3-513", 50) }
+        mock.fire("LOOT_READY")
+        local money = GoldPilotDB.nodes[1][513]
+        assert(money.n == 1 and money.gathers == nil and money.items == nil)
+    end,
     ["Loot duplicado no suma y el desuello del mismo GUID añade su objeto"] = function(addon, mock)
         setupLoot(addon, mock)
         local notified = 0

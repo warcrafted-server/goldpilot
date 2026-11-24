@@ -18,6 +18,19 @@ local function coordinate(value)
     return math.floor(value * 10000 + 0.5)
 end
 
+local function gained(items)
+    local result
+    if type(items) ~= "table" then return nil end
+    for key, value in pairs(items) do
+        value = tonumber(value)
+        if value and value > 0 then
+            result = result or {}
+            result[key] = value
+        end
+    end
+    return result
+end
+
 local function removeOldest(spots)
     local oldest = 1
     for index = 2, #spots do
@@ -26,7 +39,7 @@ local function removeOldest(spots)
     table.remove(spots, oldest)
 end
 
-function Nodes.record(db, map, object, x, y, now)
+function Nodes.record(db, map, object, x, y, now, items)
     map, object = integer(map), integer(object)
     if not map or not object then return false end
     now = tonumber(now) or 0
@@ -58,6 +71,14 @@ function Nodes.record(db, map, object, x, y, now)
             node.spots[#node.spots + 1] = { x = px, y = py, n = 1, t = now }
             if #node.spots > Nodes.maxSpots then removeOldest(node.spots) end
         end
+    end
+    local loot = gained(items)
+    if loot then
+        node.items = node.items or {}
+        for key, value in pairs(loot) do
+            node.items[key] = (tonumber(node.items[key]) or 0) + value
+        end
+        node.gathers = (tonumber(node.gathers) or 0) + 1
     end
     return true
 end

@@ -19,10 +19,10 @@ GoldPilot/                 Carpeta del addon (lo que se instala en Interface/Add
   GoldPilot.toc
   Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations
   Locales/                 Locale.lua, enUS.lua, esES.lua
-  Data/                    Semillas de nodos generadas desde wowdata
+  Data/                    Semillas de nodos generadas desde wowdata (y la local opcional en Local/)
   Store/                   Almacén de precios, historial, libro de operaciones (lógica pura)
   State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, Location
-  Engine/                  Valoración, asesor y proveedores de recomendaciones (lógica pura)
+  Engine/                  Valoración, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
   Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan
   UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión
   API.lua                  API pública mínima para otros addons
@@ -34,6 +34,7 @@ docs/
 
 - El addon vive en una subcarpeta (como LoreWake) para que el repositorio pueda contener la aplicación. El empaquetado de CurseForge (BigWigs packager, como PocketBank) usa `.pkgmeta` con `move-folders` e `ignore` para publicar solo `GoldPilot/`.
 - **Globales permitidos:** `GoldPilot` (espacio de nombres y API pública), `GoldPilotDB`, `GoldPilotCharDB`, los de los comandos (`SLASH_GOLDPILOT1/2`, `SlashCmdList.GOLDPILOT`), la función del compartimento de addons y los nombres de las ventanas que deban cerrarse con Escape. Una prueba lo comprueba.
+- **Semilla local:** `tools/generar_semilla_local.py` genera `GoldPilot/Data/Local/NodeSpots.lua` desde `wowdata` en modo lectura para probar en local; no se publica, no se versiona y el TOC de desarrollo la carga si existe.
 - **TOC:** `## Interface: 16001`, `## SavedVariables: GoldPilotDB`, `## SavedVariablesPerCharacter: GoldPilotCharDB`, `## OptionalDeps: GoldPilot_Market, TomTom`, `## X-Curse-Project-ID` cuando exista el proyecto.
 
 ## 3. Núcleo (`Core/`)
@@ -98,7 +99,7 @@ GoldPilotDB = {
 | `AuctionHouse` | resultados de búsquedas, propias, cola de consultas | Solo con la subasta abierta |
 | `Mail` | facturas de subasta y correos de caducidad | Al abrir el buzón |
 | `Loot` | objeto, cantidad, origen (nodo, PNJ) y mapa | `LOOT_READY` / `LOOT_CLOSED` |
-| `Professions` | profesiones y nivel; recetas al abrir la ventana | `SKILL_LINES_CHANGED`, apertura de profesión |
+| `Professions` | profesiones y nivel; recetas al abrir la ventana (`State/Professions.lua` lee la habilidad sin caché para las rutas) | `SKILL_LINES_CHANGED`, apertura de profesión |
 | `Location` | mapa y zona | `ZONE_CHANGED_NEW_AREA` |
 
 **Cola de consultas a la subasta**: prioridad (objeto que el jugador va a vender > seguidos > bolsas > reactivos), una consulta en vuelo a la vez, se pausa con los eventos de límite y se reanuda; se detiene al cerrar la subasta.
@@ -114,6 +115,8 @@ Proveedores puros `proveedor(State, Store, Data, Settings) -> oportunidades`, co
 ```
 
 Puntuación: `beneficio esperado × confianza × liquidez × peso del perfil`, con todos los pesos y constantes en `Engine/Weights.lua`. Proveedores previstos: vender lo que tienes (subasta frente a vendedor), recolectar en la mejor zona para tu habilidad, liquidar objetos lentos, fabricar (cuando exista), comprar reactivos baratos para tus recetas (solo con datos `OBS` o `EXT` recientes).
+
+`Engine/Routes.lua` (puro) reúne los puntos propios y los de la semilla local, descarta los que no tienen precio o no puede recoger la habilidad, los agrupa en paradas y ordena y poda el recorrido.
 
 ## 8. Interfaz (`UI/`)
 

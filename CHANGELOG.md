@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.13.1] - 2026-11-24
+
+### Añadido
+- Motor de rutas de recolección, lectura de la habilidad, valor por recogida en los nodos y generador de la semilla local (interno).
+
 ## [0.13.0] - 2026-11-24
 
 ### Añadido

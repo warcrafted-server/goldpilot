@@ -23,5 +23,6 @@ ignore:
   - .luacheckrc
   - .gitignore
   - GoldPilotDev.toc
+  - GoldPilot/Data/Local
   - tests
   - .pkgmeta
