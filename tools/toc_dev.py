@@ -18,7 +18,7 @@ def main():
             if line.startswith("## Title:"):
                 line = "## Title: GoldPilot Forever (dev)"
             elif line.startswith("## Version:"):
-                line = "## Version: dev"
+                line = line.rstrip() + "-dev"
             elif line.strip() and not line.startswith("#"):
                 line = "GoldPilot\\" + line.strip().replace("/", "\\")
             out.append(line)

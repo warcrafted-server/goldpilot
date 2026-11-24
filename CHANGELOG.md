@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.1.1] - 2026-11-24
+
+### Corregido
+- El icono del minimapa se carga también desde la copia de desarrollo.
+
+### Cambiado
+- La versión de la copia de desarrollo muestra el número real con sufijo `-dev`.
+
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
