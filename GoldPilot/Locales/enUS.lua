@@ -164,6 +164,8 @@ addon.LocaleRegister("enUS", {
     NOW_WHY = "WHY",
     NOW_TOP = "MOST VALUABLE",
     NOW_MORE = "and %d more",
+    NOW_MAILS = "IN THE MAILBOX",
+    NOW_MAIL_UNNAMED = "Mail without subject",
     NOW_OLDEST = "Oldest data",
     NOW_VIEW_INVENTORY = "View in Inventory",
     NOW_WHY_AUCTION = "Auction value includes the cut and excludes the deposit.",

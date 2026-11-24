@@ -39,6 +39,14 @@ return {
         local purchase = db.ledger[1970][6]
         assert(purchase.kind == "buy" and purchase.itemID == 2681 and purchase.qty == 1 and purchase.net == -13)
     end,
+    ["ledger aprende por nombre los objetos vendidos"] = function(addon)
+        local db = { ledger = { [2026] = { { kind = "sell", name = "A" }, { kind = "sell", name = "B" },
+            { kind = "buy", name = "B", itemID = 2 } } } }
+        local unknown = addon.Ledger.unknownNames(db)
+        assert(unknown.A and not unknown.B)
+        addon.Ledger.learn(db, "A", 7)
+        assert(addon.Ledger.itemID(db, "A") == 7 and next(addon.Ledger.unknownNames(db)) == nil)
+    end,
     ["ledger empareja uno a uno y tolera reaperturas hasta caducidad"] = function(addon)
         local db, mail = {}, sale("Same", 1, 100, 10, 5, 2)
         assert(addon.Ledger.sync(db, "Tester", { mail, sale("Same", 1, 100, 10, 5, 2) }, 100000) == 2)

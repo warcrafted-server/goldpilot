@@ -191,7 +191,7 @@ return {
         GetInboxNumItems = function() return #mails, 8 end
         GetInboxHeaderInfo = function(i)
             local m = mails[i]
-            return nil, nil, "S", nil, m.money, m.cod, m.daysLeft, m.hasItem
+            return nil, nil, "S", "Asunto", m.money, m.cod, m.daysLeft, m.hasItem
         end
         time = function() return 1000 end
         UnitName = function() return "A" end
@@ -200,6 +200,9 @@ return {
         mock.fire("MAIL_SHOW")
         mock.fire("MAIL_INBOX_UPDATE")
         assert(GoldPilotDB.mailPending.A.money == 25 and GoldPilotDB.mailPending.A.items == 1)
+        local listed = GoldPilotDB.mailPending.A
+        assert(listed.counted == 1 and #listed.list == 1)
+        assert(listed.list[1].name == "Asunto" and listed.list[1].money == 25)
         assert(GoldPilotDB.mailPending.A.total == 8 and GoldPilotDB.mailPending.A.expires == 173800)
         mock.fire("MAIL_CLOSED")
         mails[1].money = 99

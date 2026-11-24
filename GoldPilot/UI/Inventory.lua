@@ -165,6 +165,7 @@ function InventoryUI:refresh()
         end
     end
     self.page._inventoryRows = shown
+    self.widgets.list.selected = self.selected and self.selected.key or nil
     self.widgets.list:setRows(rows)
     self.widgets.metrics:setItems({
         { label = addon.L.INVENTORY_BEST, value = addon.Theme.money(built.totals.valueBest), color = { 0.5, 0.88, 0.54 } },

@@ -93,7 +93,8 @@ function Advice.build(ctx)
                 totals.mail = totals.mail + (money or 0)
                 local card = { id = char == ctx.char and "mail" or "mail_other", kind = "action", gain = money or 0,
                     confidence = char == ctx.char and 0.95 or 0.8, class = "OBS", count = items or 0, items = {},
-                    char = char, seen = tonumber(mail.t), oldest = tonumber(mail.t) }
+                    char = char, seen = tonumber(mail.t), oldest = tonumber(mail.t),
+                    mails = mail.list, mailCount = tonumber(mail.counted) }
                 if char == ctx.char then totals.now = totals.now + card.gain; cards[#cards + 1] = card
                 else otherMail[#otherMail + 1] = card end
             end

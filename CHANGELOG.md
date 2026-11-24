@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.15.2] - 2026-11-25
+
+Parche: correcciones y retoques visuales, sin función nueva.
+
+### Cambiado
+- Listas: icono mayor y sin borde gris, fondo alterno, selección dorada con banda y brillo suave al pasar el ratón (también en las tarjetas de Ahora).
+- Libro: los objetos vendidos buscan su icono por nombre (en el cliente y en el escaneo completo) y lo recuerdan; si no se conoce, sale el de interrogación.
+- Ahora: la ficha del correo dice qué hay en el buzón (hasta 6 correos, con su importe).
+
+### Corregido
+- Ahora: en la ficha sin importe, la confianza ya no se descoloca.
+- Listas: los nombres largos se recortan en vez de pisar el importe, las filas recicladas no heredan colores y la selección sigue al objeto cuando la lista se reordena.
+
 ## [0.15.1] - 2026-11-24
 
 ### Corregido

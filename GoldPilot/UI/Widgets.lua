@@ -25,6 +25,26 @@ end
 
 Widgets.frame = frame
 
+-- Recorta el borde gris que traen los iconos del juego.
+local function cropIcon(texture)
+    if texture.SetTexCoord then texture:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+end
+
+local function hoverGlow(button)
+    local glow = button:CreateTexture(nil, "HIGHLIGHT")
+    glow:SetAllPoints()
+    glow:SetColorTexture(1, 0.82, 0.2, 0.08)
+end
+
+local function selectionBand(button)
+    local band = button:CreateTexture(nil, "ARTWORK")
+    band:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
+    band:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
+    if band.SetWidth then band:SetWidth(2) end
+    band:SetColorTexture(0.9, 0.72, 0.29, 1)
+    return band
+end
+
 local function backdrop(object, color)
     color = color or { 0.12, 0.09, 0.06, 0.96 }
     solidBackground(object, { color[1], color[2], color[3], 1 })
@@ -37,6 +57,8 @@ local function backdrop(object, color)
     end
     if object.SetBackdropColor then pcall(object.SetBackdropColor, object, unpack(color)) end
 end
+
+local TEXT_COLOR = { 0.92, 0.86, 0.72 }
 
 local function text(parent, value, size, color)
     local label = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -165,12 +187,17 @@ function Widgets.list(parent, onSelect, width)
         local row = frame("Button", nil, content)
         row:SetSize(width - 4, 28)
         row.text = text(row, "", 12)
-        row.text:SetPoint("LEFT", row, "LEFT", 24, 0)
         row.rightText = text(row, "", 11)
         row.rightText:SetPoint("RIGHT", row, "RIGHT", -6, 0)
+        if row.text.SetJustifyH then row.text:SetJustifyH("LEFT") end
+        if row.text.SetWordWrap then row.text:SetWordWrap(false) end
+        row.background = row:CreateTexture(nil, "BACKGROUND")
+        row.background:SetAllPoints()
+        row.band = selectionBand(row)
+        hoverGlow(row)
         row:SetScript("OnClick", function(self)
             if inCombat() then return end
-            scroll.selected = self.dataIndex
+            scroll.selected = self.data.key or self.dataIndex
             if scroll.onSelect then scroll.onSelect(self.data) end
             render()
         end)
@@ -188,19 +215,28 @@ function Widgets.list(parent, onSelect, width)
             local badge = data.class and addon.Theme and addon.Theme.badge(data.class) or ""
             row.text:SetText((data.header and "|cffffd100" or "") .. badge .. (data.text or "") .. (data.header and "|r" or ""))
             row.rightText:SetText(data.right or "")
-            if data.color and row.text.SetTextColor then row.text:SetTextColor(unpack(data.color)) end
-            if data.rightColor and row.rightText.SetTextColor then row.rightText:SetTextColor(unpack(data.rightColor)) end
+            -- Las filas se reciclan: sin color propio hay que volver al de partida.
+            if row.text.SetTextColor then row.text:SetTextColor(unpack(data.color or TEXT_COLOR)) end
+            if row.rightText.SetTextColor then row.rightText:SetTextColor(unpack(data.rightColor or TEXT_COLOR)) end
+            if row.text.ClearAllPoints then row.text:ClearAllPoints() end
+            row.text:SetPoint("LEFT", row, "LEFT", data.icon and 34 or 10, 0)
+            row.text:SetPoint("RIGHT", row.rightText, "LEFT", -8, 0)
             if data.icon then
                 row.icon = row.icon or row:CreateTexture(nil, "ARTWORK")
-                row.icon:SetSize(16, 16)
-                row.icon:SetPoint("LEFT", row, "LEFT", 4, 0)
+                row.icon:SetSize(20, 20)
+                row.icon:SetPoint("LEFT", row, "LEFT", 8, 0)
+                cropIcon(row.icon)
                 row.icon:SetTexture(data.icon)
                 row.icon:Show()
             elseif row.icon then row.icon:Hide() end
-            row.background = row.background or row:CreateTexture(nil, "BACKGROUND")
-            row.background:SetAllPoints()
-            row.background:SetColorTexture(dataIndex == scroll.selected and 0.45 or 0.13, 0.1, 0.07, 0.8)
-            if row.SetHighlightTexture then row:SetHighlightTexture("Interface/QuestFrame/UI-QuestTitleHighlight") end
+            if scroll.selected ~= nil and (data.key or dataIndex) == scroll.selected then
+                row.background:SetColorTexture(0.27, 0.2, 0.1, 0.95)
+                row.band:Show()
+            else
+                local shade = dataIndex % 2 == 0 and 0.105 or 0.13
+                row.background:SetColorTexture(shade, shade * 0.78, shade * 0.55, 0.8)
+                row.band:Hide()
+            end
             row:Show()
         end
         for index = count + 1, #scroll.rows do scroll.rows[index]:Hide() end
@@ -288,6 +324,8 @@ function Widgets.cards(parent, onSelect, width)
         button.icon = button:CreateTexture(nil, "ARTWORK")
         button.icon:SetSize(32, 32)
         button.icon:SetPoint("LEFT", button, "LEFT", 10, 0)
+        cropIcon(button.icon)
+        hoverGlow(button)
         button.title = text(button, "", 13, { 0.92, 0.86, 0.72 })
         button.reason = text(button, "", 11, { 0.64, 0.58, 0.49 })
         button.amount = text(button, "", 13)

@@ -71,6 +71,9 @@ GoldPilotDB = {
   houses = { ["<houseKey>"] = { name=..., cut=0.05, lastSeen=t } },
   prices = { ["<houseKey>"] = { [itemKey] = "<t>:<min>:<p50>:<qty>|<d>|<w>" } },
   ledger = { [año] = { {t=, kind="sell", item=, qty=, gross=, cut=, deposit=, src="CONF"}, ... } },
+  itemNames = { ["Nombre"] = itemID },  -- objetos del Libro, aprendidos por nombre
+  mailPending = { ["Nombre"] = { t=, money=, items=, total=, expires=, counted=,
+                  list={ {name=, qty=, money=}, ... } } },  -- list: los 6 primeros correos con algo que recoger
   chars = { ["Nombre-Ruleset"] = { money=, bags={[itemID]=n}, bank={...}, bankSeen=t, profs={...} } },
   watch = { [itemKey] = true },
   reserved = { [itemID] = n },

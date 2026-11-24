@@ -2,6 +2,7 @@ local _, addon = ...
 
 local open = false
 local opening = 0
+local MAX_LISTED = 6
 
 local function after(delay, callback)
     addon.Compat.call("C_Timer.After", delay, callback)
@@ -69,6 +70,16 @@ local function readMailbox()
     if added > 0 then addon.Log:info(string.format(addon.L.LEDGER_ADDED, added)) end
 end
 
+-- Con un solo objeto y sin dinero manda el nombre del objeto; si no, el asunto del correo.
+local function describe(index, subject, money, hasItem)
+    local entry = { name = type(subject) == "string" and subject ~= "" and subject or nil,
+        money = money > 0 and money or nil }
+    if money > 0 or (tonumber(hasItem) or 1) ~= 1 then return entry end
+    local ok, name, _, _, qty = addon.Compat.call("GetInboxItem", index, 1)
+    if ok and type(name) == "string" and name ~= "" then entry.name, entry.qty = name, tonumber(qty) end
+    return entry
+end
+
 local function snapshot()
     if not open or addon.safeMode then return end
     local countOk, count, total = addon.Compat.call("GetInboxNumItems")
@@ -77,15 +88,21 @@ local function snapshot()
     if not nowOk or not tonumber(now) then return end
     local nameOk, character = addon.Compat.call("UnitName", "player")
     if not nameOk or type(character) ~= "string" or character == "" then character = "unknown" end
-    local money, items, expires = 0, 0, nil
+    local money, items, expires, list, countedMails = 0, 0, nil, {}, 0
     for index = 1, math.min(100, math.max(0, tonumber(count) or 0)) do
-        local ok, _, _, _, _, mailMoney, cod, daysLeft, hasItem = addon.Compat.call("GetInboxHeaderInfo", index)
+        local ok, _, _, _, subject, mailMoney, cod, daysLeft, hasItem = addon.Compat.call("GetInboxHeaderInfo", index)
         if ok then
             mailMoney, cod, daysLeft = tonumber(mailMoney), tonumber(cod), tonumber(daysLeft)
             local hasAttachment = hasItem == true or (tonumber(hasItem) or 0) > 0
             if mailMoney then money = money + mailMoney end
             local counted = (mailMoney or 0) > 0 or hasAttachment and (cod or 0) == 0
             if hasAttachment and (cod or 0) == 0 then items = items + 1 end
+            if counted then
+                countedMails = countedMails + 1
+                if #list < MAX_LISTED then
+                    list[#list + 1] = describe(index, subject, mailMoney or 0, hasItem)
+                end
+            end
             if counted and daysLeft and daysLeft >= 0 then
                 local expiry = now + daysLeft * 86400
                 if not expires or expiry < expires then expires = expiry end
@@ -95,7 +112,7 @@ local function snapshot()
     GoldPilotDB = GoldPilotDB or {}
     GoldPilotDB.mailPending = GoldPilotDB.mailPending or {}
     GoldPilotDB.mailPending[character] = { t = now, money = money, items = items,
-        total = math.max(tonumber(count) or 0, tonumber(total) or 0), expires = expires }
+        total = math.max(tonumber(count) or 0, tonumber(total) or 0), expires = expires, list = list, counted = countedMails }
 end
 
 addon.Modules:register("mail", {

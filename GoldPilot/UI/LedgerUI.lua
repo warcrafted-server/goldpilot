@@ -6,6 +6,8 @@ addon.LedgerUI = LedgerUI
 local GREEN, RED, GRAY = { 0.35, 0.9, 0.4 }, { 0.9, 0.45, 0.35 }, { 0.65, 0.65, 0.65 }
 local GOLD, MUTED, SOFT = { 1, 0.82, 0.2 }, { 0.55, 0.5, 0.42 }, { 0.78, 0.72, 0.55 }
 
+local UNKNOWN_ICON = "Interface/Icons/INV_Misc_QuestionMark"
+
 local function combat()
     return InCombatLockdown and InCombatLockdown()
 end
@@ -88,6 +90,18 @@ local function detailLines(item, entries, account)
     return lines
 end
 
+-- El cliente solo encuentra por nombre los objetos que ya tiene cargados; si no, queda para el próximo escaneo.
+local function itemIcon(item)
+    local itemID = item.itemID or addon.Ledger.itemID(GoldPilotDB, item.name)
+    if not itemID then
+        local ok, found = addon.Compat.call("C_Item.GetItemInfoInstant", item.name)
+        if not ok or not tonumber(found) then ok, found = addon.Compat.call("GetItemInfoInstant", item.name) end
+        itemID = ok and tonumber(found) or nil
+        if itemID then addon.Ledger.learn(GoldPilotDB, item.name, itemID) end
+    end
+    return itemID and addon.InventoryUI.itemIcon(itemID) or UNKNOWN_ICON
+end
+
 function LedgerUI:refresh()
     if combat() or not visible() or not self.page or addon.Main.activeTab ~= "ledger" then return false end
     GoldPilotDB, GoldPilotCharDB = GoldPilotDB or {}, GoldPilotCharDB or {}
@@ -101,10 +115,11 @@ function LedgerUI:refresh()
     for _, item in ipairs(items) do
         local value, color = signed(item.balance)
         rows[#rows + 1] = { key = item.name, text = item.name, right = value, rightColor = color,
-            icon = item.itemID and addon.InventoryUI.itemIcon(item.itemID) or nil, item = item }
+            icon = itemIcon(item), item = item }
         if self.selectedName == item.name then selected = item end
     end
     if not selected then self.selectedName = nil end
+    self.widgets.list.selected = self.selectedName
     self.widgets.list:setRows(rows)
     local summary = addon.Ledger.summary(GoldPilotDB, since, char)
     local balance, balanceColor = signed(summary.balance)

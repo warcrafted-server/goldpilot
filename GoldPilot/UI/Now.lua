@@ -105,7 +105,8 @@ local function detail(card, current)
     if card.id ~= "refresh" then
         local value = amount(card)
         local trust = confidence(card.confidence or 0)
-        if value ~= "" or trust ~= "" then lines[#lines + 1] = { text = value, right = trust, size = 12 } end
+        if value ~= "" then lines[#lines + 1] = { text = value, right = trust, size = 12, gap = 6 }
+        else lines[#lines + 1] = { text = trust, size = 12, gap = 6 } end
     end
     lines[#lines + 1] = { text = L.NOW_WHY, size = 11, color = { 0.55, 0.5, 0.42 }, gap = 10 }
     local why
@@ -142,6 +143,16 @@ local function detail(card, current)
                 math.floor((tonumber(item.active) or 0) / 60)),
                 right = addon.Theme.money(item.value or 0) .. L.NOW_PER_HOUR, size = 11 }
         end
+    elseif card.mails and #card.mails > 0 then
+        lines[#lines + 1] = { text = L.NOW_MAILS, size = 11, color = { 0.55, 0.5, 0.42 }, gap = 10 }
+        for _, mail in ipairs(card.mails) do
+            local label = mail.name or L.NOW_MAIL_UNNAMED
+            if mail.qty and mail.qty > 1 then label = label .. " ×" .. tostring(mail.qty) end
+            lines[#lines + 1] = { text = label, size = 11,
+                right = (mail.money or 0) > 0 and addon.Theme.money(mail.money) or nil }
+        end
+        local more = (card.mailCount or 0) - #card.mails
+        if more > 0 then lines[#lines + 1] = { text = string.format(L.NOW_MORE, more), size = 11 } end
     elseif card.items and #card.items > 0 then
         lines[#lines + 1] = { text = L.NOW_TOP, size = 11, color = { 0.55, 0.5, 0.42 }, gap = 10 }
         for _, item in ipairs(card.items) do

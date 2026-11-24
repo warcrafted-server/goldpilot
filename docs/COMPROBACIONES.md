@@ -139,3 +139,10 @@
 - [ ] Al alejar el mapa hasta que la ruta ocupe una franja estrecha, los puntos se ven más pequeños y sin números.
 - [ ] Abrir el mapa con la ruta activa la dibuja aunque el lienzo tarde en tener tamaño (un solo reintento, sin bucle).
 - [ ] `/gpilot route` imprime una línea con el estado y no falla sin el mapa del mundo abierto; `GoldPilotDB.diag.route` guarda el estado.
+
+## 0.15.2
+
+- [ ] Listas de Inventario, Libro y Zonas: icono, fondo alterno, selección dorada y nombres largos recortados sin pisar el importe.
+- [ ] Al reordenarse la lista, la fila resaltada es la de la ficha.
+- [ ] Libro: las ventas muestran icono tras un escaneo completo (o antes, si el objeto está en bolsas).
+- [ ] Ahora: la ficha de correo lista los correos; con correo solo de objetos la confianza queda alineada a la izquierda.

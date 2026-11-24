@@ -164,6 +164,8 @@ addon.LocaleRegister("esES", {
     NOW_WHY = "POR QUÉ",
     NOW_TOP = "LO MÁS VALIOSO",
     NOW_MORE = "y %d más",
+    NOW_MAILS = "LO QUE HAY EN EL BUZÓN",
+    NOW_MAIL_UNNAMED = "Correo sin asunto",
     NOW_OLDEST = "Dato más antiguo",
     NOW_VIEW_INVENTORY = "Ver en Inventario",
     NOW_WHY_AUCTION = "La subasta descuenta la comisión y no cuenta el depósito.",

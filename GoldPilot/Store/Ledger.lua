@@ -180,6 +180,35 @@ function Ledger.items(db, since, char)
     return result
 end
 
+-- Las facturas de venta no traen el identificador: se aprende por nombre y se guarda.
+function Ledger.itemID(db, name)
+    return db and db.itemNames and tonumber(db.itemNames[name]) or nil
+end
+
+function Ledger.learn(db, name, itemID)
+    itemID = tonumber(itemID)
+    if not itemID or type(name) ~= "string" or name == "" then return end
+    db.itemNames = db.itemNames or {}
+    db.itemNames[name] = itemID
+end
+
+-- Nombres del libro sin identificador; otra operación del mismo objeto también lo aporta.
+function Ledger.unknownNames(db)
+    local unknown = {}
+    for _, year in pairs(db and db.ledger or {}) do
+        for _, entry in ipairs(year) do
+            if type(entry.name) == "string" and not Ledger.itemID(db, entry.name) then
+                if tonumber(entry.itemID) then Ledger.learn(db, entry.name, entry.itemID)
+                else unknown[entry.name] = true end
+            end
+        end
+    end
+    for name in pairs(unknown) do
+        if Ledger.itemID(db, name) then unknown[name] = nil end
+    end
+    return unknown
+end
+
 function Ledger.entries(db, since, char, name, limit)
     if type(name) ~= "string" or name == "" then return {} end
     local result, sequence = {}, 0

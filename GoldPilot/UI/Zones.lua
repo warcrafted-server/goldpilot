@@ -279,6 +279,10 @@ function ZonesUI:refresh()
             selected = entries[1]
             self.selectedSession = selected and selected.session or nil
         end
+        self.widgets.list.selected = nil
+        for _, row in ipairs(rows) do
+            if row.entry == selected then self.widgets.list.selected = row.key end
+        end
         self.widgets.list:setRows(rows)
         local _, zones = self:zoneRows(now)
         self:metrics(zones, now)
@@ -307,6 +311,7 @@ function ZonesUI:refresh()
         selected = rows[1]
         self.selectedMap = selected and selected.mapID or nil
     end
+    self.widgets.list.selected = self.selectedMap
     self.widgets.list:setRows(rows)
     self:metrics(zones, now)
     if #rows == 0 then

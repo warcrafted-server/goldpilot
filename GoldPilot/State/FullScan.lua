@@ -67,6 +67,8 @@ local function process(count)
     local getLink = C_AuctionHouse.GetReplicateItemLink
     local listings, order, seen, pending, requested, registered = {}, {}, {}, {}, {}, {}
 
+    local wanted = addon.Ledger.unknownNames(GoldPilotDB)
+
     local function add(itemID, key, price, quantity)
         local entries = listings[key]
         if not entries then
@@ -78,8 +80,12 @@ local function process(count)
     end
 
     local function read(position)
-        local ok, _, _, quantity, _, _, _, _, _, _, buyout, _, _, _, _, _, _, itemID = pcall(getInfo, position - 1)
+        local ok, name, _, quantity, _, _, _, _, _, _, buyout, _, _, _, _, _, _, itemID = pcall(getInfo, position - 1)
         quantity, buyout, itemID = tonumber(quantity), tonumber(buyout), tonumber(itemID)
+        if ok and itemID and name and wanted[name] then
+            addon.Ledger.learn(GoldPilotDB, name, itemID)
+            wanted[name] = nil
+        end
         if not (ok and itemID and itemID ~= PET_CAGE and quantity and quantity > 0 and buyout and buyout > 0) then return end
         if addon.ItemKey.isGear(itemID) then
             local linkOK, link = false, nil
