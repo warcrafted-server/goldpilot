@@ -17,9 +17,8 @@
 ## Media
 
 - [ ] 0.2.0: asistente de venta y libro de operaciones.
-- [ ] 0.3.0: sesiones y asesor de recolección.
+- [ ] 0.3.0: verificar en juego la pestaña Inventario (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
 - [ ] Precio externo opcional: no se usa Auctionator ni TSM; solo se revisará más adelante si hay demanda.
-- [ ] Crear la ventana principal.
 - [ ] Probar la API web de Blizzard para Forever (rutas, frecuencia, términos de uso).
 
 ## Descartado

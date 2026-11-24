@@ -71,7 +71,7 @@ local function buildWindow()
         Main.tabOrder[#Main.tabOrder + 1] = name
     end
 
-    addPage("inventory", addon.L.TAB_INVENTORY, function(page)
+    addPage("inventory", addon.L.TAB_INVENTORY, Main.tabs.inventory or function(page)
         local label = page.placeholder
         if not label then
             label = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -101,7 +101,9 @@ local function buildWindow()
             page.tooltipCheckbox:SetChecked(dbSettings.tooltip ~= false)
         end
     end)
-    for _, tab in ipairs(Main.registeredTabs) do addPage(tab.name, tab.name, tab.builder) end
+    for _, tab in ipairs(Main.registeredTabs) do
+        if tab.name ~= "inventory" then addPage(tab.name, tab.name, tab.builder) end
+    end
 
     Main.widgets = {
         list = addon.Widgets.list(frame),
@@ -144,6 +146,7 @@ function Main:show()
     if inCombat() then addon.Log:info(addon.L.COMBAT_BLOCKED); return false end
     local frame = buildWindow()
     frame:Show()
+    if self.selectTab then self.selectTab(self.activeTab or "inventory") end
     return true
 end
 

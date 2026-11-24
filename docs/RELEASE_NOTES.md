@@ -1,3 +1,19 @@
+# 0.3.0 (2026-11-24) — English
+
+### Added
+- Inventory window with saved bags and bank contents, per item values and recommendations, account and character scopes, filtering, reservations, and watch controls.
+- Item details show quantities by character and location, vendor and observed auction prices, age, and net auction value.
+
+> Auction prices are GoldPilot's own observations. Bank contents are available after visiting the bank with each character. This release has not yet been verified in game.
+
+# 0.3.0 (2026-11-24) — Español
+
+### Añadido
+- Ventana Inventario con bolsas y bancos guardados, valores y recomendaciones por objeto, ámbitos de personaje y cuenta, filtro, reservas y seguimiento.
+- La ficha muestra cantidades por personaje y ubicación, precios de vendedor y subasta observados, antigüedad y valor neto de subasta.
+
+> Los precios de subasta son observaciones de GoldPilot. El banco está disponible después de visitarlo con cada personaje. Esta versión aún no se ha comprobado en juego.
+
 # 0.2.0 (2026-11-24) — English
 
 ### Added

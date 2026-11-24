@@ -64,6 +64,8 @@ UISpecialFrames = {}
 function print(...) mock.output[#mock.output + 1] = table.concat({ ... }, " ") end
 function GetLocale() return "enUS" end
 function InCombatLockdown() return mock.combat == true end
+function time() return 200000 end
+function UnitName() return "Player" end
 Minimap = { GetShape = function() return "ROUND" end, GetCenter = function() return 0, 0 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
 SlashCmdList = {}

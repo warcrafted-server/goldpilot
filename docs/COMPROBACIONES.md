@@ -1,7 +1,16 @@
-# Comprobaciones manuales en juego — 0.2.0
+# Comprobaciones manuales en juego — 0.3.0
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gp version` muestra `0.2.0`.
+- [ ] `/gp version` muestra `0.3.0`.
+- [ ] Abrir Inventario con `/gp` y con clic izquierdo en el minimapa.
+- [ ] Cambiar entre Personaje actual y Toda la cuenta.
+- [ ] Filtrar objetos por nombre y comprobar la lista.
+- [ ] Seleccionar un objeto, reservarlo y dejar de reservarlo; Mayús reserva una unidad.
+- [ ] Seguir un objeto y dejar de seguirlo.
+- [ ] Revisar las métricas de mejor venta, todo al vendedor, objetos sin precio y datos viejos.
+- [ ] Sin objetos, la ventana muestra un estado vacío claro; sin precios, invita a abrir la subasta.
+- [ ] No aparecen errores de Lua al abrir, filtrar, reservar o seguir.
+- [ ] La ventana no se abre ni redibuja en combate.
 - [ ] `/gp diag` genera el diagnóstico sin errores.
 - [ ] El botón del minimapa aparece, se puede mover y sus clics funcionan; `/gp minimap` lo muestra y oculta.
 - [ ] Abrir la subasta encola consultas y, al terminar, aparece el aviso `Subasta: N objetos leídos`.

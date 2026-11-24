@@ -92,7 +92,7 @@ function Widgets.list(parent, onSelect)
     local content = frame("Frame", nil, scroll)
     content:SetSize(300, 1)
     scroll:SetScrollChild(content)
-    scroll.rows, scroll.data, scroll.selected = {}, {}, nil
+    scroll.rows, scroll.data, scroll.selected, scroll.onSelect = {}, {}, nil, onSelect
     local offset = 0
     local function visibleCount()
         local height = scroll.GetHeight and scroll:GetHeight() or 360
@@ -103,13 +103,13 @@ function Widgets.list(parent, onSelect)
         local row = frame("Button", nil, content)
         row:SetSize(300, 28)
         row.text = text(row, "", 12)
-        row.text:SetPoint("LEFT", row, "LEFT", 6, 0)
+        row.text:SetPoint("LEFT", row, "LEFT", 24, 0)
         row.rightText = text(row, "", 11)
         row.rightText:SetPoint("RIGHT", row, "RIGHT", -6, 0)
         row:SetScript("OnClick", function(self)
             if inCombat() then return end
             scroll.selected = self.dataIndex
-            if onSelect then onSelect(self.data) end
+            if scroll.onSelect then scroll.onSelect(self.data) end
             render()
         end)
         scroll.rows[index] = row
@@ -127,6 +127,7 @@ function Widgets.list(parent, onSelect)
             row.text:SetText((data.header and "|cffffd100" or "") .. badge .. (data.text or "") .. (data.header and "|r" or ""))
             row.rightText:SetText(data.right or "")
             if data.color and row.text.SetTextColor then row.text:SetTextColor(unpack(data.color)) end
+            if data.rightColor and row.rightText.SetTextColor then row.rightText:SetTextColor(unpack(data.rightColor)) end
             if data.icon then
                 row.icon = row.icon or row:CreateTexture(nil, "ARTWORK")
                 row.icon:SetSize(16, 16)

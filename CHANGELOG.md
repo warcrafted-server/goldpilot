@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.3.0] - 2026-11-24
+
+### Añadido
+- Pestaña Inventario con valor por objeto, recomendación, reservar y seguir.
+
 ## [0.2.5] - 2026-11-24
 
 ### Añadido
