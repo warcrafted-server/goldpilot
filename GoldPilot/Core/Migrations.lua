@@ -41,6 +41,37 @@ addon.Migrations.steps[2] = function(db)
     mergeSections("chars", "seen")
 end
 
+addon.Migrations.steps[3] = function(db)
+    local result = {}
+    for houseKey, house in pairs(db.prices or {}) do
+        local converted = {}
+        for itemKey, value in pairs(house) do
+            local itemID = addon.ItemKey.itemID(itemKey)
+            local data = itemID and addon.DataItems and addon.DataItems[itemID]
+            local classID = data and tonumber(string.match(data, "^[^;]*;[^;]*;[^;]*;([^;]+)"))
+            if classID ~= 2 and classID ~= 4 then
+                local last, daily, weekly
+                if type(value) == "table" then
+                    last, daily, weekly = value.last, value.d or "", value.w or ""
+                elseif type(value) == "string" then
+                    local parts = { string.match(value, "^([^|]*)|([^|]*)|([^|]*)$") }
+                    if #parts == 3 then
+                        local t, min, p50, qty = string.match(parts[1], "^([^:]+):([^:]+):([^:]+):([^:]+)$")
+                        if t then last, daily, weekly = { t = tonumber(t), min = tonumber(min), p50 = tonumber(p50), qty = tonumber(qty) }, parts[2], parts[3] end
+                    end
+                end
+                if last and tonumber(last.t) and tonumber(last.min) and tonumber(last.p50) and tonumber(last.qty) then
+                    converted[itemKey] = string.format("%.0f:%.0f:%.0f:%.0f|%s|%s", last.t,
+                        math.max(1, math.floor(last.min)), math.max(1, math.floor(last.p50)),
+                        math.max(1, math.floor(last.qty)), daily, weekly)
+                end
+            end
+        end
+        result[houseKey] = converted
+    end
+    db.prices = result
+end
+
 function addon.Migrations:run(db)
     local schema = tonumber(db.schema) or 0
     while schema < #self.steps do

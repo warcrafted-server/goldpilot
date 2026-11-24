@@ -68,11 +68,7 @@ GoldPilotDB = {
   schema = 1,
   settings = { ... },
   houses = { ["<houseKey>"] = { name=..., cut=0.05, lastSeen=t } },
-  prices = { ["<houseKey>"] = { [itemKey] = {
-      last = { t=, min=, p50=, qty=, src="OBS" },     -- última observación
-      d = "<díaN>:<min>:<p50>:<qty>;...",             -- historial diario empaquetado
-      w = "<semana>:<min>:<p50>:<qty>;...",           -- historial semanal tras 90 días
-  } } },
+  prices = { ["<houseKey>"] = { [itemKey] = "<t>:<min>:<p50>:<qty>|<d>|<w>" } },
   ledger = { [año] = { {t=, kind="sell", item=, qty=, gross=, cut=, deposit=, src="CONF"}, ... } },
   chars = { ["Nombre-Ruleset"] = { money=, bags={[itemID]=n}, bank={...}, bankSeen=t, profs={...} } },
   watch = { [itemKey] = true },
@@ -85,11 +81,11 @@ GoldPilotDB = {
 }
 ```
 
-- **`itemKey`**: el ID numérico para commodities; para objetos con variantes, `itemID:sufijo` cuando se demuestre necesario (no se diseña antes de verlo).
+- **`itemKey`**: el ID numérico para objetos sin variantes; para equipo con variantes, `itemID:bonus` (los bonus ordenados numéricamente).
 - **`houseKey`**: identificador de la casa de subastas (por investigar cómo obtenerlo); mientras tanto, `faction|neutral` + ruleset.
-- **Historial empaquetado en cadenas**: reduce mucho el tamaño y el tiempo de carga frente a tablas anidadas; solo se desempaqueta al abrir la ficha de un objeto.
+- **Historial empaquetado en cadenas**: `d` y `w` usan el formato `<día>:<min>:<p50>:<qty>;...` dentro del valor de `prices`; reduce el tamaño y solo se desempaqueta al consultar el historial.
 - **`p50`**: mediana ponderada por cantidad de las primeras N unidades en venta (por defecto las que cubren el 15 % de la oferta), más robusta que el mínimo, que es fácil de manipular con un anuncio de una unidad.
-- **Poda** (al iniciar sesión, en una tarea diferida): diario 90 días, semanal hasta 52 semanas, después se borra; objetos sin observar en 180 días y no seguidos se eliminan. Presupuesto objetivo < 5 MB; las pruebas generan un caso intensivo y miden el tamaño serializado.
+- **Poda** (al iniciar sesión, en una tarea diferida): 90 días diarios para objetos de interés, 7 días para claves numéricas y 2 días para variantes; solo los objetos de interés acumulan historial semanal (hasta 52 semanas). Los objetos sin observar caducan a los 180 días si interesan y a los 30 días en caso contrario. Presupuesto objetivo < 5 MB; las pruebas generan un caso intensivo y miden el tamaño serializado.
 - `GoldPilotCharDB` (personaje): ajustes de interfaz y la sesión en curso.
 
 ## 6. Colectores (`State/`)

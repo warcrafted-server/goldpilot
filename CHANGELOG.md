@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.6.0] - 2026-11-24
+
+### Cambiado
+- Versión menor: el cambio de formato del almacén de precios incluye migración automática antes de 1.0.0.
+- Las claves distinguen variantes de equipo y el historial se poda según los objetos de interés.
+
 ## [0.5.0] - 2026-11-24
 
 ### Añadido

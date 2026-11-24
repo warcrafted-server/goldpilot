@@ -1,7 +1,7 @@
 # Comprobaciones manuales en juego — 0.3.0
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gp version` muestra `0.5.0`.
+- [ ] `/gp version` muestra `0.6.0`.
 - [ ] Abrir Inventario con `/gp` y con clic izquierdo en el minimapa.
 - [ ] Cambiar entre Personaje actual y Toda la cuenta.
 - [ ] Filtrar objetos por nombre y comprobar la lista.
@@ -48,3 +48,9 @@
 - [x] Al abrir la subasta arranca el escaneo completo (33 s, 7140 objetos); al reabrir antes de 15 min no hay cola de objetos ya leídos.
 - [ ] `/gp ledger` muestra el resumen de 30 días y representa los balances negativos con signo menos.
 - [ ] El buzón no escribe registros en combate ni en modo seguro.
+
+## 0.6.0
+
+- [ ] Tras cargar datos de esquema 2, la migración conserva el historial de consumibles, elimina las variantes antiguas de equipo y mantiene los datos desconocidos.
+- [ ] Al observar variantes de equipo diferentes, cada una conserva su precio por bonus.
+- [ ] Tras usar el almacén, el tamaño de SavedVariables permanece por debajo del presupuesto esperado.
