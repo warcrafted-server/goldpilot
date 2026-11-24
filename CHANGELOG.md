@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.8.5] - 2026-11-24
+
+### Añadido
+- Motor de consejos y foto del buzón pendiente (interno).
+
 ## [0.8.4] - 2026-11-24
 
 ### Corregido

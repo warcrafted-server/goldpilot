@@ -69,6 +69,35 @@ local function readMailbox()
     if added > 0 then addon.Log:info(string.format(addon.L.LEDGER_ADDED, added)) end
 end
 
+local function snapshot()
+    if not open or addon.safeMode then return end
+    local countOk, count, total = addon.Compat.call("GetInboxNumItems")
+    if not countOk or not tonumber(count) then return end
+    local nowOk, now = addon.Compat.call("time")
+    if not nowOk or not tonumber(now) then return end
+    local nameOk, character = addon.Compat.call("UnitName", "player")
+    if not nameOk or type(character) ~= "string" or character == "" then character = "unknown" end
+    local money, items, expires = 0, 0, nil
+    for index = 1, math.min(100, math.max(0, tonumber(count) or 0)) do
+        local ok, _, _, _, _, mailMoney, cod, daysLeft, hasItem = addon.Compat.call("GetInboxHeaderInfo", index)
+        if ok then
+            mailMoney, cod, daysLeft = tonumber(mailMoney), tonumber(cod), tonumber(daysLeft)
+            local hasAttachment = hasItem == true or (tonumber(hasItem) or 0) > 0
+            if mailMoney then money = money + mailMoney end
+            local counted = (mailMoney or 0) > 0 or hasAttachment and (cod or 0) == 0
+            if hasAttachment and (cod or 0) == 0 then items = items + 1 end
+            if counted and daysLeft and daysLeft >= 0 then
+                local expiry = now + daysLeft * 86400
+                if not expires or expiry < expires then expires = expiry end
+            end
+        end
+    end
+    GoldPilotDB = GoldPilotDB or {}
+    GoldPilotDB.mailPending = GoldPilotDB.mailPending or {}
+    GoldPilotDB.mailPending[character] = { t = now, money = money, items = items,
+        total = math.max(tonumber(count) or 0, tonumber(total) or 0), expires = expires }
+end
+
 addon.Modules:register("mail", {
     requires = { "GetInboxNumItems" },
     onEnable = function()
@@ -80,6 +109,7 @@ addon.Modules:register("mail", {
             after(4, function() if open and opening == current then readMailbox() end end)
         end)
         addon.Events:subscribe("mail", "MAIL_INBOX_UPDATE", readMailbox, 1)
+        addon.Events:subscribe("mail", "MAIL_INBOX_UPDATE", snapshot)
         addon.Events:subscribe("mail", "MAIL_CLOSED", function() open = false; opening = opening + 1 end)
     end,
 })

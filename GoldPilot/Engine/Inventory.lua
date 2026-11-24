@@ -17,7 +17,7 @@ function Inventory.build(db, houseKey, scope, now, opts)
     for charName, character in pairs(db.chars or {}) do
         if scope == nil or scope == charName then
             for _, where in ipairs({ "bags", "bank" }) do
-                for key, quantity in pairs(character[where] or {}) do
+                for key, quantity in pairs((not opts.where or opts.where == where) and (character[where] or {}) or {}) do
                     local itemID = addon.ItemKey.itemID(key)
                     quantity = tonumber(quantity) or 0
                     if itemID and quantity > 0 then
@@ -45,6 +45,7 @@ function Inventory.build(db, houseKey, scope, now, opts)
         row.vendorUnit = value.vendor and value.vendor.price or nil
         row.ahUnit = reference and reference.price or nil
         row.age = reference and reference.age or staleValue and staleValue.age or nil
+        row.t = row.age and now - row.age or nil
         row.stale = not reference and staleValue ~= nil
         local advice = addon.Advisor.recommend(row.vendorUnit, row.ahUnit, cut)
         if row.qtyAuction == 0 then
