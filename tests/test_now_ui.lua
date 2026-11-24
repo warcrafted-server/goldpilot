@@ -81,6 +81,8 @@ return {
             card("elsewhere", { char = "Alt", where = "bags", count = 2, seen = 0 }),
             card("trend_up", { kind = "info", gain = 12, count = 1, items = { { itemID = 25, key = "25", qty = 3, value = 12, percent = 18 } } }),
             card("trend_down", { kind = "info", gain = -12, count = 2, items = { { itemID = 25, key = "25", qty = 3, value = -12, percent = -18 } } }),
+            card("zone", { kind = "info", gain = 1900, count = 2, active = 3600, mapID = 6,
+                items = { { mapID = 6, value = 1900, active = 3600 } } }),
             card("refresh", { kind = "refresh", gain = 0, count = 1 }),
         }
         for _, language in ipairs({ "enUS", "esES" }) do
@@ -176,5 +178,38 @@ return {
         assert(button.value == addon.L.INVENTORY_SCOPE_CHARACTER)
         mock.combat = false
         GoldPilotCharDB = original
+    end,
+    ["Now dibuja el consejo de zona con el nombre del mapa y su lista"] = function(addon)
+        addon.Main:show()
+        local original = C_Map
+        C_Map = { GetMapInfo = function(id) return { name = "Zona " .. id } end }
+        local zone = card("zone", { kind = "info", gain = 1900, count = 2, active = 3600, mapID = 6,
+            confidence = 0.9, items = { { mapID = 6, value = 1900, active = 3600 },
+                { mapID = 5, value = 950, active = 1800 } } })
+        setCards(addon, { zone })
+        local widget = addon.NowUI.widgets.cards
+        assert(widget.items[1].title.value == string.format(addon.L.NOW_ZONE, "Zona 6"))
+        assert(widget.items[1].amount.value == "+" .. addon.Theme.money(1900) .. addon.L.NOW_PER_HOUR)
+        assert(widget.items[1].reason.value == string.format(addon.L.NOW_REASON_ZONE, 60))
+        assert(addon.NowUI.inventoryButton.hidden)
+        local text = lines(addon.NowUI.widgets.detail)
+        assert(text:find(addon.L.NOW_WHY_ZONE, 1, true))
+        assert(text:find(addon.L.NOW_ZONES_TOP, 1, true))
+        assert(text:find(string.format(addon.L.NOW_ZONE_LINE, "Zona 6", 60), 1, true))
+        assert(text:find(string.format(addon.L.NOW_ZONE_LINE, "Zona 5", 30), 1, true))
+        C_Map = nil
+        setCards(addon, { zone })
+        assert(widget.items[1].title.value == string.format(addon.L.NOW_ZONE,
+            string.format(addon.L.NOW_ZONE_UNKNOWN, 6)))
+        C_Map = original
+    end,
+    ["Now pasa la sesión y los objetos subastables a los consejos"] = function(addon)
+        addon.Main:show()
+        GoldPilotCharDB = GoldPilotCharDB or {}
+        local session = { char = "Player", last = 200000, maps = {} }
+        GoldPilotCharDB.session = session
+        setCards(addon, {})
+        assert(addon.NowUI.lastAdviceContext.session == session)
+        assert(addon.NowUI.lastAdviceContext.auctionable == addon.ItemData.auctionable)
     end,
 }

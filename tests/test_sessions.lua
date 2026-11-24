@@ -16,7 +16,8 @@ local function setupLoot(addon, mock)
     mock.enableLoot()
     clock = 200000
     time = function() return clock end
-    GoldPilotDB, GoldPilotCharDB = {}, {}
+    -- Estas pruebas cuentan solo los temporizadores del botín, no los del panel de sesión.
+    GoldPilotDB, GoldPilotCharDB = { settings = { hud = false } }, {}
     addon.Modules:enableAll()
 end
 

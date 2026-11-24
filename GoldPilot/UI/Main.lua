@@ -112,6 +112,13 @@ local function buildWindow()
                     dbSettings.fullScan = checked
                 end)
             page.scanCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -314)
+            page.hudCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_HUD,
+                dbSettings.hud ~= false, function(checked)
+                    if inCombat() then return end
+                    if addon.SessionHUD then addon.SessionHUD:setEnabled(checked)
+                    else dbSettings.hud = checked end
+                end)
+            page.hudCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -350)
         else
             page.minimapCheckbox:SetChecked(not dbSettings.minimap.hidden)
             page.tooltipCheckbox:SetChecked(dbSettings.tooltip ~= false)
@@ -119,6 +126,7 @@ local function buildWindow()
                 box:SetChecked((dbSettings.tooltipFields or {})[field] ~= false)
             end
             page.scanCheckbox:SetChecked(dbSettings.fullScan ~= false)
+            page.hudCheckbox:SetChecked(dbSettings.hud ~= false)
         end
     end)
     for _, tab in ipairs(Main.registeredTabs) do

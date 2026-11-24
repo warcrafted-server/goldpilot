@@ -70,7 +70,8 @@ end
 function Advice.build(ctx)
     ctx = ctx or {}
     local db, now = ctx.db or {}, tonumber(ctx.now) or 0
-    local normalized = { db = db, houseKey = ctx.houseKey, char = ctx.char, now = now, quality = ctx.quality }
+    local normalized = { db = db, houseKey = ctx.houseKey, char = ctx.char, now = now, quality = ctx.quality,
+        session = ctx.session, auctionable = ctx.auctionable }
     local opts = config(ctx.opts)
     local cards, totals = {}, { now = 0, mail = 0, elsewhere = 0 }
     local function add(card) if card.count > 0 then cards[#cards + 1] = card end end
@@ -187,6 +188,21 @@ function Advice.build(ctx)
     if refresh and (refresh.share > 0.5 or #actions == 0) then result[#result+1]=refresh end
     for _, card in ipairs(actions) do result[#result+1]=card end
     if refresh and result[1] ~= refresh then result[#result+1]=refresh end
+    local zones = addon.Sessions.zones(db, normalized.houseKey, now, {
+        char = ctx.account == false and ctx.char or nil,
+        current = normalized.session,
+        auctionable = normalized.auctionable,
+    })
+    if #zones > 0 and (zones[1].rate or 0) > 0 then
+        local zone = { id = "zone", kind = "info", per = "hour", class = "OBS",
+            gain = zones[1].rate, confidence = zones[1].active >= 3600 and 0.9 or 0.6,
+            count = #zones, mapID = zones[1].mapID, active = zones[1].active, items = {} }
+        for index = 1, math.min(#zones, 5) do
+            local item = zones[index]
+            zone.items[#zone.items + 1] = { mapID = item.mapID, value = item.rate, active = item.active }
+        end
+        result[#result+1] = zone
+    end
     for _, card in ipairs(infos) do result[#result+1]=card end
     return { cards = result, totals = totals }
 end

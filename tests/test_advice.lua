@@ -207,4 +207,47 @@ return {
         assert(GoldPilotDB.mailPending.A.money == 25)
         GetInboxNumItems, GetInboxHeaderInfo, time, UnitName = oldCount, oldHeader, oldTime, oldUnit
     end,
+    ["consejo de zona con la sesión en curso y el ámbito"] = function(addon, mock)
+        mock.items[1] = { sell = 1, stack = 1, class = 0 }
+        local db = inventoryDB({}, { [1] = price(199000, 1000, 10) })
+        db.sessions = {
+            { char = "A", maps = { [5] = { active = 3600, coin = 0, items = { [1] = 1 } } } },
+            { char = "B", maps = { [6] = { active = 7200, coin = 0, items = { [1] = 4 } } } },
+        }
+        local character = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 200000, account = false })
+        local zone = card(character, "zone")
+        assert(zone and zone.count == 1 and zone.mapID == 5)
+        assert(zone.gain == 950 and zone.confidence == 0.9 and zone.active == 3600)
+        assert(zone.kind == "info" and zone.per == "hour" and zone.class == "OBS")
+        assert(#zone.items == 1 and zone.items[1].mapID == 5 and zone.items[1].value == 950)
+        assert(character.totals.now == 0)
+        local account = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 200000, account = true })
+        local all = card(account, "zone")
+        assert(all.count == 2 and all.mapID == 6 and all.gain == 1900)
+        assert(all.items[1].mapID == 6 and all.items[1].value == 1900 and all.items[2].mapID == 5)
+        local current = { char = "A", last = 199000, lastMap = 8,
+            maps = { [8] = { active = 1100, coin = 0, items = { [1] = 3 } } } }
+        local live = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 200000,
+            account = true, session = current })
+        local best = card(live, "zone")
+        assert(best.count == 3 and best.mapID == 8 and best.active == 1280)
+        assert(best.gain == addon.Sessions.rate(2850, 1280) and best.confidence == 0.6)
+        assert(current.maps[8].active == 1100)
+    end,
+    ["la zona va tras las acciones y antes de las tendencias y necesita veinte minutos"] = function(addon, mock)
+        mock.items[1] = { sell = 1, stack = 1, class = 0 }
+        local now = 10 * 86400 + 100
+        local db = inventoryDB({ [1] = 1 }, {})
+        addon.Prices.record(db, "h", 1, { min = 100, p50 = 100, qty = 25 }, now - 2 * 86400)
+        addon.Prices.record(db, "h", 1, { min = 120, p50 = 120, qty = 25 }, now)
+        db.sessions = { { char = "A", maps = { [5] = { active = 3600, coin = 0, items = { [1] = 1 } } } } }
+        local result = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = now })
+        local ids = {}
+        for _, value in ipairs(result.cards) do ids[#ids + 1] = value.id end
+        assert(ids[1] == "auction" and ids[2] == "zone" and ids[#ids] == "trend_up")
+        assert(card(result, "zone").items[1].mapID == 5)
+        db.sessions[1].maps[5].active = 1199
+        local short = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = now })
+        assert(card(short, "zone") == nil)
+    end,
 }

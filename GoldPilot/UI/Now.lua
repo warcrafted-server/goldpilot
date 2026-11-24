@@ -6,12 +6,12 @@ addon.NowUI = NowUI
 local COLORS = {
     auction = { 0.35, 0.9, 0.4 }, vendor = { 1, 0.8, 0.25 }, mail = { 0.4, 0.75, 1 },
     elsewhere = { 0.75, 0.55, 1 }, trend_up = { 0.35, 0.9, 0.4 },
-    trend_down = { 0.9, 0.45, 0.35 }, refresh = { 0.6, 0.6, 0.6 },
+    trend_down = { 0.9, 0.45, 0.35 }, refresh = { 0.6, 0.6, 0.6 }, zone = { 0.95, 0.75, 0.3 },
 }
 local ICONS = {
     auction = "INV_Misc_Coin_01", vendor = "INV_Misc_Bag_10", mail = "INV_Letter_15",
     elsewhere = "INV_Box_01", trend_up = "Spell_ChargePositive",
-    trend_down = "Spell_ChargeNegative", refresh = "INV_Misc_Note_01",
+    trend_down = "Spell_ChargeNegative", refresh = "INV_Misc_Note_01", zone = "INV_Misc_Map_01",
 }
 
 local function combat()
@@ -37,11 +37,18 @@ local function cardKey(card)
     return table.concat({ tostring(card.id or card.kind), tostring(card.char or ""), tostring(card.where or "") }, "|")
 end
 
+local function mapName(mapID)
+    local ok, info = addon.Compat.call("C_Map.GetMapInfo", mapID)
+    if ok and type(info) == "table" and type(info.name) == "string" and info.name ~= "" then return info.name end
+    return string.format(addon.L.NOW_ZONE_UNKNOWN, mapID)
+end
+
 local function amount(card)
     if card.id == "refresh" or ((card.id == "mail" or card.id == "mail_other") and (card.gain or 0) <= 0) then
         return ""
     end
     local value = addon.Theme.money(math.abs(card.gain or 0))
+    if card.id == "zone" then return "+" .. value .. addon.L.NOW_PER_HOUR end
     if card.id == "trend_up" or card.id == "trend_down" then
         return (card.gain < 0 and "-" or "+") .. value
     end
@@ -59,6 +66,7 @@ local function title(card)
     end
     if id == "trend_up" then return L.NOW_TREND_UP end
     if id == "trend_down" then return L.NOW_TREND_DOWN end
+    if id == "zone" then return string.format(L.NOW_ZONE, mapName(card.mapID)) end
     return L.NOW_REFRESH
 end
 
@@ -84,6 +92,9 @@ local function reason(card, current)
     if id == "trend_up" or id == "trend_down" then
         return string.format(card.count == 1 and L.NOW_REASON_TREND_ONE or L.NOW_REASON_TREND,
             card.count, addon.Advice.defaults.trendPercent)
+    end
+    if id == "zone" then
+        return string.format(L.NOW_REASON_ZONE, math.floor((tonumber(card.active) or 0) / 60))
     end
     return string.format(card.count == 1 and L.NOW_REASON_REFRESH_ONE or L.NOW_REASON_REFRESH, card.count)
 end
@@ -118,11 +129,20 @@ local function detail(card, current)
         end
     elseif card.id == "trend_up" or card.id == "trend_down" then
         why = L.NOW_WHY_TREND
+    elseif card.id == "zone" then
+        why = L.NOW_WHY_ZONE
     else
         why = L.NOW_WHY_REFRESH
     end
     lines[#lines + 1] = { text = why, size = 11 }
-    if card.items and #card.items > 0 then
+    if card.id == "zone" and card.items and #card.items > 0 then
+        lines[#lines + 1] = { text = L.NOW_ZONES_TOP, size = 11, color = { 0.55, 0.5, 0.42 }, gap = 10 }
+        for _, item in ipairs(card.items) do
+            lines[#lines + 1] = { text = string.format(L.NOW_ZONE_LINE, mapName(item.mapID),
+                math.floor((tonumber(item.active) or 0) / 60)),
+                right = addon.Theme.money(item.value or 0) .. L.NOW_PER_HOUR, size = 11 }
+        end
+    elseif card.items and #card.items > 0 then
         lines[#lines + 1] = { text = L.NOW_TOP, size = 11, color = { 0.55, 0.5, 0.42 }, gap = 10 }
         for _, item in ipairs(card.items) do
             local name = addon.InventoryUI.itemName(item.itemID, item.key)
@@ -158,7 +178,8 @@ function NowUI:refresh()
         return ok and itemQuality or nil
     end
     local built = addon.Advice.build({ db = db, houseKey = addon.AuctionHouse.houseKey(), char = char,
-        now = current, quality = quality, account = GoldPilotCharDB.nowAccount })
+        now = current, quality = quality, account = GoldPilotCharDB.nowAccount,
+        session = GoldPilotCharDB.session, auctionable = addon.ItemData.auctionable })
     local data = {}
     for i, card in ipairs(built.cards or {}) do
         if i > 6 then break end

@@ -2,9 +2,9 @@
 
 Addon de economía para **World of Warcraft: Forever**. Muestra precios de vendedor y precios observados en la subasta en los tooltips, y valora el inventario de bolsas y banco por personaje o para toda la cuenta. Los precios de subasta proceden de lo que el jugador observa al abrir la casa de subastas; no se leen precios de otras fuentes.
 
-Comandos disponibles: `/gpilot` abre o cierra la ventana principal, `/gpilot window` hace lo mismo y `/gpilot help` muestra la ayuda. `/gpilot diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gpilot bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gpilot minimap` para ocultarlo o mostrarlo. `/gpilot watch <enlace>` sigue o deja de seguir un objeto; `/gpilot scan` hace un escaneo completo de la subasta abierta; `/gpilot ledger` resume las operaciones del mes.
+Comandos disponibles: `/gpilot` abre o cierra la ventana principal, `/gpilot window` hace lo mismo y `/gpilot help` muestra la ayuda. `/gpilot diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gpilot bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gpilot minimap` para ocultarlo o mostrarlo. `/gpilot watch <enlace>` sigue o deja de seguir un objeto; `/gpilot scan` hace un escaneo completo de la subasta abierta; `/gpilot ledger` resume las operaciones del mes; `/gpilot session` muestra la sesión de recolección en curso, `/gpilot session end` la cierra y `/gpilot hud` muestra u oculta su panel.
 
-> **Versión 0.12.0.** El Libro reúne ventas, compras y devoluciones de la subasta por periodo y personaje.
+> **Versión 0.13.0.** Un panel movible muestra el oro por hora de la sesión de recolección, y Ahora incorpora tu mejor zona.
 
 ## Documentación
 
@@ -32,6 +32,7 @@ Comandos disponibles: `/gpilot` abre o cierra la ventana principal, `/gpilot win
 - Cambia entre el personaje actual y toda la cuenta con el botón de ámbito de Ahora.
 - Inventario muestra el valor neto de lo vendible, el valor si todo se vende al vendedor, los objetos sin precio y las observaciones viejas. Cambia entre el personaje actual y toda la cuenta, filtra por nombre, oculta reservados y selecciona un objeto para ver cantidades por personaje y ubicación, precios y recomendación. Reservar aparta toda la cantidad (Mayús reserva una unidad más); Seguir añade el objeto a las consultas de subasta. Ajustes permite configurar la interfaz.
 - Libro muestra ventas, compras y devoluciones agrupadas por objeto. Filtra por personaje o cuenta y por los últimos 7 días, 30 días o todo el historial.
+- Cualquier botín de nodos y criaturas (desuello incluido) abre un panel movible con el oro por hora de la sesión; pasa a pausa si dejas de recoger y resume la sesión en el chat al terminar. `/gpilot session` muestra la sesión en curso, `/gpilot session end` la cierra y `/gpilot hud`, como la casilla de Ajustes, muestra u oculta el panel. Tras 20 minutos activos, Ahora añade el consejo de tu mejor zona.
 - Usa `/gpilot bags` para ver el valor de las bolsas al vendedor, en subasta neta y con la mejor combinación; `/gpilot diag` para el diagnóstico; `/gpilot minimap` para mostrar u ocultar el botón; y `/gpilot version` para ver la versión. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho.
 
 ## Desarrollo

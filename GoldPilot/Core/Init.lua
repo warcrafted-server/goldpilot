@@ -3,6 +3,15 @@ _G.GoldPilot = addon
 addon.name = addonName
 addon.version = (C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(addonName, "Version")) or (GetAddOnMetadata and GetAddOnMetadata(addonName, "Version")) or "desconocida"
 
+local function sessionValues(session)
+    local ok, current = addon.Compat.call("time")
+    current = ok and tonumber(current) or 0
+    local active = addon.Sessions.active(session, current)
+    local value = addon.Sessions.value(GoldPilotDB or {}, addon.AuctionHouse.houseKey(),
+        { coin = session.coin, items = session.items }, current, addon.ItemData.auctionable)
+    return math.floor(active / 60), value.total, addon.Sessions.rate(value.total, active) or 0
+end
+
 local function command(input)
     local subcommand = string.match(input or "", "^%s*(%S*)") or ""
     subcommand = string.lower(subcommand)
@@ -73,6 +82,28 @@ local function command(input)
         end, bound)
         addon.Log:info(string.format(addon.L.BAGS_SUMMARY, addon.Theme.money(values.vendor),
             addon.Theme.money(values.auction), addon.Theme.money(values.best), values.withoutPrice))
+    elseif subcommand == "session" or subcommand == "sesion" then
+        local argument = string.lower(string.match(input or "", "^%s*%S+%s+(%S*)") or "")
+        if argument == "end" or argument == "fin" then
+            local had = GoldPilotCharDB and GoldPilotCharDB.session
+            local ok, current = addon.Compat.call("time")
+            local saved = addon.Loot:finish(ok and tonumber(current) or 0)
+            if not saved then addon.Log:info(had and addon.L.SESSION_SHORT or addon.L.SESSION_NONE) end
+        else
+            local session = GoldPilotCharDB and GoldPilotCharDB.session
+            if session then
+                local minutes, total, rate = sessionValues(session)
+                addon.Log:info(string.format(addon.L.SESSION_CURRENT, minutes,
+                    addon.Theme.money(total), addon.Theme.money(rate)))
+            else
+                addon.Log:info(addon.L.SESSION_NONE)
+            end
+        end
+    elseif subcommand == "hud" then
+        if addon.SessionHUD then
+            addon.SessionHUD:toggle()
+            addon.Log:info(addon.SessionHUD:enabled() and addon.L.HUD_ON or addon.L.HUD_OFF)
+        end
     else
         addon.Log:info(addon.L.HELP)
     end

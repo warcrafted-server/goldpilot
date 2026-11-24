@@ -101,3 +101,14 @@
 ## 0.12.0
 
 - [ ] `/gpilot` y `/goldpilot` abren la ventana, y el comando de grupo del juego vuelve a hablar al grupo.
+
+## 0.13.0
+
+- [ ] El panel aparece al recoger y no duplica botín (una hierba recogida suma solo una vez).
+- [ ] El panel se mueve y recuerda el sitio.
+- [ ] El panel se oculta con la cruz, con el ajuste y con `/gpilot hud`.
+- [ ] El panel pasa a pausa a los 3 min.
+- [ ] `/gpilot session` y `/gpilot session end` responden.
+- [ ] Tras 20 min activos aparece la zona en Ahora.
+- [ ] Nada cambia en combate.
+- [ ] Los nodos con posición están en `GoldPilotDB.nodes` tras `/reload`.
