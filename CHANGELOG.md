@@ -14,6 +14,7 @@ Parche: correcciones y retoques visuales, sin función nueva.
 ### Corregido
 - Ahora: en la ficha sin importe, la confianza ya no se descoloca.
 - Listas: los nombres largos se recortan en vez de pisar el importe, las filas recicladas no heredan colores y la selección sigue al objeto cuando la lista se reordena.
+- `docs/COMPROBACIONES.md`: el título ya no indica una versión antigua (0.7.0).
 
 ## [0.15.1] - 2026-11-24
 

@@ -1,7 +1,7 @@
-# Comprobaciones manuales en juego — 0.7.0
+# Comprobaciones manuales en juego
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gpilot version` muestra `0.7.0`.
+- [ ] `/gpilot version` muestra la versión del archivo `VERSION`.
 - [ ] Abrir Inventario con `/gpilot` y con clic izquierdo en el minimapa.
 - [ ] Cambiar entre Personaje actual y Toda la cuenta.
 - [ ] Filtrar objetos por nombre y comprobar la lista.
