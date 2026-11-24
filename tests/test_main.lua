@@ -70,7 +70,7 @@ return {
         addon.Tooltip:add(frame, { id = 25 })
         assert(#frame.lines == 0)
     end,
-    ["/gp help y window tienen acciones separadas"] = function(addon, mock)
+    ["/gpilot help y window tienen acciones separadas"] = function(addon, mock)
         SlashCmdList.GOLDPILOT("help")
         assert(#mock.output == 1 and mock.output[1]:find("window", 1, true))
         SlashCmdList.GOLDPILOT("window")

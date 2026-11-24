@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.12.0] - 2026-11-24
+
+### Cambiado
+- El comando corto pasa a ser `/gpilot` (incompatible: `/gp` deja de existir porque es el del chat de grupo); `/goldpilot` sigue igual.
+
 ## [0.11.0] - 2026-11-24
 
 ### Añadido

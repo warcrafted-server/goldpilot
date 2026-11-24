@@ -73,7 +73,7 @@ return {
         addon.Modules:enableAll()
         assert(bad.enabled == false and started)
     end,
-    ["/gp version y /gp help usan la localización"] = function(addon, mock)
+    ["/gpilot version y /gpilot help usan la localización"] = function(addon, mock)
         SlashCmdList.GOLDPILOT("version")
         SlashCmdList.GOLDPILOT("help")
         local text = table.concat(mock.output, "\n")

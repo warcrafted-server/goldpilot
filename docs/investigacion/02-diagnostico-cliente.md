@@ -1,6 +1,6 @@
 # Diagnóstico del cliente: correo de subasta (Forever 1.60.1, 2026-11-24)
 
-Observado con `/gp diag` (sección `GoldPilotDB.diag.correos`, por personaje) en el buzón de personajes reales de la Alianza.
+Observado con `/gpilot diag` (sección `GoldPilotDB.diag.correos`, por personaje) en el buzón de personajes reales de la Alianza.
 
 ## Tipos de correo de la casa de subastas
 

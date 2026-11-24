@@ -79,7 +79,7 @@ local function command(input)
 end
 
 SLASH_GOLDPILOT1 = "/goldpilot"
-SLASH_GOLDPILOT2 = "/gp"
+SLASH_GOLDPILOT2 = "/gpilot"
 SlashCmdList.GOLDPILOT = command
 
 addon.Events:subscribe("core", "ADDON_LOADED", function(name)

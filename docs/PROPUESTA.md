@@ -80,7 +80,7 @@ Estética: la del Diario de aventuras que usa LoreWake (fondo marrón oscuro, fi
 **Tres niveles de información:**
 
 1. **En contexto, sin abrir nada** (nivel 0): una o dos líneas en el tooltip; un panel lateral discreto pegado a la ventana de subasta con el asistente de venta; un mini contador de sesión de recolección (oro/hora realizable) que se puede ocultar.
-2. **Panel principal** (`/gp` o botón del minimapa), pestañas:
+2. **Panel principal** (`/gpilot` o botón del minimapa), pestañas:
    - **Ahora**: franja de métricas (oro total de la cuenta, beneficio de los últimos 7 días confirmado, valor de inventario) y 3-5 recomendaciones con su porqué.
    - **Mercado**: buscador de objetos y lista de seguimiento; ficha del objeto con precio, tendencia, cantidad en venta, fuentes y antigüedad.
    - **Recolección**: zonas recomendadas para tus profesiones y sesiones pasadas.
@@ -101,7 +101,7 @@ Resumen (detalle en ARQUITECTURA §5): `GoldPilotDB` de cuenta con versión de e
 ## 9. Pruebas y compatibilidad
 
 - Pruebas fuera del juego con Lua 5.1 real (`lupa`) y simulación de la API, como LoreWake: motor, almacén de precios, migraciones, traducciones y empaquetado.
-- Diagnóstico en juego (`/gp diag`) que comprueba cada capacidad y desactiva el módulo que la necesite si falta.
+- Diagnóstico en juego (`/gpilot diag`) que comprueba cada capacidad y desactiva el módulo que la necesite si falta.
 - Lista de comprobaciones manuales por versión (`docs/COMPROBACIONES.md`) antes de publicar: nada se publica como probado sin haberlo probado en juego.
 - Compatibilidad: TOC con `## Interface: 16001`; versión del esquema de datos separada de la del addon.
 
@@ -112,7 +112,7 @@ Cada versión publicada aporta algo útil y probado en juego. Lo marcado «inter
 | Versión | Entregable | Publicable |
 |---|---|---|
 | 0.0.1 | Esta documentación | No (solo repositorio) |
-| 0.0.x | Esqueleto (núcleo, traducciones, pruebas, empaquetado) y **diagnóstico** `/gp diag` de subasta, correo, botín y profesiones | Interno |
+| 0.0.x | Esqueleto (núcleo, traducciones, pruebas, empaquetado) y **diagnóstico** `/gpilot diag` de subasta, correo, botín y profesiones | Interno |
 | **0.1.0** | Tooltip con precio de vendedor y de subasta observado (con antigüedad), búsqueda dirigida de tus objetos al abrir la subasta, valor de bolsas | Sí |
 | **0.2.0** | Asistente de venta en la subasta y libro de operaciones con ventas confirmadas por correo | Sí |
 | **0.3.0** | Sesiones de recolección con valor realizable y asesor de zonas por habilidad | Sí |
@@ -141,7 +141,7 @@ El plan ejecutable paso a paso está en `.agents/plans/goldpilot/goldpilot.PLAN.
 
 1. **Licencia:** WNCL-TP-1.0 (aplicada).
 2. **Autoría:** WarCrafted.
-3. **Nombre visible y comando:** carpeta `GoldPilot`, título «GoldPilot Forever», comandos `/goldpilot` y `/gp`.
+3. **Nombre visible y comando:** carpeta `GoldPilot`, título «GoldPilot Forever», comandos `/goldpilot` y `/gpilot`.
 4. **Archivos de agentes fuera del repositorio:** `AGENTS.md`, `CLAUDE.md`, `.agents/`, `.agentrelay/` y `.claude/` van en `.gitignore` y no se publican.
 5. **Otros addons:** GoldPilot no depende de FarmAdvisor. Con PocketBank (en desarrollo activo) se coopera: si está instalado, GoldPilot usa sus existencias de banco y bolsas de toda la cuenta en lugar de duplicarlas, y le ofrece valores (`GoldPilot.API.GetPrice`) para que PocketBank pueda mostrar el valor del banco. Sin PocketBank, GoldPilot guarda solo cantidades mínimas.
 6. **Nodos de recolección:** `wowdata` es solo semilla; lo observado en juego manda y las semillas no confirmadas se descartan (D11).

@@ -1,8 +1,8 @@
 # Comprobaciones manuales en juego — 0.7.0
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gp version` muestra `0.7.0`.
-- [ ] Abrir Inventario con `/gp` y con clic izquierdo en el minimapa.
+- [ ] `/gpilot version` muestra `0.7.0`.
+- [ ] Abrir Inventario con `/gpilot` y con clic izquierdo en el minimapa.
 - [ ] Cambiar entre Personaje actual y Toda la cuenta.
 - [ ] Filtrar objetos por nombre y comprobar la lista.
 - [ ] Seleccionar un objeto, reservarlo y dejar de reservarlo; Mayús reserva una unidad.
@@ -11,13 +11,13 @@
 - [ ] Sin objetos, la ventana muestra un estado vacío claro; sin precios, invita a abrir la subasta.
 - [ ] No aparecen errores de Lua al abrir, filtrar, reservar o seguir.
 - [ ] La ventana no se abre ni redibuja en combate.
-- [ ] `/gp diag` genera el diagnóstico sin errores.
-- [ ] El botón del minimapa aparece, se puede mover y sus clics funcionan; `/gp minimap` lo muestra y oculta.
+- [ ] `/gpilot diag` genera el diagnóstico sin errores.
+- [ ] El botón del minimapa aparece, se puede mover y sus clics funcionan; `/gpilot minimap` lo muestra y oculta.
 - [ ] Abrir la subasta encola consultas y, al terminar, aparece el aviso `Subasta: N objetos leídos`.
 - [ ] Un objeto compatible sin observación muestra el precio de vendedor y que no hay precio de subasta observado.
 - [ ] Un objeto compatible con observación muestra el precio de subasta, su antigüedad y la recomendación.
 - [ ] Mantener Mayús en el tooltip muestra el detalle adicional de la observación.
-- [ ] `/gp bags` muestra las valoraciones de vendedor, subasta neta y mejor combinación.
+- [ ] `/gpilot bags` muestra las valoraciones de vendedor, subasta neta y mejor combinación.
 - [ ] El addon no realiza acciones ni crea elementos de interfaz en combate.
 - [ ] `/reload` conserva los precios observados.
 - [ ] Tras abrir la subasta, ejecutar `/reload` y revisar `GoldPilotDB.ahLast`.
@@ -25,13 +25,13 @@
 
 ## 0.3.2
 
-- [ ] `/gp watch` con un enlace de objeto (Mayús+clic desde la bolsa con el chat abierto) lo sigue; repetido, lo deja de seguir.
+- [ ] `/gpilot watch` con un enlace de objeto (Mayús+clic desde la bolsa con el chat abierto) lo sigue; repetido, lo deja de seguir.
 - [ ] En la subasta, el chat muestra «Subasta: N/M objetos» cada 10 objetos.
 - [ ] El tooltip con Mayús muestra «en venta» y la variación de la mediana (necesita datos de un día anterior).
 
 ## 0.4.0
 
-- [ ] Con la casilla de escaneo completo activada en Ajustes, al abrir la subasta el chat dice «Escaneo completo…» y después «Escaneo completo: N objetos…»; `/gp scan` antes de 15 min avisa del límite. Si no devuelve datos, vuelve a la cola por objetos.
+- [ ] Con la casilla de escaneo completo activada en Ajustes, al abrir la subasta el chat dice «Escaneo completo…» y después «Escaneo completo: N objetos…»; `/gpilot scan` antes de 15 min avisa del límite. Si no devuelve datos, vuelve a la cola por objetos.
 - [ ] Tras el escaneo, el tooltip de objetos que no estaban en las bolsas muestra precio reciente; el tamaño de `GoldPilotDev.lua` tras un escaneo completo (se guardan todos los objetos con ofertas, decenas de miles; anotar el tamaño y el tiempo de carga al entrar).
 - [ ] Una búsqueda a mano en la subasta actualiza el «último visto» del objeto.
 - [ ] El tooltip se ve ordenado en dos columnas (cabecera GoldPilot con antigüedad, Vendedor, Último visto, Mediana, Mejor opción); con Mayús añade En venta y Tendencia.
@@ -46,7 +46,7 @@
 - [x] Las dos devoluciones de Charman se registran (2026-11-24).
 - [x] Reabrir el buzón de Charman no repite las devoluciones.
 - [x] Al abrir la subasta arranca el escaneo completo (33 s, 7140 objetos); al reabrir antes de 15 min no hay cola de objetos ya leídos.
-- [ ] `/gp ledger` muestra el resumen de 30 días y representa los balances negativos con signo menos.
+- [ ] `/gpilot ledger` muestra el resumen de 30 días y representa los balances negativos con signo menos.
 - [ ] El buzón no escribe registros en combate ni en modo seguro.
 
 ## 0.6.0
@@ -77,7 +77,7 @@
 
 ## 0.9.0
 
-- [ ] `/gp` abre la pestaña Ahora con métricas, tarjetas y ficha.
+- [ ] `/gpilot` abre la pestaña Ahora con métricas, tarjetas y ficha.
 - [ ] Sin precios, Ahora invita a abrir la casa de subastas; con datos pero sin consejos muestra el estado vacío.
 - [ ] Seleccionar consejos conserva la selección al refrescar y selecciona la primera tarjeta si desaparece.
 - [ ] Ver en Inventario abre Inventario desde consejos de subasta, vendedor y otros sitios.
@@ -97,3 +97,7 @@
 - [ ] Seleccionar un objeto muestra sus operaciones recientes y balances por personaje.
 - [ ] El Libro muestra un texto claro cuando no hay registros o cuando no existen operaciones para el periodo.
 - [ ] La ventana no crea ni redibuja elementos del Libro durante el combate.
+
+## 0.12.0
+
+- [ ] `/gpilot` y `/goldpilot` abren la ventana, y el comando de grupo del juego vuelve a hablar al grupo.

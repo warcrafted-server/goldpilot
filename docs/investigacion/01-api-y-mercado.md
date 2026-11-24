@@ -29,7 +29,7 @@ Nada de la API de subastas, correo ni profesiones está probado aún en el clien
 
 **Consecuencia:** el addon no puede depender de escaneos completos frecuentes. Las búsquedas dirigidas (los objetos que el jugador tiene, sigue o necesita) son el camino fiable dentro del juego. La validez de las comisiones debe leerse del cliente cuando sea posible (`C_AuctionHouse.GetAuctionHouseCut`, HER) y no fijarse en el código.
 
-## 2. Qué puede saber un addon (por verificar con `/gp diag`)
+## 2. Qué puede saber un addon (por verificar con `/gpilot diag`)
 
 | Información | API probable | Estado | Notas |
 |---|---|---|---|

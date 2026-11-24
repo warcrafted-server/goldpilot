@@ -14,7 +14,7 @@
 
 - [ ] Verificar en juego los arreglos de la 0.3.1: lista ancha con fondo opaco, ficha con botones siempre visibles, filtro con texto de ayuda, estrella y filtro «Solo seguidos», botón del minimapa pegado al borde con el icono nuevo.
 - [ ] Comprobar en juego fuera de ciudad: no se abre ni redibuja en combate.
-- [ ] Comprobado y correcto: tooltip, aviso al terminar la cola, precios tras `/reload`, valor de bolsas, métricas, reservar, `/gp diag` (21 presentes, 2 ausentes esperadas), SavedVariables 24 KB con 44 objetos.
+- [ ] Comprobado y correcto: tooltip, aviso al terminar la cola, precios tras `/reload`, valor de bolsas, métricas, reservar, `/gpilot diag` (21 presentes, 2 ausentes esperadas), SavedVariables 24 KB con 44 objetos.
 
 ## Media: escenario con API de Blizzard (tras D12)
 

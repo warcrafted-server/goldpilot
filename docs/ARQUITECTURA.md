@@ -4,7 +4,7 @@ Diseño técnico inicial (2026-11-23). Producto y prioridades en [PROPUESTA.md](
 
 ## 1. Principios
 
-1. **Funciona con lo que exista.** Cada módulo declara las capacidades de la API que necesita; si falta alguna, se desactiva y lo dice en `/gp diag`, sin romper el resto.
+1. **Funciona con lo que exista.** Cada módulo declara las capacidades de la API que necesita; si falta alguna, se desactiva y lo dice en `/gpilot diag`, sin romper el resto.
 2. **El dato lleva su clase.** Todo precio, cantidad o beneficio indica de dónde sale y cuándo (§4). La interfaz nunca muestra una estimación como hecho.
 3. **El jugador actúa; el addon aconseja.** Ninguna acción de subasta, correo o comercio se ejecuta sin clic del jugador.
 4. **Nada en combate.** No se crea ni redibuja interfaz en combate y no se usa nada del registro de combate ni de eventos de hechizos.
@@ -38,7 +38,7 @@ docs/
 
 ## 3. Núcleo (`Core/`)
 
-Igual que LoreWake: un único frame de eventos con suscripción por módulo y agrupación de ráfagas (`BAG_UPDATE_DELAYED`, resultados de subasta); registro de módulos con `requires`; `Compat.has(cap)` y `Compat.call` con `pcall`; registro con niveles; `/gp diag` que guarda el informe en `GoldPilotDB.diag`.
+Igual que LoreWake: un único frame de eventos con suscripción por módulo y agrupación de ráfagas (`BAG_UPDATE_DELAYED`, resultados de subasta); registro de módulos con `requires`; `Compat.has(cap)` y `Compat.call` con `pcall`; registro con niveles; `/gpilot diag` que guarda el informe en `GoldPilotDB.diag`.
 
 **Capacidades a diagnosticar desde el primer paso:** `C_AuctionHouse` (búsquedas, commodities, propias, `GetAuctionHouseCut`, `ReplicateItems`), eventos de subasta y de límite de consultas, `GetInboxInvoiceInfo` y lectura del buzón, `GetLootSourceInfo` y formato del GUID de objetos de mundo, `C_TradeSkillUI` con la ventana abierta, `C_Container` del banco, API pública de Auctionator (`Auctionator.API.v1`) y TSM (`TSM_API`).
 
