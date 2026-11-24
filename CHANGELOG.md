@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.2.4] - 2026-11-24
+
+### Añadido
+- Captura del tooltip de objeto para la ficha de CurseForge (`docs/img/capturas/tooltip-objeto.png`)
+
 ## [0.2.3] - 2026-11-24
 
 ### Añadido
