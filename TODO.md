@@ -10,6 +10,16 @@
 - [ ] PocketBank: acordar una API pública mínima (existencias por personaje) para que GoldPilot no duplique datos, y que PocketBank pueda mostrar valores de GoldPilot.
 - [ ] wowdata: importar los nodos observados por GoldPilot (`importar_obs.py`) para sustituir las semillas de Classic.
 
+## Bloqueante antes de publicar la 0.3.0 (pruebas en juego, 2026-11-24)
+
+- [ ] Ventana de Inventario con mala presentación: lista estrecha, barra de desplazamiento suelta y fondo casi transparente; rediseñar maquetación y fondo.
+- [ ] Botones Reservar/Seguir y ficha de detalle: no se ven al abrir (ficha vacía hasta elegir fila); comprobar solapes.
+- [ ] Filtro: el texto de ayuda («Filtrar por nombre») cuenta como búsqueda real y vacía la lista; tras borrar el filtro vuelve a salir todo, bien. Usar texto de ayuda atenuado que no filtre.
+- [ ] «Seguir» no tiene efecto visible (solo prioriza la cola de subasta): marcar con estrella en la lista, filtro «Seguidos» y explicarlo en la ficha.
+- [ ] Botón del minimapa: se puede arrastrar hacia dentro y fuera del anillo (debe quedarse sobre el borde del minimapa) y usa el icono antiguo; regenerar `Media/Icon.tga` con el logo nuevo.
+- [ ] Comprobar en juego fuera de ciudad: no se abre ni redibuja en combate.
+- [ ] Comprobado y correcto: tooltip, aviso al terminar la cola, precios tras `/reload`, valor de bolsas, métricas, reservar, `/gp diag` (21 presentes, 2 ausentes esperadas), SavedVariables 24 KB con 44 objetos.
+
 ## Alta: 0.1.0
 
 - [ ] Comprobar la versión 0.1.0 en juego (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
