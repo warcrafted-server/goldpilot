@@ -4,6 +4,49 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.4.0] - 2026-11-24
+
+Menor: funcionalidad nueva y compatible (los datos guardados siguen valiendo; las nuevas opciones tienen valores por defecto).
+
+### Añadido
+- Escaneo completo de la subasta con `ReplicateItems`, como Auctionator: al abrir la subasta (opción en Ajustes, desactivada por defecto como en Auctionator) o con `/gp scan`, respetando el límite del servidor de 15 min. Actualiza el precio de todos los objetos conocidos con ofertas y, si falla o no responde, se vuelve a la cola por objetos.
+- Cualquier resultado de búsqueda de la subasta (del jugador u otro addon) actualiza el precio y saca el objeto de la cola.
+- El escaneo completo guarda el precio de todos los objetos con ofertas, no solo los de la lista interna de GoldPilot (se excluyen las jaulas de mascota, que comparten identificador). El tooltip también los muestra, sin precio de vendedor cuando se desconoce.
+- Los objetos equipados (propios y de otros personajes) entran en la cola de subasta.
+- Ajustes: casillas para cada línea del tooltip (vendedor, último visto, mediana, mejor opción) y para el escaneo completo.
+- Diagnóstico del buzón: guarda cabeceras (remitente, asunto, dinero, devuelto) y adjuntos de hasta 20 correos, por personaje, y se actualiza con `MAIL_INBOX_UPDATE`.
+- El diagnóstico del buzón no guarda textos de correos de jugadores.
+- Diagnóstico de los últimos 300 botines y muestra de variantes de equipo de la subasta.
+- El diagnóstico de subasta avisa una sola vez por tipo de evento y guarda como máximo 40.
+
+### Corregido
+- Refrescar la lista del inventario ya no pierde la posición de desplazamiento.
+
+### Cambiado
+- Tooltip rediseñado en filas de dos columnas con cabecera «GoldPilot», antigüedad y clase de dato; la mediana y el último visto se muestran por separado.
+
+## [0.3.2] - 2026-11-24
+
+Parche (según la hoja de ruta, mejoras pequeñas); funcionalidad pequeña y compatible.
+
+### Añadido
+- `/gp watch <enlace o número>` (también `/gp seguir`) alterna el seguimiento de un objeto; con Mayús+clic en la bolsa se inserta el enlace.
+- El tooltip con Mayús muestra las unidades en venta y la variación de la mediana frente al último día anterior observado.
+- Progreso de la cola de subasta en el chat («Subasta: 12/40 objetos»), cada 10 objetos.
+
+### Cambiado
+- El límite de la cola de subasta sube de 300 a 1000 objetos.
+
+## [0.3.1] - 2026-11-24
+
+Parche: corrige fallos de la 0.3.0 vistos en juego, sin cambios de datos ni de compatibilidad.
+
+### Corregido
+- Inventario: lista más ancha, fondos opacos y ficha con texto ajustado; los botones Reservar y Seguir se ven siempre (desactivados hasta elegir un objeto).
+- El texto de ayuda del filtro ya no cuenta como búsqueda.
+- Los objetos seguidos llevan estrella en la lista, hay filtro «Solo seguidos» y la ficha explica qué hace seguir.
+- El botón del minimapa se queda sobre el borde al arrastrarlo y usa el icono nuevo.
+
 ## [0.3.0] - 2026-11-24
 
 ### Añadido

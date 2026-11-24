@@ -95,8 +95,8 @@ end
 local function observeMail()
     if inCombat() then return end
     local nOK, n = addon.Compat.call("GetInboxNumItems")
-    local invoices = {}
-    for i = 1, math.min(tonumber(nOK and n) or 0, 10) do
+    local invoices, headers = {}, {}
+    for i = 1, math.min(tonumber(nOK and n) or 0, 20) do
         local values = pack(addon.Compat.call("GetInboxInvoiceInfo", i))
         local invoice = {
             tipo = type(values[2]) == "number" and values[2] or nil,
@@ -107,11 +107,31 @@ local function observeMail()
             local value = values[field]
             local entry = { tipo = type(value) }
             if type(value) == "number" then entry.valor = value end
+            if field == 2 and type(value) == "string" then entry.texto = value end
             invoice.campos[field - 1] = entry
         end
         invoices[i] = invoice
+        -- Los textos solo se guardan de correos sin respuesta posible (subasta, sistema): nunca de jugadores.
+        local head = pack(addon.Compat.call("GetInboxHeaderInfo", i))
+        local system = head[1] and not head[13]
+        local header = { sender = system and type(head[4]) == "string" and head[4] or nil,
+            subject = system and type(head[5]) == "string" and head[5] or nil,
+            money = tonumber(head[6]), cod = tonumber(head[7]), daysLeft = tonumber(head[8]),
+            hasItem = head[9], wasReturned = head[11], items = {} }
+        for attachment = 1, 12 do
+            local item = pack(addon.Compat.call("GetInboxItem", i, attachment))
+            if item[2] == nil then break end
+            header.items[#header.items + 1] = { name = item[2], itemID = tonumber(item[3]), count = tonumber(item[5]) }
+        end
+        headers[i] = header
     end
-    saveSection("mail", { abierto = true, n = nOK and n or nil, facturas = invoices }, addon.L.DIAG_MAIL)
+    saveSection("mail", { abierto = true, n = nOK and n or nil, facturas = invoices, cabeceras = headers }, addon.L.DIAG_MAIL)
+    -- El archivo es de toda la cuenta: una copia por personaje evita que el último buzón borre los anteriores.
+    local _, name = addon.Compat.call("UnitName", "player")
+    if type(name) == "string" and name ~= "" and GoldPilotDB.diag then
+        GoldPilotDB.diag.correos = GoldPilotDB.diag.correos or {}
+        GoldPilotDB.diag.correos[name] = { fecha = now(), cabeceras = headers }
+    end
 end
 
 local function observeLoot()
@@ -126,7 +146,65 @@ local function observeLoot()
             slots[i] = {}
         end
     end
-    saveSection("loot", { n = nOK and n or nil, ranuras = slots }, addon.L.DIAG_LOOT)
+    local first = not (GoldPilotDB and GoldPilotDB.diag and GoldPilotDB.diag.loot)
+    GoldPilotDB = GoldPilotDB or {}
+    GoldPilotDB.diag = GoldPilotDB.diag or { caps = {} }
+    GoldPilotDB.diag.loot = { n = nOK and n or nil, ranuras = slots, fecha = now() }
+    if first then addon.Log:info(addon.L.DIAG_LOOT) end
+
+    -- Registro corto de botines para distinguir nodos, desuello y criaturas.
+    local entry = { t = now(), objetos = {} }
+    local mapOK, map = addon.Compat.call("C_Map.GetBestMapForUnit", "player")
+    entry.mapa = mapOK and tonumber(map) or nil
+    for i = 1, math.min(tonumber(nOK and n) or 0, 10) do
+        local linkOK, link = addon.Compat.call("GetLootSlotLink", i)
+        local source = pack(addon.Compat.call("GetLootSourceInfo", i))
+        entry.objetos[#entry.objetos + 1] = {
+            itemID = linkOK and type(link) == "string" and tonumber(string.match(link, "item:(%d+)")) or nil,
+            guid = source[1] and type(source[2]) == "string" and source[2] or nil,
+            cantidad = source[1] and tonumber(source[3]) or nil,
+        }
+    end
+    local log = GoldPilotDB.diag.botin or {}
+    GoldPilotDB.diag.botin = log
+    log[#log + 1] = entry
+    while #log > 300 do table.remove(log, 1) end
+end
+
+-- Muestra de variantes de equipo (sufijos aleatorios) en los resultados del resumen de subasta.
+local function observeBrowse()
+    if inCombat() or not (GoldPilotDB and GoldPilotDB.diag) then return end
+    local ok, results = addon.Compat.call("C_AuctionHouse.GetBrowseResults")
+    if not ok or type(results) ~= "table" then return end
+    local sample = { total = #results, conSufijo = 0, filas = {} }
+    for _, result in ipairs(results) do
+        local key = result.itemKey
+        if type(key) == "table" and (tonumber(key.itemSuffix) or 0) ~= 0 then
+            sample.conSufijo = sample.conSufijo + 1
+            if #sample.filas < 15 then
+                sample.filas[#sample.filas + 1] = { itemID = key.itemID, itemLevel = key.itemLevel,
+                    itemSuffix = key.itemSuffix, minPrice = result.minPrice, qty = result.totalQuantity }
+            end
+        end
+    end
+    GoldPilotDB.diag.variantes = GoldPilotDB.diag.variantes or {}
+    GoldPilotDB.diag.variantes.resumen = sample
+end
+
+-- Enlaces del escaneo completo: hasta cuatro por objeto para ver cómo se distingue cada variante.
+function addon.Diag:sampleReplicate(itemID, index)
+    if not (GoldPilotDB and GoldPilotDB.diag) then return end
+    local variants = GoldPilotDB.diag.variantes or {}
+    GoldPilotDB.diag.variantes = variants
+    variants.enlaces = variants.enlaces or {}
+    local links = variants.enlaces[itemID] or {}
+    if #links >= 4 then return end
+    local ok, link = addon.Compat.call("C_AuctionHouse.GetReplicateItemLink", index)
+    if ok and type(link) == "string" then
+        for _, seen in ipairs(links) do if seen == link then return end end
+        links[#links + 1] = link
+        variants.enlaces[itemID] = links
+    end
 end
 
 local function observeProfessions()
@@ -142,6 +220,9 @@ addon.Modules:register("diag", {
         addon.Events:subscribe("diag", "AUCTION_HOUSE_SHOW", observeAuction)
         addon.Events:subscribe("diag", "AUCTION_HOUSE_CLOSED", function() addon.Diag.auctionOpen = false end)
         addon.Events:subscribe("diag", "MAIL_SHOW", observeMail)
+        addon.Events:subscribe("diag", "MAIL_INBOX_UPDATE", observeMail, 1)
+        addon.Events:subscribe("diag", "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", observeBrowse, 2)
+        addon.Events:subscribe("diag", "AUCTION_HOUSE_BROWSE_RESULTS_ADDED", observeBrowse, 2)
         addon.Events:subscribe("diag", "LOOT_READY", observeLoot)
         addon.Events:subscribe("diag", "TRADE_SKILL_SHOW", observeProfessions)
         for _, event in ipairs(auctionEvents) do
@@ -164,9 +245,14 @@ addon.Modules:register("diag", {
                     local qtyOK, quantity = addon.Compat.call("C_AuctionHouse.GetCommoditySearchResultsQuantity", itemID)
                     if qtyOK and type(quantity) == "number" then entry.resultados = quantity end
                 end
-                auction.eventos[#auction.eventos + 1] = entry
                 auction.fecha = now()
-                addon.Log:info(addon.L.DIAG_AUCTION_EVENT .. eventName)
+                if #auction.eventos >= 40 then return end
+                auction.eventos[#auction.eventos + 1] = entry
+                if not auction.logged then auction.logged = {} end
+                if not auction.logged[eventName] then
+                    auction.logged[eventName] = true
+                    addon.Log:info(addon.L.DIAG_AUCTION_EVENT .. eventName)
+                end
             end)
         end
     end,

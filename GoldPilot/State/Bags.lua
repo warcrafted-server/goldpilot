@@ -31,6 +31,16 @@ function addon.Bags:scan()
     return scanContainers(characterBagIDs())
 end
 
+function addon.Bags:scanEquipped()
+    local items = {}
+    if not addon.Compat.has("GetInventoryItemID") then return items end
+    for slot = 1, 19 do
+        local ok, itemID = addon.Compat.call("GetInventoryItemID", "player", slot)
+        if ok and tonumber(itemID) then items[tonumber(itemID)] = (items[tonumber(itemID)] or 0) + 1 end
+    end
+    return items
+end
+
 local function characterKey()
     local _, name = addon.Compat.call("UnitName", "player")
     if type(name) ~= "string" or name == "" then name = "unknown" end
@@ -47,6 +57,7 @@ local function save()
     GoldPilotDB.chars[key] = {
         money = tonumber(money) or 0,
         bags = addon.Bags:scan(),
+        equipped = addon.Bags:scanEquipped(),
         bank = previous.bank,
         bankSeen = previous.bankSeen,
         seen = ok and tonumber(seen) or 0,
@@ -80,5 +91,6 @@ addon.Modules:register("bags", {
         addon.Events:subscribe("bags", "PLAYER_LOGIN", save)
         addon.Events:subscribe("bags", "BAG_UPDATE_DELAYED", save, 0.5)
         addon.Events:subscribe("bags", "BANKFRAME_OPENED", scanBank, 0.5)
+        addon.Events:subscribe("bags", "PLAYER_EQUIPMENT_CHANGED", save, 0.5)
     end,
 })

@@ -15,7 +15,19 @@ local function frame(kind, name, parent, template)
     return CreateFrame(kind, name, parent)
 end
 
+local function solidBackground(object, color)
+    if not object.CreateTexture then return end
+    local fill = object:CreateTexture(nil, "BACKGROUND")
+    fill:SetAllPoints()
+    fill:SetColorTexture(unpack(color))
+    object.solidFill = fill
+end
+
+Widgets.frame = frame
+
 local function backdrop(object, color)
+    color = color or { 0.12, 0.09, 0.06, 0.96 }
+    solidBackground(object, { color[1], color[2], color[3], 1 })
     if object.SetBackdrop then
         pcall(object.SetBackdrop, object, {
             bgFile = "Interface/Tooltips/UI-Tooltip-Background", edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -23,7 +35,7 @@ local function backdrop(object, color)
             insets = { left = 3, right = 3, top = 3, bottom = 3 },
         })
     end
-    if object.SetBackdropColor then pcall(object.SetBackdropColor, object, unpack(color or { 0.12, 0.09, 0.06, 0.96 })) end
+    if object.SetBackdropColor then pcall(object.SetBackdropColor, object, unpack(color)) end
 end
 
 local function text(parent, value, size, color)
@@ -84,13 +96,14 @@ function Widgets.tabs(parent, definitions, onChange)
     return bar
 end
 
-function Widgets.list(parent, onSelect)
+function Widgets.list(parent, onSelect, width)
+    width = width or 320
     local scroll = frame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", parent, "TOPLEFT", 16, -84)
     scroll:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 16, 16)
-    scroll:SetWidth(320)
+    scroll:SetWidth(width)
     local content = frame("Frame", nil, scroll)
-    content:SetSize(300, 1)
+    content:SetSize(width - 4, 1)
     scroll:SetScrollChild(content)
     scroll.rows, scroll.data, scroll.selected, scroll.onSelect = {}, {}, nil, onSelect
     local offset = 0
@@ -101,7 +114,7 @@ function Widgets.list(parent, onSelect)
     local render
     local function createRow(index)
         local row = frame("Button", nil, content)
-        row:SetSize(300, 28)
+        row:SetSize(width - 4, 28)
         row.text = text(row, "", 12)
         row.text:SetPoint("LEFT", row, "LEFT", 24, 0)
         row.rightText = text(row, "", 11)
@@ -146,8 +159,14 @@ function Widgets.list(parent, onSelect)
     function scroll:setRows(rows)
         if inCombat() then return false end
         self.data = rows or {}
-        offset = 0
-        content:SetHeight(math.max(1, #self.data * 28))
+        local height = #self.data * 28
+        content:SetHeight(math.max(1, height))
+        -- Refrescar no debe perder la posición; si la lista se acorta, se ajusta al nuevo final.
+        local limit = math.max(0, height - (scroll.GetHeight and scroll:GetHeight() or 360))
+        if offset > limit then
+            offset = limit
+            if scroll.SetVerticalScroll then scroll:SetVerticalScroll(limit) end
+        end
         render()
     end
     scroll:SetScript("OnVerticalScroll", function(_, value)
@@ -161,16 +180,21 @@ function Widgets.detail(parent)
     local panel = frame("Frame", nil, parent)
     panel:SetPoint("TOPLEFT", parent, "TOPLEFT", 352, -84)
     panel:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -16, 16)
-    backdrop(panel, { 0.09, 0.07, 0.05, 0.88 })
+    backdrop(panel, { 0.09, 0.07, 0.05, 0.95 })
     panel.lines = {}
     function panel:setLines(lines)
         if inCombat() then return false end
         for _, line in ipairs(self.lines) do line:Hide() end
         self.lines = {}
-        for i, value in ipairs(lines or {}) do
+        local previous
+        for _, value in ipairs(lines or {}) do
             local label = text(self, type(value) == "table" and value.text or value, 12,
                 type(value) == "table" and value.color or nil)
-            label:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12 - (i - 1) * 20)
+            if label.SetWidth then label:SetWidth((self.contentWidth or 300)) end
+            if label.SetJustifyH then label:SetJustifyH("LEFT") end
+            if previous then label:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, -6)
+            else label:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12) end
+            previous = label
             self.lines[#self.lines + 1] = label
         end
     end

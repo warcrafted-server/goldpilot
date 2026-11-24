@@ -82,4 +82,13 @@ return {
         local bytes = #("GoldPilotDB = " .. serialize(db))
         assert(bytes < 5 * 1024 * 1024)
     end,
+    ["prices calcula la tendencia frente a un día anterior"] = function(addon)
+        local db, day = {}, 100
+        assert(addon.Prices.trend(db, "h", "i", day * 86400) == nil)
+        addon.Prices.record(db, "h", "i", { min = 8, p50 = 100, qty = 4 }, (day - 1) * 86400 + 5)
+        assert(addon.Prices.trend(db, "h", "i", (day - 1) * 86400 + 9) == nil)
+        addon.Prices.record(db, "h", "i", { min = 8, p50 = 112, qty = 4 }, day * 86400 + 5)
+        local trend = addon.Prices.trend(db, "h", "i", day * 86400 + 9)
+        assert(trend.percent == 12 and trend.days == 1)
+    end,
 }

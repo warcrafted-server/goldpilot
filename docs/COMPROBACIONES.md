@@ -1,7 +1,7 @@
 # Comprobaciones manuales en juego — 0.3.0
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gp version` muestra `0.3.0`.
+- [ ] `/gp version` muestra `0.4.0`.
 - [ ] Abrir Inventario con `/gp` y con clic izquierdo en el minimapa.
 - [ ] Cambiar entre Personaje actual y Toda la cuenta.
 - [ ] Filtrar objetos por nombre y comprobar la lista.
@@ -22,3 +22,18 @@
 - [ ] `/reload` conserva los precios observados.
 - [ ] Tras abrir la subasta, ejecutar `/reload` y revisar `GoldPilotDB.ahLast`.
 - [ ] El tamaño de las SavedVariables resulta razonable tras usar el addon.
+
+## 0.3.2
+
+- [ ] `/gp watch` con un enlace de objeto (Mayús+clic desde la bolsa con el chat abierto) lo sigue; repetido, lo deja de seguir.
+- [ ] En la subasta, el chat muestra «Subasta: N/M objetos» cada 10 objetos.
+- [ ] El tooltip con Mayús muestra «en venta» y la variación de la mediana (necesita datos de un día anterior).
+
+## 0.4.0
+
+- [ ] Con la casilla de escaneo completo activada en Ajustes (desactivada por defecto), al abrir la subasta el chat dice «Escaneo completo…» y después «Escaneo completo: N objetos…»; `/gp scan` antes de 15 min avisa del límite. Si no devuelve datos, vuelve a la cola por objetos.
+- [ ] Tras el escaneo, el tooltip de objetos que no estaban en las bolsas muestra precio reciente; el tamaño de `GoldPilotDev.lua` tras un escaneo completo (se guardan todos los objetos con ofertas, decenas de miles; anotar el tamaño y el tiempo de carga al entrar).
+- [ ] Una búsqueda a mano en la subasta actualiza el «último visto» del objeto.
+- [ ] El tooltip se ve ordenado en dos columnas (cabecera GoldPilot con antigüedad, Vendedor, Último visto, Mediana, Mejor opción); con Mayús añade En venta y Tendencia.
+- [ ] Ajustes: cada casilla de línea del tooltip la muestra u oculta; la del escaneo completo lo desactiva.
+- [ ] Buzón: abrir el buzón con una compra y con una devolución, `/reload`, y revisar `GoldPilotDB.diag.mail.cabeceras`.

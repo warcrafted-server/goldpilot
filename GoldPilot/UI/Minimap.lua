@@ -22,9 +22,17 @@ local function position(button, angle)
         SQUARE = { UL = true, UR = true, LL = true, LR = true },
     }
     local quadrant = (y >= 0 and (x >= 0 and "UR" or "UL")) or (x >= 0 and "LR" or "LL")
-    local radius = corners[shape] and corners[shape][quadrant] and 80 or 105
+    local half = (Minimap.GetWidth and Minimap:GetWidth() or 140) / 2 + 5
+    local px, py
+    if corners[shape] and corners[shape][quadrant] then
+        local diagonal = math.sqrt(2) * half
+        px = math.max(-half, math.min(diagonal * x, half))
+        py = math.max(-half, math.min(diagonal * y, half))
+    else
+        px, py = half * x, half * y
+    end
     button:ClearAllPoints()
-    button:SetPoint("CENTER", Minimap, "CENTER", radius * x, radius * y)
+    button:SetPoint("CENTER", Minimap, "CENTER", px, py)
 end
 
 local function showMainAction()
@@ -73,23 +81,25 @@ addon.Modules:register("minimap", {
         addon.Minimap.button = button
         button:SetSize(31, 31)
         button:SetFrameStrata("MEDIUM")
-        button:SetMovable(true)
         button:EnableMouse(true)
         button:RegisterForDrag("LeftButton")
-        button:SetClampedToScreen(true)
+        -- El botón no se mueve libremente: sigue al cursor solo como ángulo y se queda en el borde.
+        local function follow(self)
+            local mx, my = Minimap:GetCenter()
+            local cx, cy = GetCursorPosition()
+            local scale = Minimap:GetEffectiveScale()
+            if not (mx and my and cx and cy and scale) then return end
+            settings.angle = math.deg(math.atan2(cy / scale - my, cx / scale - mx))
+            position(self, settings.angle)
+        end
         button:SetScript("OnDragStart", function(self)
             if inCombat() then return end
-            self:StartMoving()
+            self:SetScript("OnUpdate", follow)
         end)
         button:SetScript("OnDragStop", function(self)
+            self:SetScript("OnUpdate", nil)
             if inCombat() then return end
-            self:StopMovingOrSizing()
-            local x, y = Minimap:GetCenter()
-            local bx, by = self:GetCenter()
-            if x and y and bx and by then
-                settings.angle = math.deg(math.atan2(by - y, bx - x))
-                position(self, settings.angle)
-            end
+            follow(self)
         end)
         button:SetScript("OnClick", function(_, mouseButton)
             if inCombat() then return end

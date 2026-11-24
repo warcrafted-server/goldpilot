@@ -96,9 +96,33 @@ local function buildWindow()
                     dbSettings.tooltip = checked
                 end)
             page.tooltipCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -68)
+            local fieldsTitle = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            fieldsTitle:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -118)
+            fieldsTitle:SetText(addon.L.SETTING_FIELDS)
+            page.fieldCheckboxes = {}
+            dbSettings.tooltipFields = dbSettings.tooltipFields or {}
+            for i, field in ipairs({ "vendor", "last", "median", "advice" }) do
+                local box = addon.Widgets.checkbox(page, addon.L["SETTING_FIELD_" .. string.upper(field)],
+                    dbSettings.tooltipFields[field] ~= false, function(checked)
+                        if inCombat() then return end
+                        dbSettings.tooltipFields[field] = checked
+                    end)
+                box:SetPoint("TOPLEFT", page, "TOPLEFT", 40, -142 - (i - 1) * 32)
+                page.fieldCheckboxes[field] = box
+            end
+            page.scanCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_FULLSCAN,
+                dbSettings.fullScan == true, function(checked)
+                    if inCombat() then return end
+                    dbSettings.fullScan = checked
+                end)
+            page.scanCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -290)
         else
             page.minimapCheckbox:SetChecked(not dbSettings.minimap.hidden)
             page.tooltipCheckbox:SetChecked(dbSettings.tooltip ~= false)
+            for field, box in pairs(page.fieldCheckboxes) do
+                box:SetChecked((dbSettings.tooltipFields or {})[field] ~= false)
+            end
+            page.scanCheckbox:SetChecked(dbSettings.fullScan == true)
         end
     end)
     for _, tab in ipairs(Main.registeredTabs) do

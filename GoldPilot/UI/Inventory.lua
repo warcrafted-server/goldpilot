@@ -1,6 +1,8 @@
 local _, addon = ...
 
-local InventoryUI = { account = false, hideReserved = false, filter = "" }
+local LIST_WIDTH, DETAIL_X = 372, 418
+
+local InventoryUI = { account = false, hideReserved = false, onlyWatched = false, filter = "" }
 addon.InventoryUI = InventoryUI
 
 local function inCombat()
@@ -48,7 +50,8 @@ local function formatRow(row)
     elseif row.action == "auction" then color = { 0.35, 0.9, 0.4 }
     elseif row.action == "vendor" then color = { 1, 0.8, 0.25 }
     else color = { 0.65, 0.65, 0.65 } end
-    return { itemID = row.itemID, text = name .. " ×" .. row.qty,
+    local star = row.watched and "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_1:14|t " or ""
+    return { itemID = row.itemID, text = star .. name .. " ×" .. row.qty,
         right = right, icon = itemIcon(row.itemID), color = color, rightColor = color,
         row = row, name = name }
 end
@@ -81,16 +84,23 @@ local function detailLines(row, name)
     else reason = addon.L.INVENTORY_REASON_NONE end
     lines[#lines + 1] = string.format(addon.L.INVENTORY_RECOMMENDATION, addon.L["INVENTORY_ACTION_" .. string.upper(row.action)])
     lines[#lines + 1] = reason
+    lines[#lines + 1] = { text = row.watched and addon.L.INVENTORY_WATCH_ON or addon.L.INVENTORY_WATCH_OFF,
+        color = { 0.65, 0.65, 0.65 } }
     return lines
 end
 
 local function makeButton(parent, label, x, callback)
     local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     button:SetSize(120, 24)
-    button:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", x, 60)
+    button:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", x, 64)
     button:SetText(label)
     button:SetScript("OnClick", function() if not inCombat() then callback() end end)
     return button
+end
+
+local function setEnabled(button, enabled)
+    local method = enabled and button.Enable or button.Disable
+    if method then method(button) end
 end
 
 function InventoryUI:refresh()
@@ -103,7 +113,7 @@ function InventoryUI:refresh()
     local built = addon.Inventory.build(db, key, scope, now())
     local rows, shown = {}, {}
     for _, row in ipairs(built.rows) do
-        if (not self.hideReserved or not row.reserved) then
+        if (not self.hideReserved or not row.reserved) and (not self.onlyWatched or row.watched) then
             local formatted = formatRow(row)
             if matches(formatted.name, self.filter) then
                 rows[#rows + 1], shown[#shown + 1] = formatted, row
@@ -130,10 +140,15 @@ function InventoryUI:refresh()
     end
     self.scopeButton:SetText(self.account and addon.L.INVENTORY_SCOPE_ACCOUNT or addon.L.INVENTORY_SCOPE_CHARACTER)
     self.hideCheckbox:SetChecked(self.hideReserved)
+    self.watchedCheckbox:SetChecked(self.onlyWatched)
     if self.selected then
         self.reserveButton:SetText(self.selected.reserved and addon.L.INVENTORY_UNRESERVE or addon.L.INVENTORY_RESERVE)
         self.watchButton:SetText(self.selected.watched and addon.L.INVENTORY_UNWATCH or addon.L.INVENTORY_WATCH)
+    else
+        self.widgets.detail:setLines({ { text = addon.L.INVENTORY_PICK, color = { 0.65, 0.65, 0.65 } } })
     end
+    setEnabled(self.reserveButton, self.selected ~= nil)
+    setEnabled(self.watchButton, self.selected ~= nil)
     return true
 end
 
@@ -141,13 +156,29 @@ function InventoryUI:build(page)
     if self.page == page and page._inventoryBuilt then return self:refresh() end
     self.page, page._inventoryBuilt = page, true
     page._inventoryRows = {}
-    self.widgets = { list = addon.Widgets.list(page), detail = addon.Widgets.detail(page), metrics = addon.Widgets.metrics(page, {}) }
+    self.widgets = { list = addon.Widgets.list(page, nil, LIST_WIDTH), detail = addon.Widgets.detail(page), metrics = addon.Widgets.metrics(page, {}) }
     self.widgets.list:ClearAllPoints()
-    self.widgets.list:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -116)
-    self.widgets.list:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 16, 58)
+    self.widgets.list:SetPoint("TOPLEFT", page, "TOPLEFT", 20, -52)
+    self.widgets.list:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 20, 58)
+    self.widgets.list:SetWidth(LIST_WIDTH)
     self.widgets.detail:ClearAllPoints()
-    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", 352, -116)
-    self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -16, 58)
+    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", DETAIL_X, -48)
+    self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -16, 96)
+    self.widgets.detail.contentWidth = 330 - 24
+    local listBackground = addon.Widgets.frame("Frame", nil, page, "BackdropTemplate")
+    listBackground:SetPoint("TOPLEFT", page, "TOPLEFT", 14, -48)
+    listBackground:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", 20 + LIST_WIDTH + 26, 54)
+    if listBackground.SetFrameLevel and self.widgets.list.GetFrameLevel then
+        listBackground:SetFrameLevel(math.max(0, self.widgets.list:GetFrameLevel() - 1))
+    end
+    if listBackground.SetBackdrop then
+        pcall(listBackground.SetBackdrop, listBackground, { edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 12 })
+    end
+    if listBackground.CreateTexture then
+        local fill = listBackground:CreateTexture(nil, "BACKGROUND")
+        fill:SetAllPoints()
+        fill:SetColorTexture(0.09, 0.07, 0.05, 1)
+    end
     page.emptyText = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     page.emptyText:SetPoint("CENTER", page, "CENTER", 0, 0)
     page.emptyText:Hide()
@@ -158,24 +189,42 @@ function InventoryUI:build(page)
     self.hideCheckbox = addon.Widgets.checkbox(page, addon.L.INVENTORY_HIDE_RESERVED, self.hideReserved, function(value)
         if not inCombat() then self.hideReserved = value; self:refresh() end
     end)
-    self.hideCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 180, -10)
+    self.hideCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 176, -10)
+    self.watchedCheckbox = addon.Widgets.checkbox(page, addon.L.INVENTORY_ONLY_WATCHED, self.onlyWatched, function(value)
+        if not inCombat() then self.onlyWatched = value; self:refresh() end
+    end)
+    self.watchedCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 356, -10)
     self.filterBox = CreateFrame("EditBox", nil, page, "InputBoxTemplate")
     self.filterBox:SetSize(190, 24)
     self.filterBox:SetPoint("TOPRIGHT", page, "TOPRIGHT", -16, -12)
     if self.filterBox.SetAutoFocus then self.filterBox:SetAutoFocus(false) end
-    self.filterBox:SetText(addon.L.INVENTORY_FILTER)
-    if self.filterBox.SetScript then self.filterBox:SetScript("OnTextChanged", function(box)
+    local hint = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    hint:SetPoint("LEFT", self.filterBox, "LEFT", 8, 0)
+    if hint.SetTextColor then hint:SetTextColor(0.5, 0.5, 0.5) end
+    hint:SetText(addon.L.INVENTORY_FILTER)
+    local function updateHint(box)
+        if (box:GetText() or "") == "" and not (box.HasFocus and box:HasFocus()) then hint:Show() else hint:Hide() end
+    end
+    self.filterBox:SetScript("OnTextChanged", function(box)
+        updateHint(box)
         if inCombat() then return end
         self.filter = box:GetText() or ""
         self:refresh()
-    end) end
+    end)
+    self.filterBox:SetScript("OnEditFocusGained", function() hint:Hide() end)
+    self.filterBox:SetScript("OnEditFocusLost", updateHint)
+    self.filterBox:SetScript("OnEscapePressed", function(box)
+        box:SetText("")
+        if box.ClearFocus then box:ClearFocus() end
+    end)
+    self.filterBox:SetScript("OnEnterPressed", function(box) if box.ClearFocus then box:ClearFocus() end end)
     self.widgets.list.onSelect = function(formatted)
         if inCombat() then return end
         self.selected = formatted.row
         self.widgets.detail:setLines(detailLines(self.selected, formatted.name))
-        self.reserveButton:Show(); self.watchButton:Show()
+        self:refresh()
     end
-    self.reserveButton = makeButton(page, addon.L.INVENTORY_RESERVE, 352, function()
+    self.reserveButton = makeButton(page, addon.L.INVENTORY_RESERVE, DETAIL_X + 8, function()
         GoldPilotDB.reserved = GoldPilotDB.reserved or {}
         if self.selected.reserved then
             GoldPilotDB.reserved[self.selected.itemID] = nil
@@ -187,12 +236,11 @@ function InventoryUI:build(page)
             (tonumber(GoldPilotDB.reserved[self.selected.itemID]) or 0) + amount)
         self:refresh()
     end)
-    self.watchButton = makeButton(page, addon.L.INVENTORY_WATCH, 482, function()
+    self.watchButton = makeButton(page, addon.L.INVENTORY_WATCH, DETAIL_X + 138, function()
         GoldPilotDB.watch = GoldPilotDB.watch or {}
         GoldPilotDB.watch[self.selected.itemID] = not GoldPilotDB.watch[self.selected.itemID] or nil
         self:refresh()
     end)
-    self.reserveButton:Hide(); self.watchButton:Hide()
     return self:refresh()
 end
 

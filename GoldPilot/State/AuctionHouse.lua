@@ -2,7 +2,8 @@ local _, addon = ...
 
 addon.AuctionHouse = {}
 local AuctionHouse = addon.AuctionHouse
-local queue, current, done, generation = {}, nil, 0, 0
+local MAX_QUEUE, PROGRESS_EVERY = 1000, 10
+local queue, current, done, finished, generation = {}, nil, 0, 0, 0
 local retryScheduled = false
 local sessionActive = false
 local isOpen = false
@@ -49,28 +50,52 @@ function AuctionHouse:enqueue(itemID, front)
     local valid = validItem(itemID)
     if not valid then
         local last = GoldPilotDB and GoldPilotDB.ahLast
-        if front and last and itemID and not last.result[itemID] and sessionItemCount(last) < 300 then last.result[itemID] = "nodata" end
+        if front and last and itemID and not last.result[itemID] and sessionItemCount(last) < MAX_QUEUE then last.result[itemID] = "nodata" end
         return false
     end
     itemID = valid
     local last = GoldPilotDB and GoldPilotDB.ahLast
     if contains(itemID) or (last and last.result[itemID]) then return false end
     sessionActive = true
-    if last and sessionItemCount(last) >= 300 then return false end
+    if last and sessionItemCount(last) >= MAX_QUEUE then return false end
     if last then table.insert(last.queued, front and (current and 2 or 1) or (#last.queued + 1), itemID) end
     if front then table.insert(queue, 1, itemID) else queue[#queue + 1] = itemID end
     self:_pump()
     return true
 end
 
+-- Usado por el escaneo completo: registra los anuncios de un objeto y lo saca de la cola.
+function AuctionHouse:recordListings(itemID, listings)
+    local summary = addon.Prices.summarize(listings, addon.Prices.defaults.share)
+    if not summary then return false end
+    GoldPilotDB = GoldPilotDB or {}
+    addon.Prices.record(GoldPilotDB, houseKey(), itemID, summary, now())
+    return true
+end
+
+-- Tras un escaneo completo, lo que sigue en cola y no apareció no tiene anuncios.
+function AuctionHouse:resolveQueue(seen)
+    local last = GoldPilotDB and GoldPilotDB.ahLast
+    for _, itemID in ipairs(queue) do
+        if last then last.result[itemID] = seen[itemID] and "ok" or "empty" end
+        finished = finished + 1
+    end
+    queue = {}
+end
+
 function AuctionHouse:status()
-    return { pending = #queue, current = current, done = done }
+    return { pending = #queue, current = current, done = done, finished = finished,
+        total = finished + #queue + (current and 1 or 0) }
 end
 
 local function finishCurrent(result)
     if current and GoldPilotDB and GoldPilotDB.ahLast then GoldPilotDB.ahLast.result[current] = result or "timeout" end
     current = nil
+    finished = finished + 1
     generation = generation + 1
+    if #queue > 0 and finished % PROGRESS_EVERY == 0 then
+        addon.Log:info(string.format(addon.L.AH_PROGRESS, finished, finished + #queue))
+    end
     AuctionHouse:_pump()
 end
 
@@ -79,7 +104,8 @@ local function itemKey(itemID)
     if ok then return key end
 end
 
-local function query(itemID, key, commodity)
+-- Lee los resultados de búsqueda que el cliente tiene de un objeto y los registra.
+local function readResults(itemID, key, commodity)
     local listings = {}
     local ok, count = false, nil
     if commodity then ok, count = addon.Compat.call("C_AuctionHouse.GetNumCommoditySearchResults", itemID) end
@@ -103,21 +129,50 @@ local function query(itemID, key, commodity)
     end
     local summary = addon.Prices.summarize(listings, addon.Prices.defaults.share)
     if summary then
+        GoldPilotDB = GoldPilotDB or {}
         addon.Prices.record(GoldPilotDB, houseKey(), itemID, summary, now())
     end
+    return summary
+end
+
+local function query(itemID, key, commodity)
+    local summary = readResults(itemID, key, commodity)
     done = done + 1
     finishCurrent(summary and "ok" or "empty")
 end
 
-local function onCommodityResults(itemID)
-    if current and tonumber(itemID) == current then query(current, itemKey(current), true) end
+-- Resultado de una búsqueda ajena a la cola (del jugador u otro addon): se aprovecha y se saca de la cola.
+local function observeOther(itemID, key, commodity)
+    local valid = tonumber(itemID)
+    if not valid or valid <= 0 then return end
+    local summary = readResults(valid, key or itemKey(valid), commodity)
+    if not summary then return end
+    for index, queued in ipairs(queue) do
+        if queued == valid then
+            table.remove(queue, index)
+            local last = GoldPilotDB.ahLast
+            if last then last.result[valid] = "ok" end
+            finished = finished + 1
+            break
+        end
+    end
 end
 
-local function onItemResults(itemID)
-    if current then query(current, itemKey(current), false) end
+local function onCommodityResults(itemID)
+    itemID = tonumber(itemID)
+    if not itemID then return end
+    if current and itemID == current then query(current, itemKey(current), true)
+    else observeOther(itemID, nil, true) end
+end
+
+local function onItemResults(key)
+    local itemID = type(key) == "table" and tonumber(key.itemID) or tonumber(key)
+    if current and (itemID == nil or itemID == current) then query(current, itemKey(current), false)
+    elseif itemID then observeOther(itemID, type(key) == "table" and key or nil, false) end
 end
 
 function AuctionHouse:_pump()
+    if self.scanning then return end
     if current or #queue == 0 then
         if not current and #queue == 0 and sessionActive then
             addon.Log:info(string.format(addon.L.AH_DONE, done))
@@ -147,7 +202,7 @@ function AuctionHouse:_pump()
 end
 
 local function buildQueue()
-    queue, current, done = {}, nil, 0
+    queue, current, done, finished = {}, nil, 0, 0
     sessionActive = true
     local seen = {}
     local function append(items, sortByCount)
@@ -178,6 +233,7 @@ local function buildQueue()
     local currentName = select(2, addon.Compat.call("UnitName", "player"))
     local own = chars[currentName or "unknown"] or {}
     append(own.bank, true)
+    append(addon.Bags:scanEquipped(), false)
     local others, otherItems = {}, {}
     for name, char in pairs(chars) do
         if name ~= currentName and type(char) == "table" then others[#others + 1] = { name = name, char = char } end
@@ -188,7 +244,7 @@ local function buildQueue()
         return sa > sb
     end)
     for _, entry in ipairs(others) do
-        for _, inventory in ipairs({ entry.char.bags or {}, entry.char.bank or {} }) do
+        for _, inventory in ipairs({ entry.char.bags or {}, entry.char.bank or {}, entry.char.equipped or {} }) do
             for itemID, count in pairs(inventory) do
                 local id = tonumber(itemID)
                 if id then otherItems[id] = (otherItems[id] or 0) + (tonumber(count) or 0) end
@@ -196,7 +252,7 @@ local function buildQueue()
         end
     end
     append(otherItems, true)
-    while #queue > 300 do table.remove(queue) end
+    while #queue > MAX_QUEUE do table.remove(queue) end
     local last = GoldPilotDB.ahLast
     for _, itemID in ipairs(queue) do last.queued[#last.queued + 1] = itemID end
 end
@@ -210,12 +266,14 @@ local function opened()
     local _, cut = addon.Compat.call("C_AuctionHouse.GetAuctionHouseCut")
     GoldPilotDB.houses[key] = { lastSeen = now(), cut = tonumber(cut) }
     buildQueue()
+    if addon.FullScan then addon.FullScan:maybeStart() end
     AuctionHouse:_pump()
 end
 
 local function closed()
     isOpen = false
-    queue, current, done = {}, nil, 0
+    AuctionHouse.scanning = false
+    queue, current, done, finished = {}, nil, 0, 0
     sessionActive = false
     generation = generation + 1
 end

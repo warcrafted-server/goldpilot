@@ -22,7 +22,26 @@ local function command(input)
         end
         return
     end
-    if subcommand == "version" then
+    if subcommand == "scan" or subcommand == "escanear" then
+        if addon.FullScan then addon.FullScan:command() else addon.Log:info(addon.L.SCAN_UNSUPPORTED) end
+        return
+    end
+    if subcommand == "watch" or subcommand == "seguir" then
+        local argument = string.match(input or "", "^%s*%S+%s+(.-)%s*$") or ""
+        local itemID = tonumber(string.match(argument, "item:(%d+)")) or tonumber(argument)
+        if not itemID then
+            addon.Log:info(addon.L.WATCH_USAGE)
+        elseif not (addon.DataItems and addon.DataItems[itemID]) then
+            addon.Log:info(string.format(addon.L.WATCH_UNKNOWN, argument))
+        else
+            GoldPilotDB = GoldPilotDB or {}
+            GoldPilotDB.watch = GoldPilotDB.watch or {}
+            local nowWatched = not GoldPilotDB.watch[itemID]
+            GoldPilotDB.watch[itemID] = nowWatched or nil
+            addon.Log:info(string.format(nowWatched and addon.L.WATCH_ON or addon.L.WATCH_OFF, argument))
+            if addon.InventoryUI and addon.InventoryUI.refresh then addon.InventoryUI:refresh() end
+        end
+    elseif subcommand == "version" then
         addon.Log:info(string.format(addon.L.VERSION, addon.version))
     elseif subcommand == "minimap" then
         if addon.Minimap then addon.Minimap:toggle() end

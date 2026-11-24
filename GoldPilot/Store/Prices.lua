@@ -102,6 +102,20 @@ function Prices.get(db, houseKey, itemKey)
     return item and item.last or nil
 end
 
+-- Cambio de la mediana respecto al dato más reciente de un día anterior al actual.
+function Prices.trend(db, houseKey, itemKey, now)
+    local last = Prices.get(db, houseKey, itemKey)
+    if not last or not (tonumber(last.p50) and last.p50 > 0) then return nil end
+    local today = math.floor(now / 86400)
+    local previous
+    for _, entry in ipairs(Prices.history(db, houseKey, itemKey).daily) do
+        if entry[1] < today and (not previous or entry[1] > previous[1]) then previous = entry end
+    end
+    if not previous or previous[3] <= 0 then return nil end
+    return { percent = math.floor((last.p50 - previous[3]) / previous[3] * 100 + 0.5),
+        days = today - previous[1] }
+end
+
 function Prices.history(db, houseKey, itemKey)
     local house = db and db.prices and db.prices[houseKey]
     local item = house and house[itemKey]

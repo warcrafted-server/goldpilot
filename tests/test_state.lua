@@ -166,4 +166,75 @@ return {
         end
         assert(module and module.enabled == false)
     end,
+    ["escaneo completo registra todos los objetos, vacía la cola y respeta el límite de 15 min"] = function(addon, mock)
+        setup()
+        GoldPilotDB = { watch = { [35] = true, [36] = true }, settings = { fullScan = true } }
+        local ads = {
+            { count = 3, buyout = 300, itemID = 25 }, { count = 7, buyout = 1400, itemID = 25 },
+            { count = 1, buyout = 500, itemID = 35 }, { count = 1, buyout = 0, itemID = 36 },
+            { count = 1, buyout = 9, itemID = 999999 }, { count = 1, buyout = 7, itemID = 82800 },
+        }
+        local replicated, readCalls = 0, 0
+        C_AuctionHouse.ReplicateItems = function() replicated = replicated + 1 end
+        C_AuctionHouse.GetNumReplicateItems = function() return #ads end
+        C_AuctionHouse.GetReplicateItemInfo = function(index)
+            readCalls = readCalls + 1
+            local ad = ads[index + 1]
+            return "n", 1, ad.count, 1, true, 1, 0, 0, 0, ad.buyout, 0, false, "", "o", "o", 0, ad.itemID, true
+        end
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(replicated == 1 and addon.AuctionHouse.scanning and addon.AuctionHouse:status().current == nil)
+        mock.fire("REPLICATE_ITEM_LIST_UPDATE")
+        mock.fire("REPLICATE_ITEM_LIST_UPDATE")
+        mock.fire("REPLICATE_ITEM_LIST_UPDATE")
+        for _ = 1, 5 do mock.flushTimers() end
+        assert(readCalls == #ads)
+        assert(not addon.FullScan.inProgress and not addon.AuctionHouse.scanning)
+        assert(addon.Prices.get(GoldPilotDB, "Horde", 25).p50 == 100)
+        assert(addon.Prices.get(GoldPilotDB, "Horde", 35).min == 500)
+        assert(addon.Prices.get(GoldPilotDB, "Horde", 36) == nil)
+        assert(addon.Prices.get(GoldPilotDB, "Horde", 999999).min == 9 and addon.Prices.get(GoldPilotDB, "Horde", 82800) == nil)
+        assert(GoldPilotDB.ahLast.result[36] == "empty" and addon.AuctionHouse:status().pending == 0)
+        mock.fire("AUCTION_HOUSE_CLOSED")
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(replicated == 1)
+        local started, reason = addon.FullScan:start(true)
+        assert(not started and reason == "cooldown")
+    end,
+    ["escaneo completo vacío vuelve a la cola por objetos"] = function(addon, mock)
+        setup()
+        GoldPilotDB = { watch = { [25] = true }, settings = { fullScan = true } }
+        C_AuctionHouse.ReplicateItems = function() end
+        C_AuctionHouse.GetNumReplicateItems = function() return 0 end
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        mock.fire("REPLICATE_ITEM_LIST_UPDATE")
+        assert(not addon.AuctionHouse.scanning and addon.AuctionHouse:status().current == 25)
+    end,
+    ["una búsqueda ajena a la cola también actualiza el precio y saca el objeto de la cola"] = function(addon, mock)
+        setup()
+        GoldPilotDB = { watch = { [35] = true, [25] = true } }
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(addon.AuctionHouse:status().current == 25)
+        local pending = addon.AuctionHouse:status().pending
+        C_AuctionHouse.GetNumItemSearchResults = function() return 1 end
+        C_AuctionHouse.GetItemSearchResultInfo = function() return { buyoutAmount = 70, quantity = 1 } end
+        mock.fire("ITEM_SEARCH_RESULTS_UPDATED", { itemID = 35 })
+        assert(addon.Prices.get(GoldPilotDB, "Horde", 35).min == 70)
+        assert(addon.AuctionHouse:status().pending == pending - 1 and addon.AuctionHouse:status().current == 25)
+    end,
+    ["los objetos equipados entran en la cola"] = function(addon, mock)
+        setup()
+        GetInventoryItemID = function(_, slot) return slot == 16 and 36 or nil end
+        GoldPilotDB = {}
+        addon.Modules:enableAll()
+        assert(addon.Bags:scanEquipped()[36] == 1)
+        mock.fire("AUCTION_HOUSE_SHOW")
+        local last = GoldPilotDB.ahLast
+        local found
+        for _, id in ipairs(last.queued) do if id == 36 then found = true end end
+        assert(found)
+    end,
 }

@@ -48,4 +48,15 @@ return {
         mock.fire("ADDON_LOADED", "GoldPilot")
         assert(GoldPilotDB.schema == 2 and GoldPilotCharDB and addon.loaded)
     end,
+    ["gp watch alterna el seguimiento con enlace o número"] = function(addon, mock)
+        addon.DataItems = { [25] = "1;1;0;0;0" }
+        GoldPilotDB = {}
+        SlashCmdList.GOLDPILOT("watch |cff0070dd|Hitem:25::::|h[Algo]|h|r")
+        assert(GoldPilotDB.watch[25] == true)
+        SlashCmdList.GOLDPILOT("watch 25")
+        assert(GoldPilotDB.watch[25] == nil)
+        SlashCmdList.GOLDPILOT("watch 999")
+        SlashCmdList.GOLDPILOT("watch")
+        assert(GoldPilotDB.watch[999] == nil)
+    end,
 }

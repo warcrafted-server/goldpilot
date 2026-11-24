@@ -12,13 +12,20 @@
 
 ## Bloqueante antes de publicar la 0.3.0 (pruebas en juego, 2026-11-24)
 
-- [ ] Ventana de Inventario con mala presentación: lista estrecha, barra de desplazamiento suelta y fondo casi transparente; rediseñar maquetación y fondo.
-- [ ] Botones Reservar/Seguir y ficha de detalle: no se ven al abrir (ficha vacía hasta elegir fila); comprobar solapes.
-- [ ] Filtro: el texto de ayuda («Filtrar por nombre») cuenta como búsqueda real y vacía la lista; tras borrar el filtro vuelve a salir todo, bien. Usar texto de ayuda atenuado que no filtre.
-- [ ] «Seguir» no tiene efecto visible (solo prioriza la cola de subasta): marcar con estrella en la lista, filtro «Seguidos» y explicarlo en la ficha.
-- [ ] Botón del minimapa: se puede arrastrar hacia dentro y fuera del anillo (debe quedarse sobre el borde del minimapa) y usa el icono antiguo; regenerar `Media/Icon.tga` con el logo nuevo.
+- [ ] Verificar en juego los arreglos de la 0.3.1: lista ancha con fondo opaco, ficha con botones siempre visibles, filtro con texto de ayuda, estrella y filtro «Solo seguidos», botón del minimapa pegado al borde con el icono nuevo.
 - [ ] Comprobar en juego fuera de ciudad: no se abre ni redibuja en combate.
 - [ ] Comprobado y correcto: tooltip, aviso al terminar la cola, precios tras `/reload`, valor de bolsas, métricas, reservar, `/gp diag` (21 presentes, 2 ausentes esperadas), SavedVariables 24 KB con 44 objetos.
+
+## Alta: precios por variante (ver el plan, pasos A y B)
+
+- [ ] El equipo con sufijo («del oso»…) comparte un solo precio por objeto: las variantes se mezclan y su mediana no es fiable.
+- [ ] Escaneo de resumen como el de Auctionator (sin `ReplicateItems`), aprovechando el suyo si ya está en marcha.
+
+## Media: escenario con API de Blizzard (tras D12)
+
+- [ ] Aplicación de escritorio que descargue los precios actuales con la API web y los deje en SavedVariables (el addon no puede hacer peticiones web); el tooltip pasaría a «Vendedor, precio actual (API) y mediana», con su propia clase de dato.
+- [ ] Afinado visual final del tooltip y de la ventana con Opus, cuando todo esté hecho.
+- [ ] Diagnóstico pendiente en juego: botín y nodos de recolección (`/gp diag`) y correos de subastas caducadas o canceladas.
 
 ## Alta: 0.1.0
 

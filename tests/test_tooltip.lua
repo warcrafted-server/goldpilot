@@ -6,6 +6,10 @@ local function setup()
     GetCoinTextureString = nil
 end
 
+local function find(lines, text)
+    for _, line in ipairs(lines) do if string.find(line, text, 1, true) then return true end end
+end
+
 local function tooltip()
     local frame = { lines = {} }
     function frame:AddLine(line) self.lines[#self.lines + 1] = line end
@@ -15,17 +19,45 @@ local function tooltip()
 end
 
 return {
-    ["tooltip muestra dos lineas y cuatro con Mayus"] = function(addon)
+    ["tooltip muestra cabecera, vendedor, ultimo visto, mediana y mejor opcion; Mayus añade detalle"] = function(addon)
         setup()
         GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
         addon.Modules:enableAll()
         local frame = tooltip()
         addon.Tooltip:add(frame, { id = 25 })
-        assert(#frame.lines == 2 and string.find(frame.lines[1], "0g 0s 7c", 1, true))
+        assert(#frame.lines == 5 and string.find(frame.lines[1], "GoldPilot", 1, true))
+        assert(string.find(frame.lines[2], "Vendor: 0g 0s 7c", 1, true))
+        assert(string.find(frame.lines[3], "Last seen: 0g 0s 80c", 1, true))
+        assert(string.find(frame.lines[4], "Median: 1g", 1, true) or string.find(frame.lines[4], "Median: 0g 1s", 1, true))
+        assert(string.find(frame.lines[5], "Best option", 1, true) and string.find(frame.lines[5], "Auction", 1, true))
         local expanded = tooltip()
         IsShiftKeyDown = function() return true end
         addon.Tooltip:add(expanded, { id = 25 })
-        assert(#expanded.lines == 4 and string.find(expanded.lines[3], "80", 1, true))
+        assert(find(expanded.lines, "For sale: 12 units"))
+    end,
+    ["tooltip respeta las lineas desactivadas en ajustes"] = function(addon)
+        setup()
+        GoldPilotDB = { settings = { tooltipFields = { vendor = false, median = false, advice = false } },
+            houses = { Horde = {} }, prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
+        addon.Modules:enableAll()
+        local frame = tooltip()
+        addon.Tooltip:add(frame, { id = 25 })
+        assert(#frame.lines == 2 and find(frame.lines, "Last seen"))
+        GoldPilotDB.settings.tooltipFields.last = false
+        local none = tooltip()
+        addon.Tooltip:add(none, { id = 25 })
+        assert(#none.lines == 0)
+    end,
+    ["tooltip usa lineas dobles cuando existen"] = function(addon)
+        setup()
+        GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
+        addon.Modules:enableAll()
+        local frame = tooltip()
+        frame.doubles = {}
+        function frame:AddDoubleLine(left, right) self.doubles[#self.doubles + 1] = { left, right } end
+        addon.Tooltip:add(frame, { id = 25 })
+        assert(#frame.doubles == 5 and frame.doubles[1][1] == "GoldPilot" and string.find(frame.doubles[1][2], "ago", 1, true))
+        assert(frame.doubles[2][1] == "Vendor" and frame.doubles[3][1] == "Last seen")
     end,
     ["tooltip muestra antiguedad en gris y ausencia de observacion"] = function(addon)
         setup()
@@ -33,11 +65,11 @@ return {
         GoldPilotDB = { prices = { Horde = { [25] = { last = { t = 1, min = 5, p50 = 6, qty = 3, src = "OBS" } } } } }
         local old = tooltip()
         addon.Tooltip:add(old, { id = 25 })
-        assert(#old.lines == 2 and string.find(old.lines[2], "old data", 1, true))
+        assert(find(old.lines, "old data"))
         GoldPilotDB = nil
         local none = tooltip()
         addon.Tooltip:add(none, { id = 25 })
-        assert(#none.lines == 2 and string.find(none.lines[2], "no observed price", 1, true))
+        assert(find(none.lines, "no observed price"))
     end,
     ["tooltip no actua en combate"] = function(addon, mock)
         setup()
@@ -80,5 +112,15 @@ return {
         SlashCmdList.GOLDPILOT("bags")
         assert(#mock.output == 1 and string.find(mock.output[1], "Bags:", 1, true))
         assert(string.find(mock.output[1], "3s 80c", 1, true))
+    end,
+    ["tooltip con Mayus añade la tendencia diaria"] = function(addon)
+        setup()
+        GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = { [25] = {
+            last = { t = 99900, min = 80, p50 = 112, qty = 12, src = "OBS" }, d = "0:70:100:10" } } } }
+        addon.Modules:enableAll()
+        IsShiftKeyDown = function() return true end
+        local frame = tooltip()
+        addon.Tooltip:add(frame, { id = 25 })
+        assert(find(frame.lines, "For sale: 12 units") and find(frame.lines, "+12%"))
     end,
 }
