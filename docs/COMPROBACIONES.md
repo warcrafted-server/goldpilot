@@ -44,7 +44,7 @@
 - [x] Reabrir el buzón no duplica operaciones (2026-11-24, totales comprobados con las seis facturas).
 - [x] Con el buzón abierto un rato y tras `/reload` tampoco se duplican (2026-11-24).
 - [x] Las dos devoluciones de Charman se registran (2026-11-24).
-- [ ] Reabrir el buzón de Charman no repite las devoluciones.
-- [ ] Al abrir la subasta arranca el escaneo completo; al reabrir antes de 15 min no hay cola de objetos ya leídos.
+- [x] Reabrir el buzón de Charman no repite las devoluciones.
+- [x] Al abrir la subasta arranca el escaneo completo (33 s, 7140 objetos); al reabrir antes de 15 min no hay cola de objetos ya leídos.
 - [ ] `/gp ledger` muestra el resumen de 30 días y representa los balances negativos con signo menos.
 - [ ] El buzón no escribe registros en combate ni en modo seguro.
