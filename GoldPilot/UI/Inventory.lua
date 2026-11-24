@@ -62,38 +62,73 @@ local function formatRow(row)
         row = row, name = name }
 end
 
+local GOLD, MUTED, SOFT = { 1, 0.82, 0.2 }, { 0.55, 0.5, 0.42 }, { 0.78, 0.72, 0.55 }
+local ACTION_COLORS = { auction = { 0.35, 0.9, 0.4 }, vendor = { 1, 0.8, 0.25 }, none = { 0.65, 0.65, 0.65 } }
+local MAX_PLACES = 4
+
+-- La ficha responde por orden: qué hago, cuánto gano, por qué y dónde lo tengo.
 local function detailLines(row, name)
-    local lines = { { text = name, color = { 1, 0.82, 0.2 } },
-        string.format(addon.L.INVENTORY_TOTAL, row.qty, row.qtySellable, row.qtyReserved) }
-    if row.qtyBound > 0 then lines[#lines + 1] = string.format(addon.L.INVENTORY_BOUND, row.qtyBound) end
-    for _, part in ipairs(row.breakdown) do
-        lines[#lines + 1] = string.format(addon.L.INVENTORY_BREAKDOWN, part.char,
-            part.where == "bags" and addon.L.INVENTORY_BAGS or addon.L.INVENTORY_BANK, part.qty)
+    local L, money = addon.L, addon.Theme.money
+    local lines = {}
+    local function add(label, right, rightColor)
+        lines[#lines + 1] = { text = label, right = right, color = SOFT, rightColor = rightColor }
     end
-    lines[#lines + 1] = string.format(addon.L.INVENTORY_VENDOR, row.vendorUnit and addon.Theme.money(row.vendorUnit) or addon.L.INVENTORY_NO_PRICE)
-    local observation = addon.Prices.get(GoldPilotDB or {}, addon.AuctionHouse.houseKey(), row.key)
+    local function section(title) lines[#lines + 1] = { text = title, color = MUTED, size = 11, gap = 10 } end
+    local function dim(value) return "|cff8a8a8a" .. value .. "|r" end
+
+    lines[1] = { text = name .. "  ×" .. row.qty, color = GOLD, size = 14 }
+    lines[2] = { text = L.INVENTORY_BEST_OPTION, right = L["INVENTORY_ACTION_" .. string.upper(row.action)], size = 13, gap = 8,
+        color = { 0.92, 0.86, 0.72 }, rightColor = ACTION_COLORS[row.action] }
+    if row.action ~= "none" then
+        lines[3] = { text = string.format(L.INVENTORY_YOU_GET, row.qtySellable), right = money(row.valueBest), size = 13,
+            color = { 0.92, 0.86, 0.72 } }
+    end
+
+    section(L.INVENTORY_PER_UNIT)
+    add(L.TOOLTIP_ROW_VENDOR, row.vendorUnit and money(row.vendorUnit) or dim(L.TOOLTIP_NO_VENDOR))
+    local observation = row.qtyAuction > 0 and addon.Prices.get(GoldPilotDB or {}, addon.AuctionHouse.houseKey(), row.key)
     if observation then
-        lines[#lines + 1] = string.format(addon.L.INVENTORY_AUCTION, addon.Theme.money(observation.p50),
-            addon.Theme.money(observation.min), observation.qty, addon.Theme.age(math.max(0, now() - observation.t)))
-        if row.stale then lines[#lines + 1] = addon.L.INVENTORY_STALE_LABEL end
-    else
-        lines[#lines + 1] = addon.L.INVENTORY_NO_AUCTION
+        local cut = GoldPilotDB and GoldPilotDB.houses and GoldPilotDB.houses[addon.AuctionHouse.houseKey()]
+        cut = cut and tonumber(cut.cut) or 0.05
+        local net = math.floor(observation.p50 * (1 - cut))
+        add(L.TOOLTIP_ROW_LAST, money(observation.min))
+        add(L.TOOLTIP_ROW_MEDIAN, money(observation.p50))
+        add(string.format(L.INVENTORY_NET_UNIT, math.floor(cut * 100 + 0.5)), money(net))
+        if row.vendorUnit and not row.stale then
+            local gain = net - row.vendorUnit
+            add(L.INVENTORY_DIFFERENCE, (gain < 0 and "-" or "+") .. money(math.abs(gain)),
+                gain > 0 and ACTION_COLORS.auction or { 0.9, 0.45, 0.35 })
+        end
+        section(L.INVENTORY_MARKET)
+        add(L.TOOLTIP_ROW_FORSALE, string.format(L.TOOLTIP_UNITS, observation.qty))
+        local age = addon.Theme.age(math.max(0, now() - observation.t))
+        add(L.INVENTORY_SEEN, row.stale and dim(age .. " - " .. L.TOOLTIP_STALE) or age)
+    elseif row.qtyAuction > 0 then
+        add(L.TOOLTIP_ROW_AUCTION, dim(L.TOOLTIP_NO_AUCTION))
     end
-    lines[#lines + 1] = string.format(addon.L.INVENTORY_NET, row.valueAuction > 0 and addon.Theme.money(row.valueAuction) or addon.L.INVENTORY_NO_PRICE)
-    if row.cutAssumed then lines[#lines + 1] = addon.L.TOOLTIP_CUT_ASSUMED end
-    local reason
-    if row.action == "auction" then
-        if row.vendorUnit then
-            reason = string.format(addon.L.INVENTORY_REASON_AUCTION,
-                addon.Theme.money(math.max(0, (row.unitBest or 0) - row.vendorUnit)))
-        else reason = addon.L.INVENTORY_REASON_AUCTION_ONLY end
-    elseif row.action == "vendor" then reason = addon.L.INVENTORY_REASON_VENDOR
-    else reason = addon.L.INVENTORY_REASON_NONE end
-    lines[#lines + 1] = string.format(addon.L.INVENTORY_RECOMMENDATION, addon.L["INVENTORY_ACTION_" .. string.upper(row.action)])
-    lines[#lines + 1] = reason
-    lines[#lines + 1] = { text = row.watched and addon.L.INVENTORY_WATCH_ON or addon.L.INVENTORY_WATCH_OFF,
-        color = { 0.65, 0.65, 0.65 } }
+
+    section(L.INVENTORY_WHERE)
+    for i, part in ipairs(row.breakdown) do
+        if i > MAX_PLACES then
+            add(string.format(L.INVENTORY_MORE_PLACES, #row.breakdown - MAX_PLACES), "")
+            break
+        end
+        add(part.char .. " · " .. (part.where == "bags" and L.INVENTORY_BAGS or L.INVENTORY_BANK), tostring(part.qty))
+    end
+    if row.qtyReserved > 0 then add(L.INVENTORY_RESERVED_COUNT, tostring(row.qtyReserved)) end
+    if row.qtyBound > 0 then add(L.INVENTORY_BOUND_COUNT, tostring(row.qtyBound)) end
     return lines
+end
+
+local function buttonHelp(button, text)
+    if not button.SetScript then return end
+    button:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:AddLine(self.helpTitle or "", 1, 0.82, 0.2)
+        GameTooltip:AddLine(text, 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 end
 
 local function makeButton(parent, label, x, callback)
@@ -249,6 +284,9 @@ function InventoryUI:build(page)
         GoldPilotDB.watch[self.selected.itemID] = not GoldPilotDB.watch[self.selected.itemID] or nil
         self:refresh()
     end)
+    self.reserveButton.helpTitle, self.watchButton.helpTitle = addon.L.INVENTORY_RESERVE, addon.L.INVENTORY_WATCH
+    buttonHelp(self.reserveButton, addon.L.INVENTORY_RESERVE_HELP)
+    buttonHelp(self.watchButton, addon.L.INVENTORY_WATCH_HELP)
     return self:refresh()
 end
 

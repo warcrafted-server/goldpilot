@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.8.2] - 2026-11-24
+
+### Cambiado
+- Parche de presentación: la ficha del inventario va en dos columnas y por secciones (mejor opción, precio por unidad, mercado y dónde lo tienes), sin siglas; la ayuda de Reservar y Seguir pasa al cursor.
+
 ## [0.8.1] - 2026-11-24
 
 ### Corregido

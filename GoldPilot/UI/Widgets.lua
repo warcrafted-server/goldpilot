@@ -205,23 +205,41 @@ function Widgets.detail(parent)
     function panel:setLines(lines)
         if inCombat() then return false end
         lines = lines or {}
-        self.labels = self.labels or {}
+        self.labels, self.values = self.labels or {}, self.values or {}
         for _, label in ipairs(self.labels) do label:Hide() end
+        for _, label in pairs(self.values) do label:Hide() end
         self.lines = {}
+        local width = self.contentWidth or 300
         for i, value in ipairs(lines) do
-            local styled = type(value) == "table"
+            local line = type(value) == "table" and value or { text = value }
             local label = self.labels[i]
             if not label then
                 label = text(self, "", 12)
-                if label.SetWidth then label:SetWidth(self.contentWidth or 300) end
                 if label.SetJustifyH then label:SetJustifyH("LEFT") end
-                if i > 1 then label:SetPoint("TOPLEFT", self.labels[i - 1], "BOTTOMLEFT", 0, -6)
-                else label:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12) end
                 self.labels[i] = label
             end
-            label:SetText(styled and value.text or value)
-            if label.SetTextColor then label:SetTextColor(unpack(styled and value.color or { 0.92, 0.86, 0.72 })) end
+            if label.SetFont then label:SetFont("Fonts/FRIZQT__.TTF", line.size or 12, "") end
+            if label.SetWidth then label:SetWidth(line.right and width * 0.62 or width) end
+            if label.ClearAllPoints then label:ClearAllPoints() end
+            if i > 1 then label:SetPoint("TOPLEFT", self.labels[i - 1], "BOTTOMLEFT", 0, -(line.gap or 4))
+            else label:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12) end
+            label:SetText(line.text or "")
+            if label.SetTextColor then label:SetTextColor(unpack(line.color or { 0.92, 0.86, 0.72 })) end
             label:Show()
+            if line.right then
+                local right = self.values[i]
+                if not right then
+                    right = text(self, "", 12)
+                    if right.SetJustifyH then right:SetJustifyH("RIGHT") end
+                    self.values[i] = right
+                end
+                if right.SetFont then right:SetFont("Fonts/FRIZQT__.TTF", line.size or 12, "") end
+                if right.ClearAllPoints then right:ClearAllPoints() end
+                right:SetPoint("TOPRIGHT", label, "TOPLEFT", width, 0)
+                right:SetText(line.right)
+                if right.SetTextColor then right:SetTextColor(unpack(line.rightColor or { 1, 1, 1 })) end
+                right:Show()
+            end
             self.lines[i] = label
         end
     end
