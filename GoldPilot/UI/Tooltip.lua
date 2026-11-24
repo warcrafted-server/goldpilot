@@ -17,6 +17,18 @@ local function itemIDFromTooltip(tooltip, data)
     end
 end
 
+local function linkFromTooltip(tooltip, data)
+    if data and type(data.hyperlink) == "string" then return data.hyperlink end
+    if tooltip and tooltip.GetItem then
+        local _, link = tooltip:GetItem()
+        if type(link) == "string" then return link end
+    end
+    if TooltipUtil and TooltipUtil.GetDisplayedItem and tooltip then
+        local ok, _, link = pcall(TooltipUtil.GetDisplayedItem, tooltip)
+        if ok and type(link) == "string" then return link end
+    end
+end
+
 local function fieldSettings()
     local saved = GoldPilotDB and GoldPilotDB.settings and GoldPilotDB.settings.tooltipFields or {}
     return { vendor = saved.vendor ~= false, last = saved.last ~= false,
@@ -27,19 +39,23 @@ function Tooltip:add(tooltip, data)
     if inCombat() then return end
     local settings = GoldPilotDB and GoldPilotDB.settings
     if settings and settings.tooltip == false then return end
+    local link = linkFromTooltip(tooltip, data)
     local itemID = itemIDFromTooltip(tooltip, data)
+    if not itemID and link then itemID = addon.ItemKey.itemID(addon.ItemKey.fromLink(link, false)) end
     if not itemID then return end
+    local key = link and addon.ItemKey.fromLink(link, addon.ItemKey.isGear(itemID)) or nil
+    if addon.ItemKey.itemID(key) ~= itemID then key = itemID end
     local nowOk, now = addon.Compat.call("time")
     if not nowOk or not tonumber(now) then return end
     local houseKey = addon.AuctionHouse.houseKey()
     local db = GoldPilotDB or {}
     local known = addon.DataItems and addon.DataItems[itemID]
-    local observation = addon.Prices.get(db, houseKey, itemID)
+    local observation = addon.Prices.get(db, houseKey, key)
     if addon.AuctionHouse:isOpen() and (not observation or tonumber(now) - (tonumber(observation.t) or 0) >= 600) then
         addon.AuctionHouse:enqueue(itemID, true)
     end
     if not known and not observation then return end
-    local value = addon.Valuation.value(db, houseKey, itemID, now)
+    local value = addon.Valuation.value(db, houseKey, key, now)
     local vendor = value.vendor and value.vendor.price
     local ref = value.ref
     local stale = not ref and value.why and value.why.reason == "stale" and value.why.best
@@ -74,7 +90,7 @@ function Tooltip:add(tooltip, data)
     local expanded = IsShiftKeyDown and IsShiftKeyDown()
     if expanded and observation then
         row(L.TOOLTIP_ROW_FORSALE, string.format(L.TOOLTIP_UNITS, observation.qty))
-        local trend = addon.Prices.trend(db, houseKey, itemID, tonumber(now))
+        local trend = addon.Prices.trend(db, houseKey, key, tonumber(now))
         if trend then
             local text
             if trend.percent > 2 then text = string.format(L.TOOLTIP_TREND_UP, trend.percent, trend.days)

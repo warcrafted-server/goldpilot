@@ -1,9 +1,8 @@
 local _, addon = ...
 
 -- Escaneo completo de la casa de subastas con C_AuctionHouse.ReplicateItems, como hace Auctionator.
--- El servidor lo limita (Auctionator espera 15 min entre escaneos); si no responde se vuelve a la cola.
--- El evento de resultados puede llegar varias veces: solo se procesa la primera, y el trabajo se reparte
--- en trozos de pocos milisegundos por fotograma para no congelar el juego.
+-- El servidor lo limita a uno cada 15 min; si no responde se vuelve a la cola. El evento de resultados puede
+-- llegar varias veces (solo vale la primera) y el trabajo se reparte en trozos para no congelar el juego.
 local FullScan = { inProgress = false }
 addon.FullScan = FullScan
 
@@ -41,7 +40,7 @@ local function finish(ok, message)
     return ok
 end
 
--- Ejecuta step(i) para i = 1..total repartido en fotogramas; devuelve true al terminar vía done().
+-- Ejecuta step(i) para i = 1..total repartido en fotogramas y llama a done() al terminar.
 local function sliced(total, step, done, mine)
     local index = 1
     local function run()
@@ -63,31 +62,82 @@ end
 local function process(count)
     local mine = ticket
     local getInfo = C_AuctionHouse.GetReplicateItemInfo
-    local listings, order, seen = {}, {}, {}
+    local getLink = C_AuctionHouse.GetReplicateItemLink
+    local listings, order, seen, pending, requested, registered = {}, {}, {}, {}, {}, {}
+
+    local function add(itemID, key, price, quantity)
+        local entries = listings[key]
+        if not entries then
+            entries = {}
+            listings[key], order[#order + 1] = entries, key
+        end
+        entries[#entries + 1] = { price = price / quantity, qty = quantity }
+        seen[itemID] = true
+    end
+
     local function read(position)
         local ok, _, _, quantity, _, _, _, _, _, _, buyout, _, _, _, _, _, _, itemID = pcall(getInfo, position - 1)
         quantity, buyout, itemID = tonumber(quantity), tonumber(buyout), tonumber(itemID)
-        if ok and itemID and itemID ~= PET_CAGE and quantity and quantity > 0 and buyout and buyout > 0 then
-            -- Objetos con sufijos aleatorios conocidos, solo para el diagnóstico de variantes.
-            if itemID == 14902 or itemID == 15520 or itemID == 10057 then addon.Diag:sampleReplicate(itemID, position - 1) end
-            local entries = listings[itemID]
-            if not entries then entries = {}; listings[itemID], order[#order + 1] = entries, itemID end
-            entries[#entries + 1] = { price = buyout / quantity, qty = quantity }
+        if not (ok and itemID and itemID ~= PET_CAGE and quantity and quantity > 0 and buyout and buyout > 0) then return end
+        if addon.ItemKey.isGear(itemID) then
+            local linkOK, link = false, nil
+            if type(getLink) == "function" then linkOK, link = pcall(getLink, position - 1) end
+            local key = linkOK and addon.ItemKey.fromLink(link, true)
+            if key then add(itemID, key, buyout, quantity)
+            else
+                pending[#pending + 1] = { position = position, itemID = itemID, price = buyout, qty = quantity }
+                if not requested[itemID] then
+                    requested[itemID] = true
+                    addon.Compat.call("C_Item.RequestLoadItemDataByID", itemID)
+                end
+            end
+        else
+            add(itemID, itemID, buyout, quantity)
         end
     end
+
     local function record(position)
-        local itemID = order[position]
-        if addon.AuctionHouse:recordListings(itemID, listings[itemID]) then seen[itemID] = true end
-        listings[itemID] = nil
+        local key = order[position]
+        if addon.AuctionHouse:recordListings(key, listings[key]) then registered[key] = true end
+        listings[key] = nil
     end
+
     local function complete()
         addon.AuctionHouse:resolveQueue(seen)
-        local items = 0
+        local items, keys = 0, 0
         for _ in pairs(seen) do items = items + 1 end
-        GoldPilotDB.scan = { t = GoldPilotDB.scan and GoldPilotDB.scan.t or now(), items = items, ads = count }
+        for _ in pairs(registered) do keys = keys + 1 end
+        local previous = GoldPilotDB.scan or {}
+        GoldPilotDB.scan = { t = previous.t or now(), items = items, keys = keys, ads = count,
+            noLink = #pending }
         finish(true, string.format(addon.L.SCAN_DONE, items))
     end
-    sliced(count, read, function() sliced(#order, record, complete, mine) end, mine)
+
+    local function recordAndFinish()
+        sliced(#order, record, complete, mine)
+    end
+
+    local function retry(round)
+        if mine ~= ticket then return end
+        local unresolved = {}
+        sliced(#pending, function(index)
+            local ad = pending[index]
+            local linkOK, link = false, nil
+            if type(getLink) == "function" then linkOK, link = pcall(getLink, ad.position - 1) end
+            local key = linkOK and addon.ItemKey.fromLink(link, true)
+            if key then add(ad.itemID, key, ad.price, ad.qty)
+            else unresolved[#unresolved + 1] = ad end
+        end, function()
+            pending = unresolved
+            if #pending == 0 or round >= 3 then recordAndFinish()
+            else addon.Compat.call("C_Timer.After", 1, function() retry(round + 1) end) end
+        end, mine)
+    end
+
+    sliced(count, read, function()
+        if #pending == 0 then recordAndFinish()
+        else addon.Compat.call("C_Timer.After", 1, function() retry(1) end) end
+    end, mine)
 end
 
 local function onReplicate()
@@ -118,24 +168,19 @@ function FullScan:start(manual)
     local ok = addon.Compat.call("C_AuctionHouse.ReplicateItems")
     if not ok then finish(false, addon.L.SCAN_EMPTY); return false, "error" end
     addon.Log:info(addon.L.SCAN_START)
-    -- El plazo solo vale mientras el servidor no ha respondido; después manda el reparto en trozos.
     addon.Compat.call("C_Timer.After", TIMEOUT, function()
         if FullScan.inProgress and not FullScan.receiving and mine == ticket then finish(false, addon.L.SCAN_TIMEOUT) end
     end)
     return true
 end
 
-function FullScan:maybeStart()
-    return self:start(false)
-end
+function FullScan:maybeStart() return self:start(false) end
 
--- Respuesta del comando /gp scan.
 function FullScan:command()
     local started, reason, left = self:start(true)
     if started then return end
     if reason == "closed" then addon.Log:info(self.inProgress and addon.L.SCAN_START or addon.L.SCAN_CLOSED)
-    elseif reason == "cooldown" then
-        addon.Log:info(string.format(addon.L.SCAN_COOLDOWN, math.ceil(left / 60)))
+    elseif reason == "cooldown" then addon.Log:info(string.format(addon.L.SCAN_COOLDOWN, math.ceil(left / 60)))
     elseif reason == "unsupported" then addon.Log:info(addon.L.SCAN_UNSUPPORTED) end
 end
 

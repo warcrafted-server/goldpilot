@@ -15,8 +15,7 @@ local capabilities = {
 
 local auctionEvents = {
     "COMMODITY_SEARCH_RESULTS_UPDATED", "AUCTION_HOUSE_THROTTLED_SYSTEM_READY",
-    "AUCTION_HOUSE_THROTTLED_MESSAGE_SENT", "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED",
-    "ITEM_SEARCH_RESULTS_UPDATED",
+    "AUCTION_HOUSE_THROTTLED_MESSAGE_SENT", "ITEM_SEARCH_RESULTS_UPDATED",
 }
 
 local function now()
@@ -175,42 +174,6 @@ local function observeLoot()
     while #log > 300 do table.remove(log, 1) end
 end
 
--- Muestra de variantes de equipo (sufijos aleatorios) en los resultados del resumen de subasta.
-local function observeBrowse()
-    if inCombat() or not (GoldPilotDB and GoldPilotDB.diag) then return end
-    local ok, results = addon.Compat.call("C_AuctionHouse.GetBrowseResults")
-    if not ok or type(results) ~= "table" then return end
-    local sample = { total = #results, conSufijo = 0, filas = {} }
-    for _, result in ipairs(results) do
-        local key = result.itemKey
-        if type(key) == "table" and (tonumber(key.itemSuffix) or 0) ~= 0 then
-            sample.conSufijo = sample.conSufijo + 1
-            if #sample.filas < 15 then
-                sample.filas[#sample.filas + 1] = { itemID = key.itemID, itemLevel = key.itemLevel,
-                    itemSuffix = key.itemSuffix, minPrice = result.minPrice, qty = result.totalQuantity }
-            end
-        end
-    end
-    GoldPilotDB.diag.variantes = GoldPilotDB.diag.variantes or {}
-    GoldPilotDB.diag.variantes.resumen = sample
-end
-
--- Enlaces del escaneo completo: hasta cuatro por objeto para ver cómo se distingue cada variante.
-function addon.Diag:sampleReplicate(itemID, index)
-    if not (GoldPilotDB and GoldPilotDB.diag) then return end
-    local variants = GoldPilotDB.diag.variantes or {}
-    GoldPilotDB.diag.variantes = variants
-    variants.enlaces = variants.enlaces or {}
-    local links = variants.enlaces[itemID] or {}
-    if #links >= 4 then return end
-    local ok, link = addon.Compat.call("C_AuctionHouse.GetReplicateItemLink", index)
-    if ok and type(link) == "string" then
-        for _, seen in ipairs(links) do if seen == link then return end end
-        links[#links + 1] = link
-        variants.enlaces[itemID] = links
-    end
-end
-
 local function observeProfessions()
     if inCombat() then return end
     local ok, recipes = addon.Compat.call("C_TradeSkillUI.GetAllRecipeIDs")
@@ -225,8 +188,6 @@ addon.Modules:register("diag", {
         addon.Events:subscribe("diag", "AUCTION_HOUSE_CLOSED", function() addon.Diag.auctionOpen = false end)
         addon.Events:subscribe("diag", "MAIL_SHOW", observeMail)
         addon.Events:subscribe("diag", "MAIL_INBOX_UPDATE", function() observeMail(true) end, 1)
-        addon.Events:subscribe("diag", "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", observeBrowse, 2)
-        addon.Events:subscribe("diag", "AUCTION_HOUSE_BROWSE_RESULTS_ADDED", observeBrowse, 2)
         addon.Events:subscribe("diag", "LOOT_READY", observeLoot)
         addon.Events:subscribe("diag", "TRADE_SKILL_SHOW", observeProfessions)
         for _, event in ipairs(auctionEvents) do

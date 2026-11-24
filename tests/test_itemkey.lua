@@ -12,4 +12,13 @@ return {
         assert(addon.ItemKey.itemID("15520:12726") == 15520 and addon.ItemKey.itemID(10057) == 10057)
         assert(addon.ItemKey.itemID("id:15520") == nil)
     end,
+    ["isGear distingue arma y armadura y no cachea datos desconocidos"] = function(addon)
+        addon.DataItems[990001] = "1;1;0;2;7"
+        addon.DataItems[990002] = "1;1;0;4;1"
+        addon.DataItems[990003] = "1;1;0;7;0"
+        assert(addon.ItemKey.isGear(990001) and addon.ItemKey.isGear(990002))
+        assert(not addon.ItemKey.isGear(990003) and not addon.ItemKey.isGear(990004))
+        C_Item = { GetItemInfoInstant = function() return 990004, 4, 1, "INVTYPE_HEAD", 1, 4, 1 end }
+        assert(addon.ItemKey.isGear(990004))
+    end,
 }

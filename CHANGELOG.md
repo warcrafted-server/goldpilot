@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.6.1] - 2026-11-24
+
+### Corregido
+- Versión parche: escaneo, búsquedas y tooltip separan precios de variantes de equipo.
+
 ## [0.6.0] - 2026-11-24
 
 ### Cambiado

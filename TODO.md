@@ -18,7 +18,7 @@
 
 ## Alta: precios por variante (ver el plan, pasos A y B)
 
-- [ ] El equipo con sufijo («del oso»…) comparte un solo precio por objeto: las variantes se mezclan y su mediana no es fiable.
+- [ ] El inventario aún no distingue variantes de equipo en bolsas y banco
 
 ## Media: escenario con API de Blizzard (tras D12)
 

@@ -110,6 +110,8 @@ end
 -- Lee los resultados de búsqueda que el cliente tiene de un objeto y los registra.
 local function readResults(itemID, key, commodity)
     local listings = {}
+    local variants = {}
+    local gear = addon.ItemKey.isGear(itemID) and not commodity
     local ok, count = false, nil
     if commodity then ok, count = addon.Compat.call("C_AuctionHouse.GetNumCommoditySearchResults", itemID) end
     if ok and tonumber(count) then
@@ -125,10 +127,31 @@ local function readResults(itemID, key, commodity)
             for i = 1, tonumber(itemsCount) do
                 local infoOk, info = addon.Compat.call("C_AuctionHouse.GetItemSearchResultInfo", key, i)
                 if infoOk and type(info) == "table" and tonumber(info.buyoutAmount) then
-                    listings[#listings + 1] = { price = tonumber(info.buyoutAmount), qty = tonumber(info.quantity) or 1 }
+                    local listing = { price = tonumber(info.buyoutAmount), qty = tonumber(info.quantity) or 1 }
+                    if gear then
+                        local variant = addon.ItemKey.fromLink(info.itemLink, true)
+                        if variant then
+                            variants[variant] = variants[variant] or {}
+                            variants[variant][#variants[variant] + 1] = listing
+                        end
+                    else
+                        listings[#listings + 1] = listing
+                    end
                 end
             end
         end
+    end
+    if gear then
+        local registered, firstSummary = false, nil
+        for variant, entries in pairs(variants) do
+            local summary = addon.Prices.summarize(entries, addon.Prices.defaults.share)
+            if summary then
+                GoldPilotDB = GoldPilotDB or {}
+                addon.Prices.record(GoldPilotDB, houseKey(), variant, summary, now())
+                firstSummary, registered = firstSummary or summary, true
+            end
+        end
+        return registered and firstSummary or nil
     end
     local summary = addon.Prices.summarize(listings, addon.Prices.defaults.share)
     if summary then
@@ -275,8 +298,14 @@ local function buildQueue()
     -- Lo leído hace poco (por un escaneo o una búsqueda) no se vuelve a pedir.
     local limit = now() - FRESH
     for index = #queue, 1, -1 do
-        local price = addon.Prices.get(GoldPilotDB, houseKey(), queue[index])
-        if price and (tonumber(price.t) or 0) > limit then table.remove(queue, index) end
+        local itemID = queue[index]
+        local scan = GoldPilotDB.scan
+        if addon.ItemKey.isGear(itemID) and scan and tonumber(scan.t) and tonumber(scan.t) > limit and tonumber(scan.items) then
+            table.remove(queue, index)
+        else
+            local price = addon.Prices.get(GoldPilotDB, houseKey(), itemID)
+            if price and (tonumber(price.t) or 0) > limit then table.remove(queue, index) end
+        end
     end
     while #queue > MAX_QUEUE do table.remove(queue) end
     loads = {}

@@ -80,6 +80,12 @@ return {
     end,
     ["hover encola con prioridad solo durante subasta y sin observación reciente"] = function(addon, mock)
         setup()
+        for _, itemID in ipairs({ 25, 35, 36 }) do addon.DataItems[itemID] = "1;1;0;7;0" end
+        C_AuctionHouse = {
+            MakeItemKey = function(id) return { itemID = id } end,
+            SendSearchQuery = function() end,
+            GetNumItemSearchResults = function() return 0 end,
+        }
         GoldPilotDB = { watch = { [35] = true }, prices = { Horde = {
             [25] = { last = { t = 99950, min = 1, p50 = 1, qty = 1 } },
             [36] = { last = { t = 90000, min = 1, p50 = 1, qty = 1 } },
@@ -97,6 +103,19 @@ return {
         mock.fire("AUCTION_HOUSE_CLOSED")
         addon.Tooltip:add(tooltip(), { id = 36 })
         assert(addon.AuctionHouse:status().current == nil)
+    end,
+    ["tooltip busca el precio de la variante indicada por data.hyperlink"] = function(addon)
+        setup()
+        GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = {
+            ["25:111"] = { last = { t = 99900, min = 80, p50 = 100, qty = 1, src = "OBS" } },
+        } } }
+        addon.Modules:enableAll()
+        local first = tooltip()
+        addon.Tooltip:add(first, { id = 25, hyperlink = "item:25::::::::::::1:111" })
+        assert(find(first.lines, "Last seen: 0g 0s 80c"))
+        local other = tooltip()
+        addon.Tooltip:add(other, { id = 25, hyperlink = "item:25::::::::::::1:222" })
+        assert(not find(other.lines, "Last seen") and not find(other.lines, "0g 0s 80c"))
     end,
     ["comando bags imprime el resumen"] = function(addon, mock)
         setup()
