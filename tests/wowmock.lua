@@ -1,5 +1,6 @@
 local mock = { events = {}, output = {}, timers = {}, frames = {}, items = {} }
 _G.GoldPilotMainFrame = nil
+WorldMapFrame = nil
 UISpecialFrames = {}
 function CreateFrame(kind, name, parent, template)
     if template and mock.missingTemplates and mock.missingTemplates[template] then error("unknown template") end
@@ -12,6 +13,7 @@ function CreateFrame(kind, name, parent, template)
     function frame:SetSize(w, h) self.width, self.height = w, h end
     function frame:SetPoint(_, _, _, x, y) self.x, self.y = x, y end
     function frame:ClearAllPoints() end
+    function frame:SetAllPoints() end
     function frame:SetFrameStrata() end
     function frame:SetMovable() end
     function frame:EnableMouse() end
@@ -21,6 +23,7 @@ function CreateFrame(kind, name, parent, template)
     function frame:SetWidth(w) self.width = w end
     function frame:SetHeight(h) self.height = h end
     function frame:GetHeight() return self.height or 360 end
+    function frame:GetWidth() return self.width or 1 end
     function frame:SetScrollChild(child) self.scrollChild = child end
     function frame:SetText(value) self.value = value end
     function frame:GetText() return self.value end
@@ -44,6 +47,16 @@ function CreateFrame(kind, name, parent, template)
         function texture:Show() self.hidden = false end
         function texture:Hide() self.hidden = true end
         return texture
+    end
+    function frame:CreateLine()
+        local line = {}
+        function line:SetColorTexture(...) self.color = { ... } end
+        function line:SetThickness(value) self.thickness = value end
+        function line:SetStartPoint(...) self.start = { ... } end
+        function line:SetEndPoint(...) self.finish = { ... } end
+        function line:Show() self.hidden = false end
+        function line:Hide() self.hidden = true end
+        return line
     end
     function frame:CreateFontString()
         local font = {}
@@ -76,7 +89,7 @@ C_Item = {
     GetItemInfoInstant = function(itemID)
         itemID = tonumber(itemID)
         local item = itemID and mock.items[itemID] or nil
-        return itemID, "class", "subclass", "", 123, item and item.class or 7
+        return itemID, "class", "subclass", "", 123, item and item.class or 7, item and item.subclass or nil
     end,
     GetItemInfo = itemInfo,
     RequestLoadItemDataByID = function() end,
@@ -85,7 +98,7 @@ function GetItemInfo(itemID) return itemInfo(itemID) end
 function GetItemInfoInstant(itemID)
     local item = mock.items[tonumber(itemID)]
     itemID = tonumber(itemID)
-    return itemID, "class", "subclass", "", 123, item and item.class or 7
+    return itemID, "class", "subclass", "", 123, item and item.class or 7, item and item.subclass or nil
 end
 function InCombatLockdown() return mock.combat == true end
 function time() return 200000 end

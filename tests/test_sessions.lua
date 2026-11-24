@@ -257,4 +257,16 @@ return {
         mock.fire("LOOT_READY")
         assert(#mock.timers == 1)
     end,
+    ["zonas aceptan un minimo de actividad propio"] = function(addon)
+        local db = { sessions = { { char = "Ana", maps = {
+            [1] = { active = 100, coin = 0, items = {} },
+            [2] = { active = 1300, coin = 0, items = {} },
+        } } } }
+        local zones = addon.Sessions.zones(db, "Horde", 0)
+        assert(#zones == 1 and zones[1].mapID == 2)
+        zones = addon.Sessions.zones(db, "Horde", 0, { minActive = 1 })
+        assert(#zones == 2 and zones[1].mapID == 1 and zones[2].mapID == 2)
+        zones = addon.Sessions.zones(db, "Horde", 0, { minActive = 5000 })
+        assert(#zones == 0)
+    end,
 }

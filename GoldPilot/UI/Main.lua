@@ -76,6 +76,7 @@ local function buildWindow()
         label:SetText(addon.L.COMING_SOON)
     end)
     addPage("ledger", addon.L.TAB_LEDGER, Main.tabs.ledger or function() end)
+    addPage("zones", addon.L.TAB_ZONES or "zones", Main.tabs.zones or function() end)
     addPage("settings", addon.L.TAB_SETTINGS, function(page)
         local dbSettings = settings()
         if not page.minimapCheckbox then
@@ -130,7 +131,7 @@ local function buildWindow()
         end
     end)
     for _, tab in ipairs(Main.registeredTabs) do
-        if tab.name ~= "inventory" and tab.name ~= "now" and tab.name ~= "ledger" then
+        if tab.name ~= "inventory" and tab.name ~= "now" and tab.name ~= "ledger" and tab.name ~= "zones" then
             addPage(tab.name, tab.label or tab.name, tab.builder)
         end
     end

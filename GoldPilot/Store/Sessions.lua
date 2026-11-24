@@ -188,8 +188,9 @@ function Sessions.zones(db, houseKey, now, opts)
         absorb(current, current.lastMap, tail(current, now))
     end
     local result = {}
+    local minActive = tonumber(opts.minActive) or Sessions.defaults.zoneActive
     for _, item in pairs(zones) do
-        if item.active >= Sessions.defaults.zoneActive then
+        if item.active >= minActive then
             local value = Sessions.value(db, houseKey, { coin = item.coin, items = item.items }, now, opts.auctionable)
             result[#result + 1] = { mapID = item.mapID, active = item.active, sessions = item.sessions,
                 total = value.total, rate = Sessions.rate(value.total, item.active),

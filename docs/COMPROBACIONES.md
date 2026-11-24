@@ -112,3 +112,13 @@
 - [ ] Tras 20 min activos aparece la zona en Ahora.
 - [ ] Nada cambia en combate.
 - [ ] Los nodos con posición están en `GoldPilotDB.nodes` tras `/reload`.
+
+## 0.14.0
+
+- [ ] La pestaña Zonas aparece entre Libro y Ajustes.
+- [ ] Se alterna entre Zonas y Sesiones y entre Hierbas y minerales, Hierbas y Minerales.
+- [ ] Crear ruta la activa y Quitar ruta la limpia.
+- [ ] La ruta se ve solo en su mapa.
+- [ ] La ruta sigue alineada al hacer zoom en el mapa del mundo.
+- [ ] Nada se crea ni se redibuja en combate.
+- [ ] Sin puntos con precio, crear ruta avisa y no da errores.

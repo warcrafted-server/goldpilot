@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.14.0] - 2026-11-24
+
+### Añadido
+- Pestaña Zonas con el oro por hora medido de cada zona, el historial de sesiones y una ruta de recolección de hierbas y minerales dibujada en el mapa del mundo.
+
 ## [0.13.1] - 2026-11-24
 
 ### Añadido

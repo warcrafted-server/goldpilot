@@ -21,10 +21,10 @@ GoldPilot/                 Carpeta del addon (lo que se instala en Interface/Add
   Locales/                 Locale.lua, enUS.lua, esES.lua
   Data/                    Semillas de nodos generadas desde wowdata (y la local opcional en Local/)
   Store/                   Almacén de precios, historial, libro de operaciones (lógica pura)
-  State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, Location
+  State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, RoutePlan, Location
   Engine/                  Valoración, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
   Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan
-  UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión
+  UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión, mapa y rutas
   API.lua                  API pública mínima para otros addons
 companion/                 Aplicación externa opcional (Python), fuera del paquete del addon
 tests/                     Pruebas fuera del juego (lupa + simulación de la API)
@@ -116,7 +116,7 @@ Proveedores puros `proveedor(State, Store, Data, Settings) -> oportunidades`, co
 
 Puntuación: `beneficio esperado × confianza × liquidez × peso del perfil`, con todos los pesos y constantes en `Engine/Weights.lua`. Proveedores previstos: vender lo que tienes (subasta frente a vendedor), recolectar en la mejor zona para tu habilidad, liquidar objetos lentos, fabricar (cuando exista), comprar reactivos baratos para tus recetas (solo con datos `OBS` o `EXT` recientes).
 
-`Engine/Routes.lua` (puro) reúne los puntos propios y los de la semilla local, descarta los que no tienen precio o no puede recoger la habilidad, los agrupa en paradas y ordena y poda el recorrido.
+`Engine/Routes.lua` (puro) reúne los puntos propios y los de la semilla local, descarta los que no tienen precio o no puede recoger la habilidad, los agrupa en paradas y ordena y poda el recorrido. `State/RoutePlan.lua` lo une al juego: lee el mapa actual, su nombre, el aspecto y el ancho en yardas, valora los puntos con las sesiones y guarda el plan activo (sin SavedVariables).
 
 ## 8. Interfaz (`UI/`)
 
@@ -125,6 +125,7 @@ Puntuación: `beneficio esperado × confianza × liquidez × peso del perfil`, c
 - Tooltip: ganchos con `TooltipDataProcessor` (HER, verificar); dos líneas como máximo, ampliables con Mayús.
 - Panel de subasta anclado a la ventana de la subasta; se crea al primer `AUCTION_HOUSE_SHOW`.
 - HUD de sesión de recolección, movible y desactivable.
+- Pestaña Zonas (`UI/Zones.lua`): oro por hora medido por zona, sesiones guardadas y creación de rutas; `UI/RouteMap.lua` dibuja la ruta activa sobre el mapa del mundo con líneas y paradas numeradas.
 - Nada se crea ni se redibuja en combate.
 
 ## 9. Traducciones
