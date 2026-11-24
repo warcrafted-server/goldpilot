@@ -95,12 +95,28 @@ function Ledger.sync(db, char, mails, now)
     return added
 end
 
-function Ledger.summary(db, since)
+local function includes(entry, since, char)
+    return (tonumber(entry.t) or 0) >= (tonumber(since) or 0) and
+        (char == nil or entry.char == char)
+end
+
+local function orderedYears(db)
+    local years = {}
+    for year in pairs(db and db.ledger or {}) do years[#years + 1] = year end
+    table.sort(years, function(a, b)
+        local an, bn = tonumber(a) or 0, tonumber(b) or 0
+        if an ~= bn then return an < bn end
+        return tostring(a) < tostring(b)
+    end)
+    return years
+end
+
+function Ledger.summary(db, since, char)
     local result = { sales = 0, gross = 0, cut = 0, deposit = 0, net = 0,
         purchases = 0, spent = 0, returns = 0, balance = 0 }
     for _, year in pairs(db and db.ledger or {}) do
         for _, entry in ipairs(year) do
-            if (tonumber(entry.t) or 0) >= (tonumber(since) or 0) then
+            if includes(entry, since, char) then
                 if entry.kind == "sell" then
                     result.sales = result.sales + (tonumber(entry.qty) or 0)
                     result.gross = result.gross + (tonumber(entry.gross) or 0)
@@ -118,4 +134,73 @@ function Ledger.summary(db, since)
         end
     end
     return result
+end
+
+function Ledger.items(db, since, char)
+    local byName = {}
+    for _, yearKey in ipairs(orderedYears(db)) do
+        local year = db.ledger[yearKey]
+        for _, entry in ipairs(year) do
+            if includes(entry, since, char) and type(entry.name) == "string" and entry.name ~= "" then
+                local item = byName[entry.name]
+                if not item then
+                    item = { name = entry.name, itemID = nil, sold = 0, gross = 0, deposit = 0, cut = 0,
+                        net = 0, bought = 0, spent = 0, returned = 0, balance = 0, last = 0, chars = {},
+                    }
+                    byName[entry.name] = item
+                end
+                if not item.itemID and tonumber(entry.itemID) then item.itemID = tonumber(entry.itemID) end
+                local timestamp, net = tonumber(entry.t) or 0, tonumber(entry.net) or 0
+                if timestamp > item.last then item.last = timestamp end
+                item.balance = item.balance + net
+                if entry.char ~= nil then item.chars[entry.char] = (item.chars[entry.char] or 0) + net end
+                if entry.kind == "sell" then
+                    item.sold = item.sold + (tonumber(entry.qty) or 0)
+                    item.gross = item.gross + (tonumber(entry.gross) or 0)
+                    item.deposit = item.deposit + (tonumber(entry.deposit) or 0)
+                    item.cut = item.cut + (tonumber(entry.cut) or 0)
+                    item.net = item.net + net
+                elseif entry.kind == "buy" then
+                    item.bought = item.bought + (tonumber(entry.qty) or 0)
+                    item.spent = item.spent + (tonumber(entry.gross) or 0)
+                elseif entry.kind == "return" then
+                    item.returned = item.returned + (tonumber(entry.qty) or 0)
+                end
+            end
+        end
+    end
+    local result = {}
+    for _, item in pairs(byName) do result[#result + 1] = item end
+    table.sort(result, function(a, b)
+        local aa, bb = math.abs(a.balance), math.abs(b.balance)
+        if aa ~= bb then return aa > bb end
+        if a.last ~= b.last then return a.last > b.last end
+        return a.name < b.name
+    end)
+    return result
+end
+
+function Ledger.entries(db, since, char, name, limit)
+    if type(name) ~= "string" or name == "" then return {} end
+    local result, sequence = {}, 0
+    for _, yearKey in ipairs(orderedYears(db)) do
+        local year = db.ledger[yearKey]
+        for _, entry in ipairs(year) do
+            if includes(entry, since, char) and entry.name == name then
+                result[#result + 1] = { entry = entry, sequence = sequence }
+                sequence = sequence + 1
+            end
+        end
+    end
+    table.sort(result, function(a, b)
+        local at, bt = tonumber(a.entry.t) or 0, tonumber(b.entry.t) or 0
+        if at ~= bt then return at > bt end
+        return a.sequence < b.sequence
+    end)
+    local entries = {}
+    for i, value in ipairs(result) do
+        if limit and i > math.max(0, tonumber(limit) or 0) then break end
+        entries[#entries + 1] = value.entry
+    end
+    return entries
 end

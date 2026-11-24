@@ -16,10 +16,6 @@
 - [ ] Comprobar en juego fuera de ciudad: no se abre ni redibuja en combate.
 - [ ] Comprobado y correcto: tooltip, aviso al terminar la cola, precios tras `/reload`, valor de bolsas, métricas, reservar, `/gp diag` (21 presentes, 2 ausentes esperadas), SavedVariables 24 KB con 44 objetos.
 
-## Alta: precios por variante (ver el plan, pasos A y B)
-
-- [ ] Libro: elegir entre el personaje actual y toda la cuenta (ahora es siempre toda la cuenta).
-
 ## Media: escenario con API de Blizzard (tras D12)
 
 - [ ] Aplicación de escritorio que descargue los precios actuales con la API web y los deje en SavedVariables (el addon no puede hacer peticiones web); el tooltip pasaría a «Vendedor, precio actual (API) y mediana», con su propia clase de dato.
@@ -33,7 +29,6 @@
 ## Media
 
 - [ ] 0.2.0: asistente de venta.
-- [ ] Pestaña Libro para consultar y filtrar operaciones.
 - [ ] 0.3.0: verificar en juego la pestaña Inventario (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
 - [ ] Precio externo opcional: no se usa Auctionator ni TSM; solo se revisará más adelante si hay demanda.
 - [ ] Probar la API web de Blizzard para Forever (rutas, frecuencia, términos de uso).

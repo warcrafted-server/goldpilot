@@ -227,8 +227,9 @@ function InventoryUI:build(page)
         fill:SetAllPoints()
         fill:SetColorTexture(0.09, 0.07, 0.05, 1)
     end
-    page.emptyText = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    page.emptyText:SetPoint("CENTER", page, "CENTER", 0, 0)
+    page.emptyText = listBackground:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    page.emptyText:SetPoint("CENTER", listBackground, "CENTER", 0, 0)
+    if page.emptyText.SetWidth then page.emptyText:SetWidth(340) end
     page.emptyText:Hide()
     self.scopeButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
     self.scopeButton:SetSize(150, 24)

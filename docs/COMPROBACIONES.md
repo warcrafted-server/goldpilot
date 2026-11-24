@@ -89,3 +89,11 @@
 - [ ] Ahora permite alternar entre el personaje actual y toda la cuenta, y recuerda el ámbito por personaje.
 - [ ] El ámbito de personaje excluye correo y objetos de otros personajes, pero conserva el banco propio.
 - [ ] Los títulos largos de las tarjetas permanecen en una línea.
+
+## 0.11.0
+
+- [ ] El Libro muestra ventas, compras y devoluciones por objeto y actualiza sus métricas al cambiar el periodo.
+- [ ] Alternar entre personaje actual y toda la cuenta conserva el ámbito por personaje.
+- [ ] Seleccionar un objeto muestra sus operaciones recientes y balances por personaje.
+- [ ] El Libro muestra un texto claro cuando no hay registros o cuando no existen operaciones para el periodo.
+- [ ] La ventana no crea ni redibuja elementos del Libro durante el combate.

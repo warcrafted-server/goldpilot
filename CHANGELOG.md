@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.11.0] - 2026-11-24
+
+### Añadido
+- Pestaña Libro con ventas, compras y devoluciones por objeto, periodo y personaje o cuenta.
+
+### Corregido
+- El aviso de lista vacía ya no queda tapado por el fondo de la lista.
+
 ## [0.10.0] - 2026-11-24
 
 ### Añadido

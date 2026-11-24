@@ -149,4 +149,35 @@ return {
         assert(#GoldPilotDB.ledger[1970] == 3)
         assert(GoldPilotDB.ledger[1970][2].kind == "return" and GoldPilotDB.ledger[1970][3].kind == "return")
     end,
+    ["ledger filtra resumen, agrupa articulos y conserva movimientos sin mutar datos"] = function(addon)
+        local entries = {
+            { t = 100, char = "A", kind = "sell", name = "Mixed", itemID = 24, qty = 3, gross = 300,
+                deposit = 30, cut = 15, net = 315 },
+            { t = 100, char = "B", kind = "buy", name = "Mixed", itemID = 25, qty = 2,
+                gross = 100, net = -100 },
+            { t = 120, char = "A", kind = "return", name = "Mixed", qty = 1, net = 0 },
+            { t = 90, char = "B", kind = "sell", name = "Old", qty = 1, gross = 50, cut = 2, net = 48 },
+            { t = 130, char = "A", kind = "buy", name = "Loss", qty = 1, gross = 500, net = -500 },
+            { t = 140, char = "A", kind = "sell", qty = 1, gross = 2, net = 2 },
+        }
+        local db = { ledger = { [1970] = entries } }
+        local all = addon.Ledger.items(db, 100)
+        assert(#all == 2 and all[1].name == "Loss" and all[2].name == "Mixed",
+            #all .. ":" .. tostring(all[1] and all[1].name) .. ":" .. tostring(all[2] and all[2].name))
+        local mixed = all[2]
+        assert(mixed.itemID == 24 and mixed.sold == 3 and mixed.gross == 300 and mixed.deposit == 30)
+        assert(mixed.cut == 15 and mixed.net == 315 and mixed.bought == 2 and mixed.spent == 100)
+        assert(mixed.returned == 1 and mixed.balance == 215 and mixed.last == 120)
+        assert(mixed.chars.A == 315 and mixed.chars.B == -100)
+        local selected = addon.Ledger.items(db, 100, "A")
+        assert(#selected == 2 and selected[1].name == "Loss" and selected[2].balance == 315)
+        local summary = addon.Ledger.summary(db, 100, "A")
+        assert(summary.sales == 4 and summary.gross == 302 and summary.cut == 15)
+        assert(summary.purchases == 1 and summary.spent == 500 and summary.balance == -183)
+        local recent = addon.Ledger.entries(db, 0, nil, "Mixed", 2)
+        assert(#recent == 2 and recent[1] == entries[3] and recent[2] == entries[1])
+        assert(addon.Ledger.entries(db, 0, "A", "Mixed")[1] == entries[3])
+        assert(#addon.Ledger.entries(db, 0, nil, nil) == 0)
+        assert(entries[1].sequence == nil and entries[1].chars == nil)
+    end,
 }
