@@ -1,7 +1,7 @@
-# Comprobaciones manuales en juego — 0.1.0
+# Comprobaciones manuales en juego — 0.2.0
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gp version` muestra `0.1.0`.
+- [ ] `/gp version` muestra `0.2.0`.
 - [ ] `/gp diag` genera el diagnóstico sin errores.
 - [ ] El botón del minimapa aparece, se puede mover y sus clics funcionan; `/gp minimap` lo muestra y oculta.
 - [ ] Abrir la subasta encola consultas y, al terminar, aparece el aviso `Subasta: N objetos leídos`.
@@ -11,4 +11,5 @@
 - [ ] `/gp bags` muestra las valoraciones de vendedor, subasta neta y mejor combinación.
 - [ ] El addon no realiza acciones ni crea elementos de interfaz en combate.
 - [ ] `/reload` conserva los precios observados.
+- [ ] Tras abrir la subasta, ejecutar `/reload` y revisar `GoldPilotDB.ahLast`.
 - [ ] El tamaño de las SavedVariables resulta razonable tras usar el addon.

@@ -4,7 +4,7 @@ Versión 1 de la propuesta, 2026-11-23. Basada en [investigacion/01-api-y-mercad
 
 ## 1. Visión y ventajas
 
-**GoldPilot es un piloto, no un escáner.** Consultar precios y contar oro por hora ya lo hacen TSM, Auctionator y una decena de contadores de recolección en Forever. GoldPilot se sitúa una capa por encima: toma los datos que haya (los suyos, los de Auctionator o TSM si están instalados, los de la aplicación opcional) y responde a tres preguntas con una explicación corta y un grado de confianza visible:
+**GoldPilot es un piloto, no un escáner.** Consultar precios y contar oro por hora ya lo hacen TSM, Auctionator y una decena de contadores de recolección en Forever. GoldPilot se sitúa una capa por encima: usa los precios que observa por sí mismo y, opcionalmente, los datos de su aplicación, y responde a tres preguntas con una explicación corta y un grado de confianza visible:
 
 1. **¿Qué hago ahora para ganar oro?** (recolectar dónde, vender qué, fabricar qué).
 2. **¿Qué hago con lo que tengo?** (vender en subasta, al vendedor o conservar).
@@ -16,7 +16,7 @@ Ventajas frente a lo existente:
 - **Valor realizable, no valor teórico.** El oro/hora de una sesión pondera cada material por lo que de verdad se puede vender (liquidez, cantidad en venta, comisión y depósito), no por el precio mínimo listado.
 - **Contabilidad real** a partir de las facturas del correo de la subasta: compras, ventas, comisiones, depósitos perdidos y objetos que no se venden.
 - **Asesor de recolección que aprende del juego**: arranca con una semilla de nodos por zona (`wowdata`, en buena parte heredada de Classic) y la corrige con lo que el jugador recolecta de verdad en Forever.
-- **Integra en lugar de competir:** lee precios de Auctionator y TSM si existen; funciona sin ellos.
+- **Autosuficiente:** no usa Auctionator ni TSM; el jugador puede no tenerlos instalados.
 - **Castellano completo**, estética coherente con LoreWake y código abierto.
 
 ## 2. Arquitectura recomendada (resumen)
@@ -45,7 +45,7 @@ Un **addon autosuficiente** con la misma estructura probada en LoreWake (núcleo
 | Fabricación y rentabilidad de recetas | Las profesiones están rediseñadas en Forever; no se sabe qué da `C_TradeSkillUI` | Diagnóstico con la ventana de profesión abierta; `wowdata` como respaldo de recetas y reactivos |
 | Identificar la casa de subastas actual (facción, neutral, ruleset) | No hay API conocida que lo diga | Diagnóstico; respaldo: PNJ subastador por zona + facción |
 | Liquidez y demanda | Desde el juego no se ven las ventas ajenas. Con instantáneas sucesivas de la API web se puede estimar (lo que desaparece pudo venderse, caducar o cancelarse) | Solo en la aplicación, marcado como estimación |
-| Integración con Auctionator y TSM | Si su API pública está en la build de Forever y qué devuelve | Diagnóstico con ambos instalados |
+| Precio externo opcional | Si hay demanda de fuentes adicionales | Revisar más adelante; GoldPilot no usa Auctionator ni TSM |
 | Depósito exacto | Fórmula no publicada y cambiada en noviembre | Medirlo: el addon registra el depósito real que cobra el juego |
 | API web de Blizzard para Forever | Sin documentación oficial; frecuencia de actualización; términos de uso sobre redistribución | Prueba técnica de la aplicación (roadmap 0.7) |
 | Detección de nodos por el GUID del objeto | GUID parcialmente ofuscado | Diagnóstico al recolectar |
@@ -118,7 +118,7 @@ Cada versión publicada aporta algo útil y probado en juego. Lo marcado «inter
 | **0.2.0** | Asistente de venta en la subasta y libro de operaciones con ventas confirmadas por correo | Sí |
 | **0.3.0** | Sesiones de recolección con valor realizable y asesor de zonas por habilidad | Sí |
 | **0.4.0** | Panel principal con «Ahora», Inventario (vender/conservar, reservas) y existencias de la cuenta | Sí |
-| **0.5.0** | Historial y tendencias en juego; fuentes opcionales Auctionator y TSM | Sí |
+| **0.5.0** | Historial y tendencias en juego; sin fuentes externas de otros addons | Sí |
 | **0.6.0** | Fabricación: coste y rentabilidad de recetas (según el diagnóstico) | Sí |
 | **0.7.0** | Aplicación externa alfa: instantáneas de la API web, historial, informe, `GoldPilot_Market` | Sí (app en GitHub; addon igual) |
 | 1.0.0 | Estable: esquema de datos congelado, traducciones completas, documentación de usuario | Sí |

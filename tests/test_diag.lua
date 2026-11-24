@@ -21,6 +21,7 @@ return {
             GetBuildInfo = function() return "1.60.1", "70862" end,
             GetLocale = function() return "esES" end,
         }, function()
+            GoldPilotDB = { diag = { auction = { abierta = true }, mail = { n = 4 }, loot = { n = 2 }, profs = { recetas = 9 } } }
             addon.Diag:run()
             assert(GoldPilotDB.diag.version == addon.version)
             assert(GoldPilotDB.diag.build == "1.60.1 (70862)")
@@ -29,6 +30,11 @@ return {
             assert(GoldPilotDB.diag.caps["C_AuctionHouse.SendSearchQuery"] == true)
             assert(GoldPilotDB.diag.caps["C_AuctionHouse.GetAuctionHouseCut"] == false)
             assert(GoldPilotDB.diag.caps["GetInboxInvoiceInfo"] == false)
+            assert(GoldPilotDB.diag.bags[-3] == 0 and GoldPilotDB.diag.bags[-1] == 0)
+            assert(GoldPilotDB.diag.bags[0] == 0 and GoldPilotDB.diag.bags[12] == 0)
+            assert(GoldPilotDB.diag.bags[-2] == nil)
+            assert(GoldPilotDB.diag.auction.abierta and GoldPilotDB.diag.mail.n == 4)
+            assert(GoldPilotDB.diag.loot.n == 2 and GoldPilotDB.diag.profs.recetas == 9)
             assert(#mock.output > 0)
         end)
     end,

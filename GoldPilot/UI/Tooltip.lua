@@ -20,14 +20,18 @@ end
 function Tooltip:add(tooltip, data)
     if inCombat() then return end
     local itemID = itemIDFromTooltip(tooltip, data)
-    if not itemID or not (addon.DataItems and addon.DataItems[itemID]) then return end
-    local nowOk, now = pcall(time)
+    if not itemID then return end
+    local nowOk, now = addon.Compat.call("time")
     if not nowOk or not tonumber(now) then return end
     local houseKey = addon.AuctionHouse.houseKey()
     local db = GoldPilotDB or {}
+    local observation = addon.DataItems and addon.DataItems[itemID] and addon.Prices.get(db, houseKey, itemID)
+    if addon.AuctionHouse:isOpen() and (not observation or tonumber(now) - (tonumber(observation.t) or 0) >= 600) then
+        addon.AuctionHouse:enqueue(itemID, true)
+    end
+    if not (addon.DataItems and addon.DataItems[itemID]) then return end
     local value = addon.Valuation.value(db, houseKey, itemID, now)
     local vendor = value.vendor and value.vendor.price
-    local observation = addon.Prices.get(db, houseKey, itemID)
     local ref = value.ref
     local stale = not ref and value.why and value.why.reason == "stale" and value.why.best
     local shownAuction = ref or stale

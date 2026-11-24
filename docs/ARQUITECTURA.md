@@ -23,7 +23,7 @@ GoldPilot/                 Carpeta del addon (lo que se instala en Interface/Add
   Store/                   Almacén de precios, historial, libro de operaciones (lógica pura)
   State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, Location
   Engine/                  Valoración, asesor y proveedores de recomendaciones (lógica pura)
-  Sources/                 Fuentes de precio: propia, vendedor, Auctionator, TSM, Market (app)
+  Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan
   UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión
   API.lua                  API pública mínima para otros addons
 companion/                 Aplicación externa opcional (Python), fuera del paquete del addon
@@ -34,7 +34,7 @@ docs/
 
 - El addon vive en una subcarpeta (como LoreWake) para que el repositorio pueda contener la aplicación. El empaquetado de CurseForge (BigWigs packager, como PocketBank) usa `.pkgmeta` con `move-folders` e `ignore` para publicar solo `GoldPilot/`.
 - **Globales permitidos:** `GoldPilot` (espacio de nombres y API pública), `GoldPilotDB`, `GoldPilotCharDB`, los de los comandos (`SLASH_GOLDPILOT1/2`, `SlashCmdList.GOLDPILOT`), la función del compartimento de addons y los nombres de las ventanas que deban cerrarse con Escape. Una prueba lo comprueba.
-- **TOC:** `## Interface: 16001`, `## SavedVariables: GoldPilotDB`, `## SavedVariablesPerCharacter: GoldPilotCharDB`, `## OptionalDeps: Auctionator, TradeSkillMaster, GoldPilot_Market, TomTom`, `## X-Curse-Project-ID` cuando exista el proyecto.
+- **TOC:** `## Interface: 16001`, `## SavedVariables: GoldPilotDB`, `## SavedVariablesPerCharacter: GoldPilotCharDB`, `## OptionalDeps: GoldPilot_Market, TomTom`, `## X-Curse-Project-ID` cuando exista el proyecto.
 
 ## 3. Núcleo (`Core/`)
 
@@ -52,12 +52,12 @@ Igual que LoreWake: un único frame de eventos con suscripción por módulo y ag
 | Observado | `OBS` | Visto por el jugador en su casa de subastas, con fecha | 1,2 de plata por Hierro, 4 300 en venta, hace 2 h |
 | Registrado | `REG` | Acción propia anotada por el addon | Publicaste 40 lingotes a 1 de oro |
 | Confirmado | `CONF` | Hecho comunicado por el juego | Factura del correo: vendidos 20, recibiste X tras comisión |
-| Externo | `EXT` | Llegado de la aplicación o de otro addon, con su origen y fecha | Mediana regional de la API web; precio de Auctionator |
+| Externo | `EXT` | Llegado de la aplicación opcional, con su origen y fecha | Mediana regional de la API web |
 | Estimado | `EST` | Derivado por GoldPilot | Valor realizable, oro/hora, liquidez |
 
 Cada estimación guarda las entradas que la producen para poder explicarla en la ficha («calculado con 3 observaciones de las últimas 24 h y una comisión del 5 %»).
 
-**Elección del precio de referencia** (`Engine/Valuation.lua`): la fuente más reciente y fiable dentro de una ventana de validez configurable (por defecto 48 h), en este orden de preferencia: `OBS` propio > `EXT` de la aplicación > `EXT` de Auctionator o TSM > sin precio (se dice, no se inventa). El precio de vendedor (`GAME`) siempre se muestra aparte como suelo.
+**Elección del precio de referencia** (`Engine/Valuation.lua`): la fuente más reciente y fiable dentro de una ventana de validez configurable (por defecto 48 h), en este orden de preferencia: `OBS` propio > `EXT` de la aplicación > sin precio (se dice, no se inventa). El precio de vendedor (`GAME`) siempre se muestra aparte como suelo.
 
 ## 5. Almacenamiento
 

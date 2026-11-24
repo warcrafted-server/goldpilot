@@ -2,11 +2,17 @@ local _, addon = ...
 
 addon.Bags = {}
 
-function addon.Bags:scan()
+local function characterBagIDs()
+    local maxBag = tonumber(NUM_TOTAL_EQUIPPED_BAG_SLOTS) or 5
+    local ids = {}
+    for bag = 0, maxBag do ids[#ids + 1] = bag end
+    return ids
+end
+
+local function scanContainers(ids)
     local items = {}
     if not addon.Compat.has("C_Container.GetContainerNumSlots") then return items end
-    local maxBag = tonumber(NUM_BAG_SLOTS) or 4
-    for bag = 0, maxBag do
+    for _, bag in ipairs(ids) do
         local slotsOk, slots = addon.Compat.call("C_Container.GetContainerNumSlots", bag)
         if slotsOk and tonumber(slots) then
             for slot = 1, tonumber(slots) do
@@ -21,24 +27,50 @@ function addon.Bags:scan()
     return items
 end
 
+function addon.Bags:scan()
+    return scanContainers(characterBagIDs())
+end
+
 local function characterKey()
     local _, name = addon.Compat.call("UnitName", "player")
-    local _, realm = addon.Compat.call("GetRealmName")
     if type(name) ~= "string" or name == "" then name = "unknown" end
-    if type(realm) ~= "string" or realm == "" then realm = "unknown" end
-    return name .. "-" .. realm
+    return name
 end
 
 local function save()
     GoldPilotDB = GoldPilotDB or {}
     GoldPilotDB.chars = GoldPilotDB.chars or {}
     local _, money = addon.Compat.call("GetMoney")
-    local ok, seen = pcall(time)
-    GoldPilotDB.chars[characterKey()] = {
+    local ok, seen = addon.Compat.call("time")
+    local key = characterKey()
+    local previous = GoldPilotDB.chars[key] or {}
+    GoldPilotDB.chars[key] = {
         money = tonumber(money) or 0,
         bags = addon.Bags:scan(),
+        bank = previous.bank,
+        bankSeen = previous.bankSeen,
         seen = ok and tonumber(seen) or 0,
     }
+end
+
+local function scanBank()
+    GoldPilotDB = GoldPilotDB or {}
+    GoldPilotDB.chars = GoldPilotDB.chars or {}
+    local key = characterKey()
+    local container = addon.Compat.has("C_Container.GetContainerNumSlots")
+    if not container then return end
+    local equipped = tonumber(NUM_TOTAL_EQUIPPED_BAG_SLOTS) or 5
+    local ids = { tonumber(BANK_CONTAINER) or -1 }
+    for bag = equipped + 1, equipped + (tonumber(NUM_BANKBAGSLOTS) or 7) do
+        ids[#ids + 1] = bag
+    end
+    local reagentBank = Enum and Enum.BagIndex and tonumber(Enum.BagIndex.Reagentbank) or -3
+    ids[#ids + 1] = reagentBank
+    local items = scanContainers(ids)
+    local char = GoldPilotDB.chars[key] or {}
+    local ok, seen = addon.Compat.call("time")
+    char.bank, char.bankSeen = items, ok and tonumber(seen) or 0
+    GoldPilotDB.chars[key] = char
 end
 
 addon.Modules:register("bags", {
@@ -47,5 +79,6 @@ addon.Modules:register("bags", {
         save()
         addon.Events:subscribe("bags", "PLAYER_LOGIN", save)
         addon.Events:subscribe("bags", "BAG_UPDATE_DELAYED", save, 0.5)
+        addon.Events:subscribe("bags", "BANKFRAME_OPENED", scanBank, 0.5)
     end,
 })

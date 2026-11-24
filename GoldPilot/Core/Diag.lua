@@ -44,13 +44,21 @@ end
 
 function addon.Diag:run()
     if inCombat() then return end
-    local report = { caps = {} }
+    GoldPilotDB = GoldPilotDB or {}
+    local report = {}
+    for key, value in pairs(GoldPilotDB.diag or {}) do report[key] = value end
+    report.caps = {}
     local ok, version, build = addon.Compat.call("GetBuildInfo")
     if ok then report.build = tostring(version or "") .. (build and (" (" .. tostring(build) .. ")") or "") end
     local localeOK, locale = addon.Compat.call("GetLocale")
     if localeOK then report.locale = locale end
     report.version = addon.version
     report.fecha = now()
+    report.bags = {}
+    for _, bag in ipairs({ -3, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }) do
+        local slotsOK, slots = addon.Compat.call("C_Container.GetContainerNumSlots", bag)
+        report.bags[bag] = slotsOK and tonumber(slots) or 0
+    end
 
     local present, absent = 0, {}
     for _, path in ipairs(capabilities) do
@@ -58,7 +66,6 @@ function addon.Diag:run()
         report.caps[path] = exists
         if exists then present = present + 1 else absent[#absent + 1] = path end
     end
-    GoldPilotDB = GoldPilotDB or {}
     GoldPilotDB.diag = report
     addon.Log:info(string.format(addon.L.DIAG_SUMMARY, present, #capabilities - present))
     if #absent > 0 then addon.Log:info(addon.L.DIAG_MISSING .. table.concat(absent, ", ")) end

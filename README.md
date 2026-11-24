@@ -4,7 +4,7 @@ Addon de economía para **World of Warcraft: Forever**. Esta versión temprana m
 
 Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gp bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ayuda con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo.
 
-> **Versión 0.1.0 temprana.** Aún no se ha comprobado en juego. No incluye una ventana principal.
+> **Versión 0.2.0 temprana.** Aún no se ha comprobado en juego. No incluye una ventana principal.
 
 ## Documentación
 
@@ -17,7 +17,7 @@ Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ven
 ## Requisitos
 
 - Cliente WoW Forever (Interface 16001, build de referencia 1.60.1.70862).
-- Sin dependencias. Opcionales previstos: Auctionator, TradeSkillMaster, TomTom y la aplicación externa GoldPilot (Windows).
+- Sin dependencias. Opcionales previstos: TomTom y la aplicación externa GoldPilot (Windows).
 
 ## Instalación
 
@@ -27,7 +27,7 @@ Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ven
 ## Uso
 
 - Pasa el cursor por un objeto compatible para ver su precio de vendedor y, si se ha observado, su precio de subasta, antigüedad y recomendación. Mantén **Mayús** para ver más detalle.
-- Al abrir la casa de subastas, GoldPilot consulta en cola los objetos de las bolsas. Al terminar muestra `Subasta: N objetos leídos`.
+- Al abrir la subasta, GoldPilot consulta objetos seguidos, bolsas y bancos de los personajes guardados; al pasar el cursor prioriza objetos sin observación reciente. El banco se registra al abrirlo. Al terminar muestra `Subasta: N objetos leídos`.
 - Usa `/gp bags` para ver el valor de las bolsas al vendedor, en subasta neta y con la mejor combinación; `/gp diag` para el diagnóstico; `/gp minimap` para mostrar u ocultar el botón; y `/gp version` para ver la versión. El botón del minimapa abre la ayuda con clic izquierdo y ejecuta el diagnóstico con clic derecho.
 - No hay ventana principal en esta versión.
 

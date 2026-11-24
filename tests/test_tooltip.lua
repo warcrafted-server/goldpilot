@@ -17,7 +17,7 @@ end
 return {
     ["tooltip muestra dos lineas y cuatro con Mayus"] = function(addon)
         setup()
-        GoldPilotDB = { houses = { ["Horde-Forever"] = {} }, prices = { ["Horde-Forever"] = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
+        GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
         addon.Modules:enableAll()
         local frame = tooltip()
         addon.Tooltip:add(frame, { id = 25 })
@@ -30,7 +30,7 @@ return {
     ["tooltip muestra antiguedad en gris y ausencia de observacion"] = function(addon)
         setup()
         time = function() return 300000 end
-        GoldPilotDB = { prices = { ["Horde-Forever"] = { [25] = { last = { t = 1, min = 5, p50 = 6, qty = 3, src = "OBS" } } } } }
+        GoldPilotDB = { prices = { Horde = { [25] = { last = { t = 1, min = 5, p50 = 6, qty = 3, src = "OBS" } } } } }
         local old = tooltip()
         addon.Tooltip:add(old, { id = 25 })
         assert(#old.lines == 2 and string.find(old.lines[2], "old data", 1, true))
@@ -46,6 +46,26 @@ return {
         addon.Tooltip:add(frame, { id = 25 })
         assert(#frame.lines == 0)
     end,
+    ["hover encola con prioridad solo durante subasta y sin observación reciente"] = function(addon, mock)
+        setup()
+        GoldPilotDB = { watch = { [35] = true }, prices = { Horde = {
+            [25] = { last = { t = 99950, min = 1, p50 = 1, qty = 1 } },
+            [36] = { last = { t = 90000, min = 1, p50 = 1, qty = 1 } },
+        } } }
+        addon.Bags.scan = function() return {} end
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        addon.Tooltip:add(tooltip(), { id = 25 })
+        addon.Tooltip:add(tooltip(), { id = 36 })
+        assert(addon.AuctionHouse:status().current == 35)
+        mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 35)
+        assert(addon.AuctionHouse:status().current == 36)
+        mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 36)
+        assert(addon.AuctionHouse:status().current == nil)
+        mock.fire("AUCTION_HOUSE_CLOSED")
+        addon.Tooltip:add(tooltip(), { id = 36 })
+        assert(addon.AuctionHouse:status().current == nil)
+    end,
     ["comando bags imprime el resumen"] = function(addon, mock)
         setup()
         C_Container = {
@@ -54,8 +74,8 @@ return {
         }
         NUM_BAG_SLOTS = 0
         GoldPilotDB = {
-            houses = { ["Horde-Forever"] = { cut = 0.05 } },
-            prices = { ["Horde-Forever"] = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } },
+            houses = { Horde = { cut = 0.05 } },
+            prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } },
         }
         SlashCmdList.GOLDPILOT("bags")
         assert(#mock.output == 1 and string.find(mock.output[1], "Bags:", 1, true))

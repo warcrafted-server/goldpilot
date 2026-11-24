@@ -4,6 +4,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.2.0] - 2026-11-24
+
+### Añadido
+- Registro del banco, consultas de subasta para bolsas y bancos de otros personajes, consultas prioritarias al pasar el cursor y registro compacto de la última sesión.
+
+### Cambiado
+- Las claves de casas y personajes ya no incluyen reino; el esquema migra las claves guardadas.
+- El diagnóstico conserva las sondas ya guardadas. GoldPilot obtiene precios solo de sus propias observaciones en la subasta.
+
+### Corregido
+- Se conserva el banco anterior hasta abrir el banco, y cada resultado de consulta queda registrado.
+
 ## [0.1.1] - 2026-11-24
 
 ### Corregido

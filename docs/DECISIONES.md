@@ -5,7 +5,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 ## D1. Ser una capa de decisión, no otro escáner de precios — propuesta
 
 - **Contexto:** TSM (con app de escritorio), Auctionator y una decena de contadores de oro/hora ya funcionan en Forever.
-- **Decisión:** GoldPilot se centra en recomendar, explicar y medir el beneficio real; obtiene precios de lo que observa el jugador, de Auctionator/TSM si están y de su aplicación opcional.
+- **Decisión:** GoldPilot se centra en recomendar, explicar y medir el beneficio real; obtiene precios de sus propias observaciones y de su aplicación opcional.
 - **Descartado:** competir en escaneo completo (además está limitado por el servidor).
 
 ## D2. Clase de dato obligatoria en cada cifra — propuesta
@@ -77,3 +77,9 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 ## D13. Archivos de agentes fuera del repositorio — aceptada (2026-11-23)
 
 - **Decisión:** `AGENTS.md`, `CLAUDE.md`, `.agents/`, `.agentrelay/` y `.claude/` en `.gitignore`. El commit inicial de AgentRelay se rehace para que no queden en el historial (el remoto aún está vacío).
+
+## D14. Sin dependencias de otros addons de precios — aceptada (2026-11-24)
+
+- **Contexto:** el jugador puede no tener Auctionator ni TSM instalados.
+- **Decisión:** GoldPilot obtiene precios mediante sus propias consultas y observaciones de la subasta.
+- **Descartado:** leer precios de Auctionator o TSM.
