@@ -44,6 +44,7 @@ Vende mejor en WoW Forever: precios de vendedor y de subasta en el tooltip de ca
 - **Standalone:** no Auctionator, TradeSkillMaster or any other addon needed. Spanish and English.
 
 ### Commands
+- `/gp` or `/gp window`: open or close the main window (Inventory is a placeholder; Settings controls the minimap button and item tooltip lines).
 - `/gp bags`: value of your bags.
 - `/gp diag`: technical report of what your client supports (useful when reporting a problem).
 - `/gp minimap`: show or hide the minimap button.
@@ -71,6 +72,7 @@ Problems or ideas? Leave a comment, and if you report a bug, include the output 
 - **Autónomo:** no necesita Auctionator, TradeSkillMaster ni ningún otro addon. En castellano e inglés.
 
 ### Comandos
+- `/gp` o `/gp window`: abre o cierra la ventana principal (Inventario es provisional; Ajustes configura el botón del minimapa y las líneas del tooltip).
 - `/gp bags`: valor de tus bolsas.
 - `/gp diag`: informe técnico de lo que soporta tu cliente (útil al comunicar un problema).
 - `/gp minimap`: muestra u oculta el botón del minimapa.

@@ -2,7 +2,7 @@
 
 Addon de economía para **World of Warcraft: Forever**. Esta versión temprana muestra precios de vendedor y precios observados en la subasta en los tooltips, y permite consultar el valor estimado de las bolsas. Los precios de subasta proceden de lo que el jugador observa al abrir la casa de subastas; todavía no se leen precios de otras fuentes.
 
-Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gp bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ayuda con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo.
+Comandos disponibles: `/gp` abre o cierra la ventana principal, `/gp window` hace lo mismo y `/gp help` muestra la ayuda. `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gp bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo.
 
 > **Versión 0.2.0 temprana.** Aún no se ha comprobado en juego. No incluye una ventana principal.
 
@@ -28,7 +28,7 @@ Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ven
 
 - Pasa el cursor por un objeto compatible para ver su precio de vendedor y, si se ha observado, su precio de subasta, antigüedad y recomendación. Mantén **Mayús** para ver más detalle.
 - Al abrir la subasta, GoldPilot consulta objetos seguidos, bolsas y bancos de los personajes guardados; al pasar el cursor prioriza objetos sin observación reciente. El banco se registra al abrirlo. Al terminar muestra `Subasta: N objetos leídos`.
-- Usa `/gp bags` para ver el valor de las bolsas al vendedor, en subasta neta y con la mejor combinación; `/gp diag` para el diagnóstico; `/gp minimap` para mostrar u ocultar el botón; y `/gp version` para ver la versión. El botón del minimapa abre la ayuda con clic izquierdo y ejecuta el diagnóstico con clic derecho.
+- Usa `/gp` para abrir la ventana principal (Inventario está pendiente y Ajustes permite configurar la interfaz); `/gp bags` para ver el valor de las bolsas al vendedor, en subasta neta y con la mejor combinación; `/gp diag` para el diagnóstico; `/gp minimap` para mostrar u ocultar el botón; y `/gp version` para ver la versión. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho.
 - No hay ventana principal en esta versión.
 
 ## Desarrollo

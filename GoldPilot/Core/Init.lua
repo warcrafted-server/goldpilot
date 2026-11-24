@@ -6,6 +6,13 @@ addon.version = (C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMet
 local function command(input)
     local subcommand = string.match(input or "", "^%s*(%S*)") or ""
     subcommand = string.lower(subcommand)
+    if subcommand == "" or subcommand == "window" then
+        if addon.Main then addon.Main:toggle() end
+        return
+    elseif subcommand == "help" then
+        addon.Log:info(addon.L.HELP)
+        return
+    end
     if subcommand == "diag" then
         local action, itemID = string.match(input or "", "^%s*%S+%s*(%S*)%s*(%S*)")
         if string.lower(action or "") == "ah" then

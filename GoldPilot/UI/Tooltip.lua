@@ -19,6 +19,8 @@ end
 
 function Tooltip:add(tooltip, data)
     if inCombat() then return end
+    local settings = GoldPilotDB and GoldPilotDB.settings
+    if settings and settings.tooltip == false then return end
     local itemID = itemIDFromTooltip(tooltip, data)
     if not itemID then return end
     local nowOk, now = addon.Compat.call("time")

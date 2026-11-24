@@ -1,8 +1,8 @@
 local _, addon = ...
 addon.LocaleRegister("enUS", {
-    HELP = "Commands: /gp help, /gp version, /gp diag, /gp minimap, /gp bags",
+    HELP = "Commands: /gp [window], /gp help, /gp version, /gp diag, /gp minimap, /gp bags",
     MINIMAP_TITLE = "GoldPilot",
-    MINIMAP_LEFT = "Left-click: help / version",
+    MINIMAP_LEFT = "Left-click: open or close GoldPilot",
     MINIMAP_RIGHT = "Right-click: run diagnostics",
     VERSION = "GoldPilot %s",
     DIAG_SUMMARY = "Diagnostic: %d capabilities present, %d absent.",
@@ -27,4 +27,11 @@ addon.LocaleRegister("enUS", {
     TOOLTIP_DETAILS = "Observed min: %s; quantity: %d",
     TOOLTIP_DETAILS_NONE = "No observed minimum or quantity",
     TOOLTIP_CUT_ASSUMED = "Assumed 5% auction cut",
+    WINDOW_TITLE = "GoldPilot Forever",
+    TAB_INVENTORY = "Inventory",
+    TAB_SETTINGS = "Settings",
+    COMING_SOON = "Coming soon",
+    SETTING_MINIMAP = "Show minimap button",
+    SETTING_TOOLTIP = "Show item tooltip lines",
+    COMBAT_BLOCKED = "GoldPilot cannot open its window during combat.",
 })

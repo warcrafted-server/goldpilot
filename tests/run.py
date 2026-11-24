@@ -7,7 +7,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ADDON = os.path.join(ROOT, "GoldPilot")
-ALLOWED = {"GoldPilot", "GoldPilotDB", "GoldPilotCharDB", "SLASH_GOLDPILOT1", "SLASH_GOLDPILOT2"}
+ALLOWED = {"GoldPilot", "GoldPilotDB", "GoldPilotCharDB", "SLASH_GOLDPILOT1", "SLASH_GOLDPILOT2", "GoldPilotMainFrame"}
 
 
 def read(path):

@@ -28,7 +28,7 @@ local function position(button, angle)
 end
 
 local function showMainAction()
-    addon.Log:info(addon.L.HELP)
+    if addon.Main then addon.Main:toggle() end
 end
 
 function addon.Minimap:toggle()
@@ -37,10 +37,19 @@ function addon.Minimap:toggle()
     GoldPilotDB.settings = GoldPilotDB.settings or {}
     GoldPilotDB.settings.minimap = GoldPilotDB.settings.minimap or { angle = 220, hidden = false }
     local settings = GoldPilotDB.settings.minimap
-    settings.hidden = not settings.hidden
+    self:setVisible(settings.hidden)
+end
+
+function addon.Minimap:setVisible(visible)
+    if inCombat() then return false end
+    GoldPilotDB = GoldPilotDB or {}
+    GoldPilotDB.settings = GoldPilotDB.settings or {}
+    GoldPilotDB.settings.minimap = GoldPilotDB.settings.minimap or {}
+    GoldPilotDB.settings.minimap.hidden = not visible
     if self.button then
-        if settings.hidden then self.button:Hide() else self.button:Show() end
+        if visible then self.button:Show() else self.button:Hide() end
     end
+    return true
 end
 
 -- En la copia de desarrollo (junction a la raíz del repo) el addon está en una subcarpeta.

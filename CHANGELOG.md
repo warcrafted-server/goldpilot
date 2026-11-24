@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.2.5] - 2026-11-24
+
+### Añadido
+- Ventana principal con pestañas y componentes de interfaz.
+
+### Cambiado
+- `/gp` abre la ventana y `/gp help` muestra la ayuda.
+
 ## [0.2.4] - 2026-11-24
 
 ### Añadido
