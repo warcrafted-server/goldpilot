@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.12.1] - 2026-11-24
+
+### Añadido
+- Registro interno de sesiones de recolección y de la posición de los nodos a partir del botín (aún sin interfaz).
+
 ## [0.12.0] - 2026-11-24
 
 ### Cambiado

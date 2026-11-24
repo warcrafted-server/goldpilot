@@ -94,6 +94,35 @@ Minimap = { GetShape = function() return "ROUND" end, GetCenter = function() ret
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
 SlashCmdList = {}
 C_Timer = { After = function(_, fn) mock.timers[#mock.timers + 1] = fn end }
+mock.loot = {}
+mock.fishing = false
+mock.mapID, mock.mapX, mock.mapY = 1, 0.5, 0.5
+function mock.enableLoot()
+    function GetNumLootItems() return #mock.loot end
+    function GetLootSlotLink(slot)
+        local entry = mock.loot[slot]
+        return entry and entry.link or nil
+    end
+    function GetLootSourceInfo(slot)
+        local entry = mock.loot[slot]
+        if not entry then return nil end
+        local values = {}
+        for _, source in ipairs(entry.sources or {}) do
+            values[#values + 1] = source.guid
+            values[#values + 1] = source.qty
+        end
+        return unpack(values)
+    end
+    function IsFishingLoot() return mock.fishing == true end
+    C_Map = {
+        GetBestMapForUnit = function() return mock.mapID end,
+        GetPlayerMapPosition = function()
+            local x, y = mock.mapX, mock.mapY
+            if mock.mapFields then return { x = x, y = y } end
+            return { GetXY = function() return x, y end }
+        end,
+    }
+end
 function mock.fire(event, ...)
     if mock.events[event] then mock.events[event].handler(nil, event, ...) end
 end

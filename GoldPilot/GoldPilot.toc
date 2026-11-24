@@ -2,7 +2,7 @@
 ## Title: GoldPilot Forever
 ## Notes: Asesoría económica y de subastas para WoW Forever.
 ## Author: WarCrafted
-## Version: 0.12.0
+## Version: 0.12.1
 ## X-Curse-Project-ID: 1827348
 ## IconTexture: Interface/AddOns/GoldPilot/Media/Icon
 ## SavedVariables: GoldPilotDB
@@ -22,6 +22,8 @@ Core/Init.lua
 Data/Generated/NodeSeeds.lua
 Store/Prices.lua
 Store/Ledger.lua
+Store/Sessions.lua
+Store/Nodes.lua
 Engine/Valuation.lua
 Engine/Advisor.lua
 Engine/Inventory.lua
@@ -30,6 +32,7 @@ State/Bags.lua
 State/ItemData.lua
 State/Maintenance.lua
 State/Mail.lua
+State/Loot.lua
 State/AuctionHouse.lua
 State/FullScan.lua
 UI/Theme.lua

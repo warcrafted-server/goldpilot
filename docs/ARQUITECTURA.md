@@ -73,10 +73,11 @@ GoldPilotDB = {
   chars = { ["Nombre-Ruleset"] = { money=, bags={[itemID]=n}, bank={...}, bankSeen=t, profs={...} } },
   watch = { [itemKey] = true },
   reserved = { [itemID] = n },
-  sessions = { ... },   -- últimas 50 sesiones de recolección, resumidas
-  nodes = { [mapID] = { [nodeKey] = { src="obs"|"seed", seen=n, first=t, last=t } },
-            dropped = { ["mapID:nodeKey"] = t } },  -- semillas descartadas (D11)
-  gatherCount = { [mapID] = { [profesión] = n } },  -- nodos recogidos por zona (para descartar semillas)
+  sessions = { { start=t, stop=t, char="Nombre", active=n, coin=, loots=, nodes=, items={[itemKey]=n},
+                 lastMap=mapID, maps={[mapID]={active=, coin=, items={[itemKey]=n}}} }, ... },
+            -- últimas 50 sesiones de recolección, resumidas
+  nodes = { [mapID] = { [objectID] = { n=, first=t, last=t,
+            spots={ {x=, y=, n=, t=}, ... } } } },  -- x, y = coordenada del mapa * 10000
   diag = { ... },
 }
 ```
