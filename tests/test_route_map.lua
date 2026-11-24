@@ -116,6 +116,117 @@ return {
         assert(map.dots[2].color[1] == 0.3 and map.dots[1].color[1] == 1)
         addon.RoutePlan:clear()
     end,
+    ["route map usa el nivel del gestor de chinchetas y el respaldo 2200"] = function(addon, mock)
+        local frame = mapFrame(mock, 7)
+        local manager = { GetValidFrameLevel = function(_, key)
+            if key == "PIN_FRAME_LEVEL_MAP_HIGHLIGHT" then return 12 end
+        end }
+        frame.GetPinFrameLevelsManager = function() return manager end
+        addon.RoutePlan.active = { mapID = 7, route = { stops = stops(2), points = 2 } }
+        assert(addon.RouteMap:refresh())
+        assert(addon.RouteMap.level == 13 and addon.RouteMap.frame.level == 13)
+        manager.GetValidFrameLevel = function() return 0 end
+        assert(addon.RouteMap:refresh())
+        assert(addon.RouteMap.level == 2200 and addon.RouteMap.frame.level == 2200)
+        frame.GetPinFrameLevelsManager = function() error("sin gestor") end
+        assert(addon.RouteMap:refresh())
+        assert(addon.RouteMap.level == 2200 and addon.RouteMap.frame.level == 2200)
+        addon.RoutePlan:clear()
+    end,
+    ["route map dibuja dentro del rectangulo del mapa padre"] = function(addon, mock)
+        mapFrame(mock, 100)
+        C_Map = { GetMapRectOnMap = function(planID, shownID)
+            if planID == 7 and shownID == 100 then return 0.5, 1, 0.25, 0.75 end
+        end }
+        addon.RoutePlan.active = { mapID = 7, route = { stops = stops(3), points = 3 } }
+        assert(addon.RouteMap:refresh())
+        local map = addon.RouteMap
+        assert(near(map.lines[1].start[3], 625, 1e-6) and near(map.lines[1].start[4], -187.5, 1e-6))
+        assert(near(map.dots[1].point[4], 625, 1e-6) and near(map.dots[1].point[5], -187.5, 1e-6))
+        assert(map.labels[1].value == "1" and map.labels[1].hidden == false)
+        local status = addon.RouteMap:status()
+        assert(status.planMap == 7 and status.mapID == 100 and status.frame == true)
+        assert(status.rect[1] == 0.5 and status.rect[2] == 1 and status.rect[3] == 0.25 and status.rect[4] == 0.75)
+        C_Map = nil
+        addon.RoutePlan:clear()
+    end,
+    ["route map en franja estrecha usa puntos pequenos y sin numeros"] = function(addon, mock)
+        local _, setMap = mapFrame(mock, 7)
+        addon.RoutePlan.active = { mapID = 7, route = { stops = stops(3), points = 3 } }
+        assert(addon.RouteMap:refresh())
+        local map = addon.RouteMap
+        assert(map.dots[1].width == 7 and map.labels[1].hidden == false)
+        C_Map = { GetMapRectOnMap = function() return 0, 0.2, 0, 1 end }
+        setMap(100)
+        assert(addon.RouteMap:refresh())
+        assert(map.dots[1].width == 4 and map.dots[1].height == 4)
+        assert(map.labels[1].hidden == true)
+        addon.RouteFollow.plan = addon.RoutePlan.active
+        addon.RouteFollow.next = 2
+        assert(addon.RouteMap:refresh())
+        assert(map.dots[2].width == 6 and map.dots[2].height == 6)
+        addon.RouteFollow.plan = nil
+        addon.RouteFollow.next = nil
+        C_Map = nil
+        addon.RoutePlan:clear()
+    end,
+    ["route map oculta la ruta si el rectangulo del mapa padre no vale"] = function(addon, mock)
+        local _, setMap = mapFrame(mock, 7)
+        addon.RoutePlan.active = { mapID = 7, route = { stops = stops(2), points = 2 } }
+        assert(addon.RouteMap:refresh())
+        local map = addon.RouteMap
+        local rects = {
+            function() return 0.5, 0.51, 0.2, 0.8 end,
+            function() return 0.1, 1.2, 0.2, 0.8 end,
+            function() return 0.1, 0.9, "x", 0.8 end,
+        }
+        for _, rect in ipairs(rects) do
+            C_Map = { GetMapRectOnMap = rect }
+            setMap(100)
+            assert(addon.RouteMap:refresh() == false and map.frame.hidden == true)
+            setMap(7)
+        end
+        C_Map = nil
+        addon.RoutePlan:clear()
+    end,
+    ["route map reintenta una sola vez si el lienzo no tiene tamano"] = function(addon, mock)
+        local frame = mapFrame(mock, 7)
+        local canvas = frame:GetCanvas()
+        addon.RoutePlan.active = { mapID = 7, route = { stops = stops(2), points = 2 } }
+        assert(addon.RouteMap:refresh())
+        canvas:SetSize(0, 0)
+        assert(addon.RouteMap:refresh() == false)
+        assert(#mock.timers == 1)
+        assert(addon.RouteMap:refresh() == false)
+        assert(#mock.timers == 1)
+        canvas:SetSize(1000, 500)
+        mock.flushTimers()
+        assert(addon.RouteMap.frame.hidden == false and addon.RouteMap.retried == false)
+        addon.RoutePlan:clear()
+    end,
+    ["route map guarda el ultimo error de dibujo"] = function(addon, mock)
+        mapFrame(mock, 7)
+        addon.RoutePlan.active = { mapID = 7, route = { stops = stops(2), points = 2 } }
+        assert(addon.RouteMap:refresh())
+        assert(addon.RouteMap.lastError == nil)
+        addon.RouteMap.lines[1].SetStartPoint = function() error("fallo punto") end
+        assert(addon.RouteMap:refresh())
+        assert(addon.RouteMap.lastError and addon.RouteMap.lastError:find("fallo punto", 1, true))
+        addon.RoutePlan:clear()
+    end,
+    ["route map status sin mapa del mundo no falla"] = function(addon)
+        WorldMapFrame = nil
+        local status = addon.RouteMap:status()
+        assert(type(status) == "table")
+        assert(status.available == false and status.frame == false and status.shown == false)
+        assert(status.width == 0 and status.height == 0 and status.stops == 0 and status.rect == nil)
+        assert(status.level == nil and status.mapID == nil and status.planMap == nil)
+        assert(status.combat == false and status.scale == 1)
+        addon.RoutePlan.active = { mapID = 7, route = { stops = stops(2), points = 2 } }
+        status = addon.RouteMap:status()
+        assert(status.stops == 2 and status.planMap == 7 and status.mapID == nil)
+        addon.RoutePlan:clear()
+    end,
     ["route plan lee el mapa, el nombre y el aspecto del juego"] = function(addon, mock)
         C_Map = {
             GetBestMapForUnit = function(unit) if unit == "player" then return 7 end end,

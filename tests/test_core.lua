@@ -80,6 +80,23 @@ return {
         assert(text:find("GoldPilot " .. addon.version, 1, true))
         assert(text:find(addon.L.HELP, 1, true))
     end,
+    ["/gpilot route guarda el estado de la ruta sin mapa del mundo"] = function(addon, mock)
+        WorldMapFrame = nil
+        GoldPilotDB = {}
+        addon.RoutePlan.active = { mapID = 7, points = 2,
+            route = { stops = { { x = 0.1, y = 0.1 }, { x = 0.9, y = 0.9 } }, points = 2 } }
+        SlashCmdList.GOLDPILOT("route")
+        local line = mock.output[#mock.output]
+        assert(line and line:find("7", 1, true))
+        local saved = GoldPilotDB.diag.route
+        assert(type(saved) == "table" and saved.planMap == 7 and saved.stops == 2)
+        assert(saved.available == false and saved.rect == nil)
+        for _, value in pairs(saved) do
+            local kind = type(value)
+            assert(kind == "boolean" or kind == "number" or kind == "string")
+        end
+        addon.RoutePlan:clear()
+    end,
     ["ADDON_LOADED crea las bases y migra"] = function(addon, mock)
         mock.fire("ADDON_LOADED", "GoldPilot")
         assert(GoldPilotDB.schema == 3 and GoldPilotCharDB and addon.loaded)

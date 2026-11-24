@@ -131,3 +131,11 @@
 - [ ] Tras visitar paradas con y sin nodo, `/reload` y revisar que `GoldPilotDB.routeVisits` guarda visitas y aciertos.
 - [ ] En vuelo o muerto no se registran visitas.
 - [ ] Nada se crea ni se redibuja en combate; el punto de TomTom se marca al salir.
+
+## 0.15.1
+
+- [ ] La ruta se ve sobre el arte del mapa, encima de las chinchetas, sin quedar tapada y sin errores de Lua.
+- [ ] Con un mapa unido abierto, la ruta aparece dentro del rectángulo de su mapa dentro del mapa mostrado.
+- [ ] Al alejar el mapa hasta que la ruta ocupe una franja estrecha, los puntos se ven más pequeños y sin números.
+- [ ] Abrir el mapa con la ruta activa la dibuja aunque el lienzo tarde en tener tamaño (un solo reintento, sin bucle).
+- [ ] `/gpilot route` imprime una línea con el estado y no falla sin el mapa del mundo abierto; `GoldPilotDB.diag.route` guarda el estado.

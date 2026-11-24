@@ -104,6 +104,26 @@ local function command(input)
             addon.SessionHUD:toggle()
             addon.Log:info(addon.SessionHUD:enabled() and addon.L.HUD_ON or addon.L.HUD_OFF)
         end
+    elseif subcommand == "route" or subcommand == "ruta" then
+        if not addon.RouteMap then return end
+        local status = addon.RouteMap:status()
+        GoldPilotDB = GoldPilotDB or {}
+        GoldPilotDB.diag = GoldPilotDB.diag or {}
+        local saved = {}
+        for key, value in pairs(status) do
+            local kind = type(value)
+            if kind == "boolean" or kind == "number" or kind == "string" then saved[key] = value end
+        end
+        if type(status.rect) == "table" then
+            saved.rect = table.concat({ tostring(status.rect[1]), tostring(status.rect[2]),
+                tostring(status.rect[3]), tostring(status.rect[4]) }, ",")
+        end
+        GoldPilotDB.diag.route = saved
+        addon.Log:info(string.format(addon.L.ROUTE_STATUS,
+            tostring(status.available), tostring(status.frame), tostring(status.shown), tostring(status.level),
+            tostring(status.mapID), tostring(status.planMap), tostring(status.stops), tostring(status.width),
+            tostring(status.height), tostring(status.scale), tostring(status.combat), tostring(saved.rect),
+            tostring(addon.RouteMap.lastError)))
     else
         addon.Log:info(addon.L.HELP)
     end

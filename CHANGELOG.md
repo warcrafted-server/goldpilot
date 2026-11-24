@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.15.1] - 2026-11-24
+
+### Corregido
+- La ruta de recolección no se veía bajo el arte del mapa ni con mapas unidos: ahora se dibuja por encima de las chinchetas y dentro del rectángulo del mapa que la contiene, y se reintenta el dibujo si el lienzo aún no tiene tamaño. `/gpilot route` resume su estado y lo guarda en el diagnóstico.
+
 ## [0.15.0] - 2026-11-24
 
 ### Añadido

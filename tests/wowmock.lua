@@ -15,6 +15,8 @@ function CreateFrame(kind, name, parent, template)
     function frame:ClearAllPoints() end
     function frame:SetAllPoints() end
     function frame:SetFrameStrata() end
+    function frame:SetFrameLevel(value) self.level = value end
+    function frame:GetFrameLevel() return self.level or 0 end
     function frame:SetMovable() end
     function frame:EnableMouse() end
     function frame:RegisterForDrag() end

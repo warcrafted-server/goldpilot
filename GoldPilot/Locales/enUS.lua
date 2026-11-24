@@ -1,6 +1,7 @@
 local _, addon = ...
 addon.LocaleRegister("enUS", {
-    HELP = "Commands: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <link>, /gpilot ledger, /gpilot session [end], /gpilot hud",
+    HELP = "Commands: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <link>, /gpilot ledger, /gpilot session [end], /gpilot hud",
+    ROUTE_STATUS = "Route: available %s, frame %s, shown %s, level %s, map %s, plan map %s, stops %s, size %sx%s, scale %s, combat %s, rect %s, error %s",
     LEDGER_ADDED = "Ledger: %d new records.",
     LEDGER_SUMMARY = "Last 30 days: sold %d items, gross %s, deposit %s, cut %s, net %s; bought %d (%s spent); returned %d; balance %s.",
     MINIMAP_TITLE = "GoldPilot",
