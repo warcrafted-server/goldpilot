@@ -6,7 +6,7 @@ local _, addon = ...
 local FullScan = { inProgress = false }
 addon.FullScan = FullScan
 
-local COOLDOWN, TIMEOUT, SLICE_MS, SLICE_ITEMS = 15 * 60, 120, 6, 200
+local COOLDOWN, TIMEOUT, SLICE_MS, SLICE_ITEMS = 15 * 60, 120, 10, 200
 -- El cliente carga los objetos poco a poco: se insiste mientras sigan llegando enlaces.
 local MAX_ROUNDS, MAX_STALLED, ROUND_DELAY = 15, 3, 2
 local ticket = 0
@@ -98,29 +98,34 @@ local function process(count)
         end
     end
 
-    local function record(position)
+    -- Las variantes de un objeto con anuncios aún sin enlace se registran al final, completas.
+    local held, flushed = {}, false
+    local function record(position, late)
         local key = order[position]
+        if not listings[key] or (not late and held[addon.ItemKey.itemID(key)]) then return end
         if addon.AuctionHouse:recordListings(key, listings[key]) then registered[key] = true end
         listings[key] = nil
     end
 
-    local function complete()
-        addon.AuctionHouse:resolveQueue(seen)
+    local function saveStats(phase)
+        local previous = GoldPilotDB.scan or {}
         local items, keys = 0, 0
         for _ in pairs(seen) do items = items + 1 end
         for _ in pairs(registered) do keys = keys + 1 end
-        local previous = GoldPilotDB.scan or {}
-        GoldPilotDB.scan = { t = previous.t or now(), items = items, keys = keys, ads = count,
-            noLink = #pending }
-        finish(true, string.format(addon.L.SCAN_DONE, items))
+        GoldPilotDB.scan = { t = previous.t or now(), items = items, keys = keys, ads = count, noLink = #pending,
+            wait = previous.wait, main = previous.main, late = previous.late }
+        GoldPilotDB.scan[phase] = now() - GoldPilotDB.scan.t
+        return items, keys
     end
 
-    local function recordAndFinish()
-        sliced(#order, record, complete, mine)
+    local function flush()
+        if flushed then return end
+        flushed, FullScan.flush = true, nil
+        sliced(#order, function(position) record(position, true) end, function() saveStats("late") end, ticket)
     end
 
     local function retry(round, stalled)
-        if mine ~= ticket then return end
+        if flushed or mine ~= ticket then return end
         local unresolved, before, asked = {}, #pending, {}
         sliced(#pending, function(index)
             local ad = pending[index]
@@ -136,22 +141,37 @@ local function process(count)
                 end
             end
         end, function()
+            if flushed then return end
             pending = unresolved
             stalled = #pending < before and 0 or stalled + 1
-            if #pending == 0 or round >= MAX_ROUNDS or stalled >= MAX_STALLED then recordAndFinish()
+            if #pending == 0 or round >= MAX_ROUNDS or stalled >= MAX_STALLED then flush()
             else addon.Compat.call("C_Timer.After", ROUND_DELAY, function() retry(round + 1, stalled) end) end
         end, mine)
     end
 
+    local function publish()
+        addon.AuctionHouse:resolveQueue(seen)
+        local items, keys = saveStats("main")
+        finish(true, string.format(addon.L.SCAN_DONE, items, keys))
+        if #pending == 0 then return end
+        -- El resto sigue en segundo plano: finish cambia el ticket y cerrar la subasta llama a flush.
+        mine = ticket
+        FullScan.flush = flush
+        addon.Compat.call("C_Timer.After", ROUND_DELAY, function() retry(1, 0) end)
+    end
+
     sliced(count, read, function()
-        if #pending == 0 then recordAndFinish()
-        else addon.Compat.call("C_Timer.After", 1, function() retry(1, 0) end) end
+        for _, ad in ipairs(pending) do held[ad.itemID], seen[ad.itemID] = true, true end
+        sliced(#order, record, publish, mine)
     end, mine)
 end
 
 local function onReplicate()
     if not FullScan.inProgress or FullScan.receiving then return end
     FullScan.receiving = true
+    if GoldPilotDB and GoldPilotDB.scan then
+        GoldPilotDB.scan.wait = now() - (tonumber(GoldPilotDB.scan.t) or now())
+    end
     local ok, count = addon.Compat.call("C_AuctionHouse.GetNumReplicateItems")
     count = ok and tonumber(count) or 0
     if count <= 0 then
@@ -200,6 +220,7 @@ addon.Modules:register("fullscan", {
         addon.Events:subscribe("fullscan", "AUCTION_HOUSE_CLOSED", function()
             FullScan.inProgress, FullScan.receiving = false, false
             ticket = ticket + 1
+            if FullScan.flush then FullScan.flush() end
         end)
     end,
 })

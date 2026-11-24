@@ -300,7 +300,7 @@ return {
         mock.fire("REPLICATE_ITEM_LIST_UPDATE")
         mock.fire("AUCTION_HOUSE_CLOSED")
         for _ = 1, 4 do mock.flushTimers() end
-        assert(addon.Prices.get(GoldPilotDB, "Horde", 25) == nil and GoldPilotDB.scan.items == nil)
+        assert(addon.Prices.get(GoldPilotDB, "Horde", 25) == nil and GoldPilotDB.scan.keys == 0)
     end,
     ["búsqueda de objeto registra cada variante de equipo"] = function(addon, mock)
         setup()
@@ -440,5 +440,31 @@ return {
         local items, bound = addon.Bags:scan()
         assert(items["100:222"] == 2 and bound["100:222"] == 2)
         assert(GoldPilotDB.links["100:222"] == "item:100::::::::::::1:222")
+    end,
+    ["el escaneo publica lo resuelto y completa las variantes pendientes al cerrar"] = function(addon, mock)
+        setup()
+        mock.items[25] = { class = 4 }
+        GoldPilotDB = { settings = { fullScan = true } }
+        local ads = { { id = 25, price = 100, bonus = 1 }, { id = 25, price = 60 }, { id = 35, price = 7 } }
+        C_AuctionHouse.ReplicateItems = function() end
+        C_AuctionHouse.GetNumReplicateItems = function() return #ads end
+        C_AuctionHouse.GetReplicateItemInfo = function(index)
+            local ad = ads[index + 1]
+            return "n", 1, 1, 1, true, 1, 0, 0, 0, ad.price, 0, false, "", "o", "o", 0, ad.id, true
+        end
+        C_AuctionHouse.GetReplicateItemLink = function(index)
+            local ad = ads[index + 1]
+            return ad.bonus and ("item:25::::::::::::1:" .. ad.bonus) or nil
+        end
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        mock.fire("REPLICATE_ITEM_LIST_UPDATE")
+        assert(not addon.FullScan.inProgress and not addon.AuctionHouse.scanning)
+        assert(addon.Prices.get(GoldPilotDB, "Horde", 35).min == 7)
+        assert(addon.Prices.get(GoldPilotDB, "Horde", "25:1") == nil and addon.FullScan.flush)
+        mock.fire("AUCTION_HOUSE_CLOSED")
+        for _ = 1, 4 do mock.flushTimers() end
+        assert(addon.Prices.get(GoldPilotDB, "Horde", "25:1").min == 100)
+        assert(not addon.FullScan.flush and GoldPilotDB.scan.noLink == 1 and GoldPilotDB.scan.late)
     end,
 }

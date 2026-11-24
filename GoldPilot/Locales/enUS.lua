@@ -21,7 +21,7 @@ addon.LocaleRegister("enUS", {
     TOOLTIP_TREND_DOWN = "median -%d%% since %d d ago",
     TOOLTIP_TREND_FLAT = "median steady since %d d ago",
     SCAN_START = "Full auction house scan in progress; it may take a moment.",
-    SCAN_DONE = "Full scan: %d items with listings updated.",
+    SCAN_DONE = "Full scan: %d items (%d prices including variants).",
     SCAN_EMPTY = "The full scan returned no data; falling back to per-item queries.",
     SCAN_TIMEOUT = "The full scan did not respond; falling back to per-item queries.",
     SCAN_COOLDOWN = "The server limits full scans; wait about %d min.",

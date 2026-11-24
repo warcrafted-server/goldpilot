@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.8.1] - 2026-11-24
+
+### Corregido
+- Parche: el escaneo publica sus precios al terminar la lectura y resuelve después, en segundo plano, los enlaces de equipo pendientes (tardaba unos 100 s).
+- Las pestañas de la ventana no se veían y no se podía llegar a Ajustes.
+- Las métricas del inventario se salían de la ventana; la ficha y las métricas reutilizan sus textos en lugar de crear otros en cada refresco.
+
 ## [0.8.0] - 2026-11-24
 
 ### Cambiado

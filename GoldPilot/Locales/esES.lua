@@ -21,7 +21,7 @@ addon.LocaleRegister("esES", {
     TOOLTIP_TREND_DOWN = "mediana -%d %% desde hace %d d",
     TOOLTIP_TREND_FLAT = "mediana estable desde hace %d d",
     SCAN_START = "Escaneo completo de la subasta en curso; puede tardar un poco.",
-    SCAN_DONE = "Escaneo completo: %d objetos con ofertas actualizados.",
+    SCAN_DONE = "Escaneo completo: %d objetos (%d precios con sus variantes).",
     SCAN_EMPTY = "El escaneo completo no devolvió datos; se consulta objeto a objeto.",
     SCAN_TIMEOUT = "El escaneo completo no respondió; se consulta objeto a objeto.",
     SCAN_COOLDOWN = "El servidor limita el escaneo completo; espera unos %d min.",

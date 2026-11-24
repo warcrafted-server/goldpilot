@@ -70,6 +70,27 @@ function Widgets.window(name, title, width, height)
     return root
 end
 
+-- Un botón sin plantilla no tiene texto visible: se le da fuente, fondo y línea de selección.
+function Widgets.tabButton(parent, name, label, index)
+    local button = frame("Button", nil, parent)
+    button:SetSize(140, 28)
+    button:SetPoint("LEFT", parent, "LEFT", (index - 1) * 146, 0)
+    button.name, button.label = name, label
+    local fill = button:CreateTexture(nil, "BACKGROUND")
+    fill:SetAllPoints()
+    fill:SetColorTexture(0.2, 0.15, 0.09, 0.9)
+    button.fill = fill
+    local line = button:CreateTexture(nil, "ARTWORK")
+    line:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
+    line:SetSize(140, 2)
+    line:SetColorTexture(1, 0.82, 0.2, 1)
+    line:Hide()
+    button.line = line
+    if button.SetNormalFontObject then button:SetNormalFontObject("GameFontNormal") end
+    button:SetText(label)
+    return button
+end
+
 function Widgets.tabs(parent, definitions, onChange)
     local bar = frame("Frame", nil, parent)
     bar:SetSize(720, 34)
@@ -79,17 +100,16 @@ function Widgets.tabs(parent, definitions, onChange)
         if inCombat() then return false end
         self.selected = name
         for _, item in ipairs(self.buttons) do
-            if item.name == name then item:SetText("|cffffd100" .. item.label .. "|r")
+            local active = item.name == name
+            if item.fill then item.fill:SetColorTexture(active and 0.32 or 0.2, active and 0.24 or 0.15, active and 0.13 or 0.09, 1) end
+            if item.line then if active then item.line:Show() else item.line:Hide() end end
+            if active then item:SetText("|cffffd100" .. item.label .. "|r")
             else item:SetText("|cffd8c7a3" .. item.label .. "|r") end
         end
         if onChange then onChange(name) end
     end
     for i, item in ipairs(definitions) do
-        local button = frame("Button", nil, bar)
-        button:SetSize(140, 28)
-        button:SetPoint("LEFT", bar, "LEFT", (i - 1) * 146, 0)
-        button.name, button.label = item.name, item.label
-        button:SetText(item.label)
+        local button = Widgets.tabButton(bar, item.name, item.label, i)
         button:SetScript("OnClick", function() bar:select(item.name) end)
         bar.buttons[#bar.buttons + 1] = button
     end
@@ -184,18 +204,25 @@ function Widgets.detail(parent)
     panel.lines = {}
     function panel:setLines(lines)
         if inCombat() then return false end
-        for _, line in ipairs(self.lines) do line:Hide() end
+        lines = lines or {}
+        self.labels = self.labels or {}
+        for _, label in ipairs(self.labels) do label:Hide() end
         self.lines = {}
-        local previous
-        for _, value in ipairs(lines or {}) do
-            local label = text(self, type(value) == "table" and value.text or value, 12,
-                type(value) == "table" and value.color or nil)
-            if label.SetWidth then label:SetWidth((self.contentWidth or 300)) end
-            if label.SetJustifyH then label:SetJustifyH("LEFT") end
-            if previous then label:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, -6)
-            else label:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12) end
-            previous = label
-            self.lines[#self.lines + 1] = label
+        for i, value in ipairs(lines) do
+            local styled = type(value) == "table"
+            local label = self.labels[i]
+            if not label then
+                label = text(self, "", 12)
+                if label.SetWidth then label:SetWidth(self.contentWidth or 300) end
+                if label.SetJustifyH then label:SetJustifyH("LEFT") end
+                if i > 1 then label:SetPoint("TOPLEFT", self.labels[i - 1], "BOTTOMLEFT", 0, -6)
+                else label:SetPoint("TOPLEFT", self, "TOPLEFT", 12, -12) end
+                self.labels[i] = label
+            end
+            label:SetText(styled and value.text or value)
+            if label.SetTextColor then label:SetTextColor(unpack(styled and value.color or { 0.92, 0.86, 0.72 })) end
+            label:Show()
+            self.lines[i] = label
         end
     end
     return panel
@@ -209,20 +236,22 @@ function Widgets.metrics(parent, values)
     strip.items = {}
     function strip:setItems(items)
         if inCombat() then return false end
-        for _, item in ipairs(self.items) do item:Hide() end
-        self.items = {}
-        for i, item in ipairs(items or {}) do
-            local label = text(self, (item.label or "") .. "  " .. (item.value or ""), 11, item.color)
-            label:SetPoint("LEFT", self, "LEFT", (i - 1) * 220, 0)
-            self.items[#self.items + 1] = label
+        items = items or {}
+        local step = (self.contentWidth or 728) / math.max(1, #items)
+        for i, item in ipairs(items) do
+            local label = self.items[i]
+            if not label then
+                label = text(self, "", 11)
+                self.items[i] = label
+            end
+            label:SetText("|cffa89878" .. (item.label or "") .. "|r  " .. (item.value or ""))
+            label:SetPoint("LEFT", self, "LEFT", (i - 1) * step, 0)
+            label:Show()
         end
+        for i = #items + 1, #self.items do self.items[i]:Hide() end
         return true
     end
-    for i, item in ipairs(values or {}) do
-        local label = text(strip, (item.label or "") .. "  " .. (item.value or ""), 11, item.color)
-        label:SetPoint("LEFT", strip, "LEFT", (i - 1) * 220, 0)
-        strip.items[#strip.items + 1] = label
-    end
+    strip:setItems(values)
     return strip
 end
 

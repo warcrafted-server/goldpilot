@@ -61,11 +61,7 @@ local function buildWindow()
         page:Hide()
         pages[name] = page
         Main.tabs[name] = builder
-        local button = CreateFrame("Button", nil, Main.tabsBar)
-        button:SetSize(140, 28)
-        button:SetPoint("LEFT", Main.tabsBar, "LEFT", #Main.tabsBar.buttons * 146, 0)
-        button.name, button.label = name, label
-        button:SetText(label)
+        local button = addon.Widgets.tabButton(Main.tabsBar, name, label, #Main.tabsBar.buttons + 1)
         button:SetScript("OnClick", function() Main.tabsBar:select(name) end)
         Main.tabsBar.buttons[#Main.tabsBar.buttons + 1] = button
         Main.tabOrder[#Main.tabOrder + 1] = name
@@ -154,11 +150,7 @@ function Main:registerTab(name, builder)
         page:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 0, 0)
         page:Hide()
         self.pages[name] = page
-        local button = CreateFrame("Button", nil, self.tabsBar)
-        button:SetSize(140, 28)
-        button:SetPoint("LEFT", self.tabsBar, "LEFT", #self.tabsBar.buttons * 146, 0)
-        button.name, button.label = name, name
-        button:SetText(name)
+        local button = addon.Widgets.tabButton(self.tabsBar, name, name, #self.tabsBar.buttons + 1)
         button:SetScript("OnClick", function() self.tabsBar:select(name) end)
         self.tabsBar.buttons[#self.tabsBar.buttons + 1] = button
         self.tabOrder[#self.tabOrder + 1] = name
