@@ -275,6 +275,77 @@ function Widgets.detail(parent)
     return panel
 end
 
+function Widgets.cards(parent, onSelect, width)
+    width = width or 420
+    local panel = frame("Frame", nil, parent)
+    panel:SetSize(width, 6 * 66 - 6)
+    panel.items, panel.onSelect = {}, onSelect
+    local function makeCard(index)
+        local button = frame("Button", nil, panel)
+        button:SetSize(width, 60)
+        button.fill = button:CreateTexture(nil, "BACKGROUND")
+        button.fill:SetAllPoints()
+        button.icon = button:CreateTexture(nil, "ARTWORK")
+        button.icon:SetSize(32, 32)
+        button.icon:SetPoint("LEFT", button, "LEFT", 10, 0)
+        button.title = text(button, "", 13, { 0.92, 0.86, 0.72 })
+        button.reason = text(button, "", 11, { 0.64, 0.58, 0.49 })
+        button.amount = text(button, "", 13)
+        button.confidence = text(button, "", 10, { 0.64, 0.58, 0.49 })
+        button.band = button:CreateTexture(nil, "OVERLAY")
+        button.band:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
+        button.band:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
+        if button.band.SetWidth then button.band:SetWidth(3) end
+        panel.items[index] = button
+        button:SetScript("OnClick", function(self)
+            if inCombat() then return end
+            panel.selectedKey = self.data.key
+            panel:setCards(panel.data)
+            if panel.onSelect then panel.onSelect(self.data) end
+        end)
+        return button
+    end
+    function panel:setCards(list)
+        if inCombat() then return false end
+        self.data = list or {}
+        for i = 1, math.min(#self.data, 6) do
+            local data = self.data[i]
+            local button = self.items[i] or makeCard(i)
+            button:SetSize(width, 60)
+            if button.ClearAllPoints then button:ClearAllPoints() end
+            button:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -(i - 1) * 66)
+            button.data = data
+            button.fill:SetColorTexture(data.key == self.selectedKey and 0.2 or 0.04,
+                data.key == self.selectedKey and 0.15 or 0.03,
+                data.key == self.selectedKey and 0.08 or 0.02,
+                data.key == self.selectedKey and 0.9 or 0.75)
+            button.band:SetColorTexture(unpack(data.accent or { 0.6, 0.6, 0.6 }))
+            button.icon:SetTexture(data.icon or "")
+            button.title:SetText(data.title or "")
+            button.reason:SetText(data.reason or "")
+            button.amount:SetText(data.right or "")
+            if button.amount.SetTextColor then button.amount:SetTextColor(unpack(data.rightColor or { 1, 1, 1 })) end
+            button.confidence:SetText(data.confidence or "")
+            local textWidth = math.max(40, width - 52 - 120)
+            for _, label in ipairs({ button.title, button.reason }) do
+                if label.ClearAllPoints then label:ClearAllPoints() end
+                label:SetPoint("TOPLEFT", button, "TOPLEFT", 52, label == button.title and -10 or -34)
+                if label.SetWidth then label:SetWidth(textWidth) end
+                if label.SetJustifyH then label:SetJustifyH("LEFT") end
+            end
+            if button.amount.ClearAllPoints then button.amount:ClearAllPoints() end
+            button.amount:SetPoint("TOPRIGHT", button, "TOPRIGHT", -10, -10)
+            if button.confidence.ClearAllPoints then button.confidence:ClearAllPoints() end
+            button.confidence:SetPoint("TOPRIGHT", button, "TOPRIGHT", -10, -34)
+            if button.reason.SetWordWrap then button.reason:SetWordWrap(false) end
+            button:Show()
+        end
+        for i = math.min(#self.data, 6) + 1, #self.items do self.items[i]:Hide() end
+        return true
+    end
+    return panel
+end
+
 -- Tarjetas de métricas: valor grande y etiqueta debajo.
 function Widgets.metrics(parent, values)
     local strip = frame("Frame", nil, parent)

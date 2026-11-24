@@ -65,6 +65,7 @@ local function buildWindow()
         Main.tabOrder[#Main.tabOrder + 1] = name
     end
 
+    addPage("now", addon.L.TAB_NOW or "now", Main.tabs.now or function() end)
     addPage("inventory", addon.L.TAB_INVENTORY, Main.tabs.inventory or function(page)
         local label = page.placeholder
         if not label then
@@ -120,7 +121,7 @@ local function buildWindow()
         end
     end)
     for _, tab in ipairs(Main.registeredTabs) do
-        if tab.name ~= "inventory" then addPage(tab.name, tab.name, tab.builder) end
+        if tab.name ~= "inventory" and tab.name ~= "now" then addPage(tab.name, tab.label or tab.name, tab.builder) end
     end
 
     Main.widgets = {
@@ -131,24 +132,30 @@ local function buildWindow()
     Main.widgets.list:Hide()
     Main.widgets.detail:Hide()
     Main.widgets.metrics:Hide()
-    Main.tabsBar:select("inventory")
+    Main.tabsBar:select("now")
     frame:Hide()
     return frame
 end
 
-function Main:registerTab(name, builder)
+function Main:registerTab(name, builder, label)
     if type(name) ~= "string" or type(builder) ~= "function" then return false end
     self.tabs[name] = builder
     local found = false
-    for _, tab in ipairs(self.registeredTabs) do if tab.name == name then tab.builder = builder; found = true end end
-    if not found then self.registeredTabs[#self.registeredTabs + 1] = { name = name, builder = builder } end
+    for _, tab in ipairs(self.registeredTabs) do
+        if tab.name == name then
+            tab.builder = builder
+            if label ~= nil then tab.label = label end
+            found = true
+        end
+    end
+    if not found then self.registeredTabs[#self.registeredTabs + 1] = { name = name, builder = builder, label = label } end
     if self.frame and not self.pages[name] then
         local page = CreateFrame("Frame", nil, self.frame)
         page:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -24)
         page:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 0, 0)
         page:Hide()
         self.pages[name] = page
-        self.tabsBar:add(name, name)
+        self.tabsBar:add(name, label or name)
         self.tabOrder[#self.tabOrder + 1] = name
     end
     return true
@@ -158,7 +165,7 @@ function Main:show()
     if inCombat() then addon.Log:info(addon.L.COMBAT_BLOCKED); return false end
     local frame = buildWindow()
     frame:Show()
-    if self.tabsBar then self.tabsBar:select(self.activeTab or "inventory") end
+    if self.tabsBar then self.tabsBar:select(self.activeTab or "now") end
     return true
 end
 

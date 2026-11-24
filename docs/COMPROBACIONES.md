@@ -74,3 +74,12 @@
 - [ ] Los objetos salen del juego; wowdata genera solo semillas de nodos.
 - [ ] Un objeto nunca visto con precio de subasta aparece en tooltip e inventario.
 - [ ] Los objetos ligados al recoger y de misión no se encolan; objetos sin datos sí.
+
+## 0.9.0
+
+- [ ] `/gp` abre la pestaña Ahora con métricas, tarjetas y ficha.
+- [ ] Sin precios, Ahora invita a abrir la casa de subastas; con datos pero sin consejos muestra el estado vacío.
+- [ ] Seleccionar consejos conserva la selección al refrescar y selecciona la primera tarjeta si desaparece.
+- [ ] Ver en Inventario abre Inventario desde consejos de subasta, vendedor y otros sitios.
+- [ ] Las tarjetas de correo, tendencias y actualización muestran sus detalles.
+- [ ] La ventana no se redibuja durante el combate.

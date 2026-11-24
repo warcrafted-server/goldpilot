@@ -3,6 +3,7 @@ return {
         mock.items = { [10] = { sell = 100, stack = 1, class = 0, bind = 0 }, [11] = { sell = 50, stack = 1, class = 0, bind = 0 } }
         GoldPilotDB = { chars = { Player = { bags = { [10] = 2 } }, Other = { bank = { [11] = 3 } } } }
         addon.Main:show()
+        addon.Main.tabsBar:select("inventory")
         local ui = addon.InventoryUI
         local page = addon.Main.pages.inventory
         assert(page and ui.widgets.list.data[1].itemID == 10)
@@ -27,6 +28,7 @@ return {
         mock.items = { [10] = { sell = 100, stack = 1, class = 0, bind = 0 } }
         GoldPilotDB = { chars = {} }
         addon.Main:show()
+        addon.Main.tabsBar:select("inventory")
         local ui = addon.InventoryUI
         assert(addon.Main.pages.inventory.emptyText.value == addon.L.INVENTORY_EMPTY_PRICES)
         local original = ui.account
@@ -41,6 +43,7 @@ return {
             ["100:222"] = "item:100::::::::::::1:222",
         } }
         addon.Main:show()
+        addon.Main.tabsBar:select("inventory")
         local ui = addon.InventoryUI
         assert(ui.widgets.list.data[1].key == "100:222")
         ui.widgets.list.rows[1].scripts.OnClick(ui.widgets.list.rows[1])

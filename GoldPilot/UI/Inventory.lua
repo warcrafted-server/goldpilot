@@ -44,6 +44,8 @@ local function itemIcon(itemID, key)
     return ok and icon or nil
 end
 
+InventoryUI.itemName, InventoryUI.itemIcon = itemName, itemIcon
+
 local function matches(name, filter)
     return filter == "" or string.find(string.lower(name), string.lower(filter), 1, true) ~= nil
 end
