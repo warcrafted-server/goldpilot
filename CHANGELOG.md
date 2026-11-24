@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.2.3] - 2026-11-24
+
+### Añadido
+- Identificador del proyecto de CurseForge (`X-Curse-Project-ID`) en el TOC
+
 ## [0.2.2] - 2026-11-24
 
 ### Cambiado

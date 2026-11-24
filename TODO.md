@@ -13,7 +13,6 @@
 ## Alta: 0.1.0
 
 - [ ] Comprobar la versión 0.1.0 en juego (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
-- [ ] Crear el proyecto de CurseForge y añadir `X-Curse-Project-ID` al TOC cuando exista.
 
 ## Media
 
