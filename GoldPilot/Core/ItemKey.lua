@@ -53,19 +53,11 @@ function ItemKey.isGear(itemID)
     itemID = tonumber(itemID)
     if not itemID or itemID < 1 or itemID ~= math.floor(itemID) then return false end
     if gearCache[itemID] ~= nil then return gearCache[itemID] end
-    local classID
-    local data = addon.DataItems and addon.DataItems[itemID]
-    if type(data) == "string" then
-        local _, _, _, class = string.match(data, "^([^;]*);([^;]*);([^;]*);([^;]*)")
-        classID = tonumber(class)
-    end
+    local ok, _, _, _, _, _, classID = addon.Compat.call("C_Item.GetItemInfoInstant", itemID)
+    classID = ok and tonumber(classID) or nil
     if not classID then
-        local ok, _, _, _, _, _, value = addon.Compat.call("C_Item.GetItemInfoInstant", itemID)
-        if ok then classID = tonumber(value) end
-    end
-    if not classID then
-        local ok, _, _, _, _, _, value = addon.Compat.call("GetItemInfoInstant", itemID)
-        if ok then classID = tonumber(value) end
+        ok, _, _, _, _, _, classID = addon.Compat.call("GetItemInfoInstant", itemID)
+        classID = ok and tonumber(classID) or nil
     end
     if not classID then return false end
     gearCache[itemID] = classID == 2 or classID == 4

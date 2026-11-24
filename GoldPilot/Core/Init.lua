@@ -41,8 +41,8 @@ local function command(input)
         local itemID = tonumber(string.match(argument, "item:(%d+)")) or tonumber(argument)
         if not itemID then
             addon.Log:info(addon.L.WATCH_USAGE)
-        elseif not (addon.DataItems and addon.DataItems[itemID]) then
-            addon.Log:info(string.format(addon.L.WATCH_UNKNOWN, argument))
+        elseif itemID <= 0 or itemID ~= math.floor(itemID) then
+            addon.Log:info(addon.L.WATCH_USAGE)
         else
             GoldPilotDB = GoldPilotDB or {}
             GoldPilotDB.watch = GoldPilotDB.watch or {}

@@ -1,27 +1,16 @@
 #!/usr/bin/env python3
-"""Genera datos compactos de objetos y nodos desde wowdata."""
+"""Genera semillas de nodos desde wowdata."""
 import argparse
 import datetime
 import os
 import sqlite3
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_DB = r"C:\Users\msanc\Documents\Projectes\wowdata\datos\wow.sqlite"
-MAX_ITEMS_BYTES = 1024 * 1024
+DEFAULT_DB = r"C:\Users\msanc\Documents\Projectes\Wow\wowdata\datos\wow.sqlite"
 
 
 def abrir_db(path):
     return sqlite3.connect("file:" + os.path.abspath(path).replace("\\", "/") + "?mode=ro", uri=True)
-
-
-def cargar_items(db, limitar=False):
-    sql = """SELECT s.ID, COALESCE(s.SellPrice, 0), COALESCE(s.Stackable, 1),
-                    s.Bonding, COALESCE(i.ClassID, 0), COALESCE(i.SubclassID, 0)
-               FROM ItemSparse s JOIN Item i ON i.ID = s.ID
-              WHERE s.Bonding IN (0, 2, 3) AND i.ClassID != 12"""
-    if limitar:
-        sql += " AND i.ClassID IN (0, 5, 7, 9)"
-    return sorted(db.execute(sql).fetchall())
 
 
 def cargar_nodos(db):
@@ -29,15 +18,6 @@ def cargar_nodos(db):
                    "obs" if origen == "juego" else "seed")
                   for tipo, objeto_id, item_id, zona_id, puntos, origen in db.execute(
                       "SELECT tipo, objeto_id, item_id, zona_id, puntos, origen FROM v_nodo_zona"))
-
-
-def render_items(rows, fecha, limitado=False):
-    nota = "; limitado a ClassID 0, 5, 7 y 9 por tamaño" if limitado else ""
-    lines = ["-- Generado: " + fecha + " | Origen: wowdata | Objetos: " + str(len(rows)) + nota,
-             "local _, GP = ...", "GP.DataItems = {"]
-    lines.extend("    [%d] = \"%d;%d;%d;%d;%d\"," % tuple(row) for row in rows)
-    lines.append("}")
-    return "\n".join(lines) + "\n"
 
 
 def render_nodos(rows, fecha):
@@ -57,24 +37,14 @@ def generar(db_path, addon_dir, fecha):
 
 
 def generar_desde_conexion(db, addon_dir, fecha):
-    items = cargar_items(db)
-    content = render_items(items, fecha)
-    limitado = len(content.encode("utf-8")) > MAX_ITEMS_BYTES
-    if limitado:
-        items = cargar_items(db, limitar=True)
-        content = render_items(items, fecha, limitado=True)
     nodos = cargar_nodos(db)
     generated = os.path.join(addon_dir, "Data", "Generated")
     os.makedirs(generated, exist_ok=True)
-    items_path = os.path.join(generated, "Items.lua")
     nodes_path = os.path.join(generated, "NodeSeeds.lua")
-    with open(items_path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(content)
     with open(nodes_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(render_nodos(nodos, fecha))
-    print("Objetos: %d | Nodos: %d | Items.lua: %d bytes | NodeSeeds.lua: %d bytes" %
-          (len(items), len(nodos), os.path.getsize(items_path), os.path.getsize(nodes_path)))
-    return items, nodos
+    print("Nodos: %d | NodeSeeds.lua: %d bytes" % (len(nodos), os.path.getsize(nodes_path)))
+    return nodos
 
 
 def main(argv=None):

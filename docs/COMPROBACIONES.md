@@ -63,6 +63,14 @@
 
 ## 0.7.0
 
-- [ ] Los precios de vendedor se obtienen del cliente incluso para objetos ausentes de DataItems.
+- [ ] Los precios de vendedor se obtienen del cliente incluso para objetos nunca vistos.
 - [ ] Las variantes de equipo aparecen por separado en bolsas y banco.
 - [ ] Los objetos ligados muestran su precio de vendedor y nunca recomiendan subasta.
+
+
+## 0.8.0
+
+- [ ] La versión 0.8.0 coincide en VERSION, TOC y README.
+- [ ] Los objetos salen del juego; wowdata genera solo semillas de nodos.
+- [ ] Un objeto nunca visto con precio de subasta aparece en tooltip e inventario.
+- [ ] Los objetos ligados al recoger y de misión no se encolan; objetos sin datos sí.

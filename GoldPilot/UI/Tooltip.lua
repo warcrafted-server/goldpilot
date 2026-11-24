@@ -60,13 +60,11 @@ function Tooltip:add(tooltip, data)
     if not nowOk or not tonumber(now) then return end
     local houseKey = addon.AuctionHouse.houseKey()
     local db = GoldPilotDB or {}
-    local known = addon.DataItems and addon.DataItems[itemID]
     local observation = addon.Prices.get(db, houseKey, key)
     local bound = isBound(data)
     if not bound and addon.AuctionHouse:isOpen() and (not observation or tonumber(now) - (tonumber(observation.t) or 0) >= 600) then
         addon.AuctionHouse:enqueue(itemID, true)
     end
-    if not known and not observation and not addon.Valuation.known(key) then return end
     local value = addon.Valuation.value(db, houseKey, key, now)
     local vendor = value.vendor and value.vendor.price
     if not observation and not vendor then return end

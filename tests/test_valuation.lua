@@ -24,17 +24,16 @@ return {
         value, why = addon.Valuation.choose({ { class = "OBS", src = "OBS", price = -1, t = 2 } }, 2000)
         assert(value == nil and why.reason == "none")
     end,
-    ["valuation lee precio de vendedor y pila generados"] = function(addon)
-        addon.DataItems = { [1] = "25;10;0;2;3", [2] = "0;1;0;2;3" }
+    ["valuation lee precio de vendedor del juego"] = function(addon, mock)
+        mock.items = { [1] = { sell = 25, stack = 10, class = 2, bind = 3 }, [2] = { sell = nil, stack = 1, class = 2, bind = 3 } }
         local vendor = addon.Valuation.vendor(1)
         assert(vendor.price == 25 and vendor.class == "GAME")
-        assert(addon.Valuation.stack(1) == 10 and addon.Valuation.vendor(2) == nil)
-        assert(addon.Valuation.stack(99) == nil)
+        assert(addon.Valuation.vendor(2) == nil)
         local result = addon.Valuation.value({}, "h", 1, 100)
         assert(result.vendor and result.vendor.price == 25)
     end,
-    ["valuation ignora fuentes externas que fallan"] = function(addon)
-        addon.DataItems[55] = "0;1;0;0;0"
+    ["valuation ignora fuentes externas que fallan"] = function(addon, mock)
+        mock.items[55] = { class = 0, bind = 0 }
         addon.Valuation.registerSource("broken", function() error("fallo") end)
         addon.Valuation.registerSource("working", function(key) assert(string.match(key, "^55")); return 42, 100 end)
         local value = addon.Valuation.reference({}, "h", "55", 120)
@@ -43,16 +42,16 @@ return {
         assert(result.ref and result.ref.price == 42)
         assert(result.vendor == nil and result.why == nil)
     end,
-    ["vendor prioriza proveedor y distingue cero de dato desconocido"] = function(addon)
-        addon.DataItems = { [77] = "12;1;0;0;0" }
+    ["vendor usa solo el proveedor y descarta precios cero"] = function(addon, mock)
+        mock.items = { [77] = { sell = 12, stack = 1, class = 0, bind = 0 } }
         addon.Valuation.registerVendor(function(key) assert(key == "77:9"); return 8 end)
         assert(addon.Valuation.vendor("77:9").price == 8)
         addon.Valuation.registerVendor(function() return 0 end)
-        assert(addon.Valuation.vendor(77).price == 12 and addon.Valuation.known("77:9"))
-        addon.DataItems = {}
-        assert(addon.Valuation.vendor(78) == nil and addon.Valuation.known(78))
+        assert(addon.Valuation.vendor(77) == nil)
+        mock.items = {}
+        assert(addon.Valuation.vendor(78) == nil)
         addon.Valuation.registerVendor(function() return nil end)
-        assert(not addon.Valuation.known(78))
+        assert(addon.Valuation.vendor(78) == nil)
     end,
     ["item data cachea precio cero y GET_ITEM_INFO_RECEIVED lo refresca"] = function(addon, mock)
         local price, requests = 0, 0
@@ -63,11 +62,23 @@ return {
             RequestLoadItemDataByID = function() requests = requests + 1 end,
         }
         addon.Modules:enableAll()
-        assert(addon.Valuation.vendor(79) == nil and addon.Valuation.known(79))
+        assert(addon.Valuation.vendor(79) == nil)
         assert(addon.ItemData.cache[79] == 0 and requests == 0)
         price = 25
         assert(addon.Valuation.vendor(79) == nil)
         mock.fire("GET_ITEM_INFO_RECEIVED", 79, true)
         assert(addon.Valuation.vendor(79).price == 25)
+    end,
+    ["auctionable filtra vinculacion y refresca la cache al recibir datos"] = function(addon, mock)
+        mock.items = { [81] = { bind = 1 }, [82] = { bind = 4 }, [83] = { bind = 2 } }
+        assert(addon.ItemData.auctionable(81) == false)
+        assert(addon.ItemData.auctionable(82) == false)
+        assert(addon.ItemData.auctionable(83) == true)
+        assert(addon.ItemData.auctionable(84) == nil)
+        mock.items[81] = { bind = 0 }
+        assert(addon.ItemData.auctionable(81) == false)
+        addon.Modules:enableAll()
+        mock.fire("GET_ITEM_INFO_RECEIVED", 81, true)
+        assert(addon.ItemData.auctionable(81) == true)
     end,
 }

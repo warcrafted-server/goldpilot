@@ -27,7 +27,9 @@ function AuctionHouse:isOpen() return isOpen end
 
 local function validItem(itemID)
     itemID = addon.ItemKey.itemID(itemID)
-    return itemID and addon.Valuation.known(itemID) and itemID or nil
+    if not itemID then return nil end
+    if addon.ItemData.auctionable(itemID) == false then return nil end
+    return itemID
 end
 
 local function contains(itemID)
@@ -52,7 +54,8 @@ function AuctionHouse:enqueue(itemID, front)
     local valid = validItem(itemID)
     if not valid then
         local last = GoldPilotDB and GoldPilotDB.ahLast
-        if front and last and itemID and not last.result[itemID] and sessionItemCount(last) < MAX_QUEUE then last.result[itemID] = "nodata" end
+        if front and last and itemID and addon.ItemData.auctionable(itemID) == false
+            and not last.result[itemID] and sessionItemCount(last) < MAX_QUEUE then last.result[itemID] = "nodata" end
         return false
     end
     itemID = valid

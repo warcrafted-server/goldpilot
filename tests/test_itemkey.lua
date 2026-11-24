@@ -12,13 +12,19 @@ return {
         assert(addon.ItemKey.itemID("15520:12726") == 15520 and addon.ItemKey.itemID(10057) == 10057)
         assert(addon.ItemKey.itemID("id:15520") == nil)
     end,
-    ["isGear distingue arma y armadura y no cachea datos desconocidos"] = function(addon)
-        addon.DataItems[990001] = "1;1;0;2;7"
-        addon.DataItems[990002] = "1;1;0;4;1"
-        addon.DataItems[990003] = "1;1;0;7;0"
+    ["isGear distingue arma y armadura y no cachea datos desconocidos"] = function(addon, mock)
+        C_Item, GetItemInfoInstant = nil, nil
+        assert(not addon.ItemKey.isGear(990001))
+        mock.items[990001] = { class = 2 }
+        mock.items[990002] = { class = 4 }
+        mock.items[990003] = { class = 7 }
+        C_Item = { GetItemInfoInstant = function(itemID)
+            local item = mock.items[itemID]
+            return itemID, 4, 1, "INVTYPE_HEAD", 1, item and item.class or 7
+        end }
         assert(addon.ItemKey.isGear(990001) and addon.ItemKey.isGear(990002))
-        assert(not addon.ItemKey.isGear(990003) and not addon.ItemKey.isGear(990004))
-        C_Item = { GetItemInfoInstant = function() return 990004, 4, 1, "INVTYPE_HEAD", 1, 4, 1 end }
+        assert(not addon.ItemKey.isGear(990003))
+        C_Item = { GetItemInfoInstant = function() return 990004, 4, 1, "INVTYPE_HEAD", 1, 4 end }
         assert(addon.ItemKey.isGear(990004))
     end,
 }

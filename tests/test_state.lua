@@ -1,6 +1,4 @@
 local function setup()
-    C_Item = nil
-    GetItemInfoInstant = nil
     GetInventoryItemID = nil
     NUM_BAG_SLOTS = 2
     NUM_TOTAL_EQUIPPED_BAG_SLOTS = nil
@@ -39,14 +37,14 @@ local function setup()
     }
 end
 
-local function setNonGearFixtures(addon)
+local function setNonGearFixtures(addon, mock)
     for _, itemID in ipairs({ 25, 35, 36, 37, 38, 40, 41, 42 }) do
-        addon.DataItems[itemID] = "1;1;0;7;0"
+        mock.items[itemID] = { sell = 1, stack = 1, class = 7, bind = 0 }
     end
 end
 
 return {
-    ["bags scan suma pilas e ignora huecos"] = function(addon)
+    ["bags scan suma pilas e ignora huecos"] = function(addon, mock)
         setup()
         local bags = addon.Bags:scan()
         assert(bags[25] == 7 and bags[35] == 2 and bags[36] == 5 and bags[999998] == 4)
@@ -58,10 +56,12 @@ return {
         addon.Modules:enableAll()
         mock.fire("AUCTION_HOUSE_SHOW")
         assert(addon.AuctionHouse:status().current == 25)
-        assert(addon.AuctionHouse:status().pending == 2)
+        assert(addon.AuctionHouse:status().pending >= 2)
         mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 25)
         assert(addon.AuctionHouse:status().current == 35)
         mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 35)
+        assert(addon.AuctionHouse:status().current == 999999)
+        mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 999999)
         assert(addon.AuctionHouse:status().current == 36)
         mock.fire("AUCTION_HOUSE_CLOSED")
         local status = addon.AuctionHouse:status()
@@ -69,7 +69,7 @@ return {
     end,
     ["resultado de subasta registra OBS con p50 ponderado"] = function(addon, mock)
         setup()
-        setNonGearFixtures(addon)
+        setNonGearFixtures(addon, mock)
         GoldPilotDB = { watch = { [25] = true } }
         addon.Modules:enableAll()
         mock.fire("AUCTION_HOUSE_SHOW")
@@ -132,8 +132,11 @@ return {
         mock.fire("AUCTION_HOUSE_SHOW")
         local last = GoldPilotDB.ahLast
         assert(last.houseKey == "Horde" and last.queued[1] == 35)
-        addon.AuctionHouse:enqueue(999999, true)
-        assert(last.result[999999] == "nodata")
+        mock.items[999998] = { bind = 1 }
+        assert(not addon.AuctionHouse:enqueue(999998, true))
+        assert(last.result[999998] == "nodata")
+        assert(addon.AuctionHouse:enqueue(999999, true))
+        assert(last.result[999999] == nil)
         mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 35)
         assert(last.result[35] == "empty")
         assert(not addon.AuctionHouse:enqueue(35, true))
@@ -167,7 +170,7 @@ return {
         mock.fire("AUCTION_HOUSE_SHOW")
         assert(GoldPilotDB.ahLast.result[25] == "senderror")
     end,
-    ["subasta sin API se desactiva sin error"] = function(addon)
+    ["subasta sin API se desactiva sin error"] = function(addon, mock)
         C_AuctionHouse = nil
         addon.Modules:enableAll()
         local module
@@ -178,7 +181,7 @@ return {
     end,
     ["escaneo completo registra todos los objetos, vacía la cola y respeta el límite de 15 min"] = function(addon, mock)
         setup()
-        setNonGearFixtures(addon)
+        setNonGearFixtures(addon, mock)
         GoldPilotDB = { watch = { [35] = true, [36] = true }, settings = { fullScan = true } }
         local ads = {
             { count = 3, buyout = 300, itemID = 25 }, { count = 7, buyout = 1400, itemID = 25 },
@@ -225,6 +228,7 @@ return {
     end,
     ["escaneo completo registra variantes y no asigna su precio a la clave numérica"] = function(addon, mock)
         setup()
+        mock.items[25] = { class = 2 }
         GoldPilotDB = { settings = { fullScan = true } }
         local ads = { { price = 100, bonus = 123 }, { price = 200, bonus = 456 } }
         C_AuctionHouse.ReplicateItems = function() end
@@ -247,6 +251,7 @@ return {
     end,
     ["escaneo reintenta enlaces ausentes y descarta los que nunca llegan"] = function(addon, mock)
         setup()
+        mock.items[25] = { class = 2 }
         GoldPilotDB = { settings = { fullScan = true } }
         C_AuctionHouse.ReplicateItems = function() end
         C_AuctionHouse.GetNumReplicateItems = function() return 1 end
@@ -282,6 +287,7 @@ return {
     end,
     ["cerrar la subasta cancela los reintentos de enlaces"] = function(addon, mock)
         setup()
+        mock.items[25] = { class = 2 }
         GoldPilotDB = { settings = { fullScan = true } }
         C_AuctionHouse.ReplicateItems = function() end
         C_AuctionHouse.GetNumReplicateItems = function() return 1 end
@@ -298,6 +304,7 @@ return {
     end,
     ["búsqueda de objeto registra cada variante de equipo"] = function(addon, mock)
         setup()
+        mock.items[25] = { class = 2 }
         GoldPilotDB = { watch = { [25] = true } }
         C_AuctionHouse.GetNumItemSearchResults = function() return 2 end
         C_AuctionHouse.GetItemSearchResultInfo = function(_, index)
@@ -330,7 +337,7 @@ return {
     end,
     ["una búsqueda ajena a la cola también actualiza el precio y saca el objeto de la cola"] = function(addon, mock)
         setup()
-        setNonGearFixtures(addon)
+        setNonGearFixtures(addon, mock)
         GoldPilotDB = { watch = { [35] = true, [25] = true } }
         addon.Modules:enableAll()
         mock.fire("AUCTION_HOUSE_SHOW")
@@ -394,7 +401,7 @@ return {
         NUM_TOTAL_EQUIPPED_BAG_SLOTS = 0
         C_Container.GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end
         C_Container.GetContainerItemInfo = function() return { itemID = 25, stackCount = 2, isBound = true } end
-        setNonGearFixtures(addon)
+        setNonGearFixtures(addon, mock)
         GoldPilotDB = { watch = { [25] = true } }
         addon.Modules:enableAll()
         mock.fire("AUCTION_HOUSE_SHOW")
@@ -408,8 +415,8 @@ return {
         C_Container.GetContainerItemInfo = function(_, slot)
             return { itemID = 40 + slot, stackCount = slot }
         end
-        setNonGearFixtures(addon)
-        for id = 41, 45 do addon.DataItems[id] = "1;1;0;7;0" end
+        setNonGearFixtures(addon, mock)
+        for id = 41, 45 do mock.items[id] = { sell = 1, class = 7 } end
         GoldPilotDB = { chars = { Tester = { bank = { [35] = 8 } } } }
         local originalScan, scans = addon.Bags.scan, 0
         addon.Bags.scan = function(self) scans = scans + 1; return originalScan(self) end
@@ -422,9 +429,9 @@ return {
         assert(queued[6] == 35 and #queued == 6)
         mock.fire("AUCTION_HOUSE_CLOSED")
     end,
-    ["bags scan conserva clave de variante, ligado y enlace del cliente"] = function(addon)
+    ["bags scan conserva clave de variante, ligado y enlace del cliente"] = function(addon, mock)
         setup()
-        addon.DataItems[100] = "1;1;0;4;0"
+        mock.items[100] = { sell = 1, stack = 1, class = 4, bind = 0 }
         C_Container.GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end
         C_Container.GetContainerItemInfo = function()
             return { itemID = 100, stackCount = 2, isBound = true, hyperlink = "|Hitem:100::::::::::::1:222|h[Test]|h" }

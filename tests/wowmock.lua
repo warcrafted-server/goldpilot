@@ -1,4 +1,4 @@
-local mock = { events = {}, output = {}, timers = {}, frames = {} }
+local mock = { events = {}, output = {}, timers = {}, frames = {}, items = {} }
 _G.GoldPilotMainFrame = nil
 UISpecialFrames = {}
 function CreateFrame(kind, name, parent, template)
@@ -63,6 +63,29 @@ UIParent = CreateFrame("Frame", "UIParent")
 UISpecialFrames = {}
 function print(...) mock.output[#mock.output + 1] = table.concat({ ... }, " ") end
 function GetLocale() return "enUS" end
+local function itemInfo(itemID)
+    itemID = tonumber(itemID)
+    local item = itemID and mock.items[itemID] or nil
+    if not item then return nil end
+    local name = item.name or ("Item " .. itemID)
+    return name, "item:" .. itemID, 1, 1, 1, "class", "subclass", item.stack or 1,
+        "", 123, item.sell, nil, nil, item.bind or 0
+end
+C_Item = {
+    GetItemInfoInstant = function(itemID)
+        itemID = tonumber(itemID)
+        local item = itemID and mock.items[itemID] or nil
+        return itemID, "class", "subclass", "", 123, item and item.class or 7
+    end,
+    GetItemInfo = itemInfo,
+    RequestLoadItemDataByID = function() end,
+}
+function GetItemInfo(itemID) return itemInfo(itemID) end
+function GetItemInfoInstant(itemID)
+    local item = mock.items[tonumber(itemID)]
+    itemID = tonumber(itemID)
+    return itemID, "class", "subclass", "", 123, item and item.class or 7
+end
 function InCombatLockdown() return mock.combat == true end
 function time() return 200000 end
 function UnitName() return "Player" end

@@ -15,7 +15,6 @@ addon.LocaleRegister("enUS", {
     DIAG_PROFS = "Diagnostic: profession window opened.",
     AH_PROGRESS = "Auction house: %d/%d items",
     WATCH_USAGE = "Usage: /gp watch <item link or ID>",
-    WATCH_UNKNOWN = "GoldPilot does not know item %s.",
     WATCH_ON = "Watching %s.",
     WATCH_OFF = "No longer watching %s.",
     TOOLTIP_TREND_UP = "median +%d%% since %d d ago",

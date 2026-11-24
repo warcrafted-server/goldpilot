@@ -1,6 +1,6 @@
 return {
-    ["inventory combina personajes, banco y limita reservas"] = function(addon)
-        addon.DataItems = { [1] = "100;1;0;0;0", [2] = "0;1;0;0;0" }
+    ["inventory combina personajes, banco y limita reservas"] = function(addon, mock)
+        mock.items = { [1] = { sell = 100, stack = 1, class = 0, bind = 0 }, [2] = { sell = nil, stack = 1, class = 0, bind = 0 } }
         local db = { chars = {
             Alice = { bags = { [1] = 4, [2] = 2 }, bank = { [1] = 3 } },
             Bob = { bags = { [1] = 5 }, bank = { [1] = 6 } },
@@ -15,8 +15,8 @@ return {
         local character = addon.Inventory.build(db, "h", "Alice", 2100)
         assert(#character.rows == 2 and character.rows[1].qty == 7)
     end,
-    ["inventory ordena valor, reserva vendible y etiqueta antiguedad y comision"] = function(addon)
-        addon.DataItems = { [1] = "100;1;0;0;0", [2] = "500;1;0;0;0", [3] = "0;1;0;0;0" }
+    ["inventory ordena valor, reserva vendible y etiqueta antiguedad y comision"] = function(addon, mock)
+        mock.items = { [1] = { sell = 100, stack = 1, class = 0, bind = 0 }, [2] = { sell = 500, stack = 1, class = 0, bind = 0 }, [3] = { sell = nil, stack = 1, class = 0, bind = 0 } }
         local db = { chars = { A = { bags = { [1] = 2, [2] = 1, [3] = 1 } } },
             reserved = { [1] = 1 }, prices = { h = {
                 [1] = { last = { t = 200000, p50 = 300, min = 250, qty = 8 } },
@@ -29,8 +29,8 @@ return {
         assert(built.rows[2].qtySellable == 1 and built.rows[2].cutAssumed)
         assert(built.rows[3].action == "none")
     end,
-    ["inventory separa variantes, reserva libres y valora ligados solo al vendedor"] = function(addon)
-        addon.DataItems = { [100] = "20;1;0;4;0" }
+    ["inventory separa variantes, reserva libres y valora ligados solo al vendedor"] = function(addon, mock)
+        mock.items = { [100] = { sell = 20, stack = 1, class = 4, bind = 0 } }
         local db = { chars = { A = {
             bags = { ["100:1"] = 3, ["100:2"] = 2 },
             bound = { ["100:1"] = 1, ["100:2"] = 2 },
@@ -46,11 +46,11 @@ return {
         assert(second.qtyBound == 2 and second.action == "vendor" and second.valueAuction == 0)
         assert(second.qtyReserved == 0 and second.valueBest == 40)
     end,
-    ["inventory acepta datos antiguos sin bound y objetos ausentes de DataItems con vendedor"] = function(addon)
-        addon.DataItems = {}
-        addon.Valuation.registerVendor(function(key) if addon.ItemKey.itemID(key) == 2973 then return 452 end end)
-        local built = addon.Inventory.build({ chars = { Player = { bags = { [2973] = 2 } } } }, "h", nil, 100)
+    ["inventory incluye objetos nunca vistos con precio de subasta"] = function(addon, mock)
+        mock.items = {}
+        local built = addon.Inventory.build({ chars = { Player = { bags = { [2973] = 2 } } },
+            prices = { h = { [2973] = { last = { t = 90, p50 = 500, min = 400, qty = 2 } } } } }, "h", nil, 100)
         assert(#built.rows == 1 and built.rows[1].qtyBound == 0)
-        assert(built.rows[1].vendorUnit == 452 and built.rows[1].valueVendor == 904)
+        assert(built.rows[1].ahUnit == 500 and built.rows[1].action == "auction")
     end,
 }

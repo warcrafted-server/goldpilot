@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.8.0] - 2026-11-24
+
+### Cambiado
+- Los objetos para valorar, seguir y consultar se obtienen del juego (subasta, bolsas, banco y equipo).
+
+### Eliminado
+- La lista de objetos generada desde wowdata; wowdata sigue generando las semillas de nodos.
+
 ## [0.7.0] - 2026-11-24
 
 ### Añadido

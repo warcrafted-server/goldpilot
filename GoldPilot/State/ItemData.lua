@@ -1,6 +1,6 @@
 local _, addon = ...
 
-local ItemData = { cache = {}, requested = {} }
+local ItemData = { cache = {}, requested = {}, auctionableCache = {} }
 addon.ItemData = ItemData
 
 local function pack(...)
@@ -28,12 +28,34 @@ local function vendorPrice(key)
     end
 end
 
+function ItemData.auctionable(itemID)
+    itemID = tonumber(itemID)
+    if not itemID or itemID < 1 or itemID ~= math.floor(itemID) then return nil end
+    if ItemData.auctionableCache[itemID] ~= nil then return ItemData.auctionableCache[itemID] end
+    local ok, name, _, _, _, _, _, _, _, _, _, _, _, _, bindType = addon.Compat.call("C_Item.GetItemInfo", itemID)
+    if not ok or name == nil then
+        ok, name, _, _, _, _, _, _, _, _, _, _, _, _, bindType = addon.Compat.call("GetItemInfo", itemID)
+    end
+    if not ok or name == nil then
+        if not ItemData.requested[itemID] then
+            ItemData.requested[itemID] = true
+            addon.Compat.call("C_Item.RequestLoadItemDataByID", itemID)
+        end
+        return nil
+    end
+    bindType = tonumber(bindType)
+    if not bindType then return nil end
+    ItemData.auctionableCache[itemID] = bindType ~= 1 and bindType ~= 4
+    return ItemData.auctionableCache[itemID]
+end
+
 function ItemData:received(itemID)
     itemID = tonumber(itemID)
     if not itemID then return end
     for key in pairs(self.cache) do
         if addon.ItemKey.itemID(key) == itemID then self.cache[key] = nil end
     end
+    self.auctionableCache[itemID] = nil
     self.requested[itemID] = nil
 end
 

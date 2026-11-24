@@ -19,8 +19,9 @@ local function tooltip()
 end
 
 return {
-    ["tooltip muestra cabecera, vendedor, ultimo visto, mediana y mejor opcion; Mayus añade detalle"] = function(addon)
+    ["tooltip muestra cabecera, vendedor, ultimo visto, mediana y mejor opcion; Mayus añade detalle"] = function(addon, mock)
         setup()
+        mock.items[25] = { sell = 7, class = 7 }
         GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
         addon.Modules:enableAll()
         local frame = tooltip()
@@ -35,7 +36,7 @@ return {
         addon.Tooltip:add(expanded, { id = 25 })
         assert(find(expanded.lines, "For sale: 12 units"))
     end,
-    ["tooltip respeta las lineas desactivadas en ajustes"] = function(addon)
+    ["tooltip respeta las lineas desactivadas en ajustes"] = function(addon, mock)
         setup()
         GoldPilotDB = { settings = { tooltipFields = { vendor = false, median = false, advice = false } },
             houses = { Horde = {} }, prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
@@ -48,8 +49,10 @@ return {
         addon.Tooltip:add(none, { id = 25 })
         assert(#none.lines == 0)
     end,
-    ["tooltip usa lineas dobles cuando existen"] = function(addon)
+    ["tooltip usa lineas dobles cuando existen"] = function(addon, mock)
         setup()
+        mock.items[25] = { sell = 7, class = 7 }
+        mock.items[25] = { sell = 7, class = 7 }
         GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = { [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 12, src = "OBS" } } } } }
         addon.Modules:enableAll()
         local frame = tooltip()
@@ -59,7 +62,7 @@ return {
         assert(#frame.doubles == 5 and frame.doubles[1][1] == "GoldPilot" and string.find(frame.doubles[1][2], "ago", 1, true))
         assert(frame.doubles[2][1] == "Vendor" and frame.doubles[3][1] == "Last seen")
     end,
-    ["tooltip muestra antiguedad en gris y ausencia de observacion"] = function(addon)
+    ["tooltip muestra antiguedad en gris y ausencia de observacion"] = function(addon, mock)
         setup()
         time = function() return 300000 end
         GoldPilotDB = { prices = { Horde = { [25] = { last = { t = 1, min = 5, p50 = 6, qty = 3, src = "OBS" } } } } }
@@ -69,7 +72,7 @@ return {
         GoldPilotDB = nil
         local none = tooltip()
         addon.Tooltip:add(none, { id = 25 })
-        assert(find(none.lines, "no observed price"))
+        assert(#none.lines == 0)
     end,
     ["tooltip no actua en combate"] = function(addon, mock)
         setup()
@@ -80,7 +83,7 @@ return {
     end,
     ["hover encola con prioridad solo durante subasta y sin observación reciente"] = function(addon, mock)
         setup()
-        for _, itemID in ipairs({ 25, 35, 36 }) do addon.DataItems[itemID] = "1;1;0;7;0" end
+        for _, itemID in ipairs({ 25, 35, 36 }) do mock.items[itemID] = { sell = 1, stack = 1, class = 7, bind = 0 } end
         C_AuctionHouse = {
             MakeItemKey = function(id) return { itemID = id } end,
             SendSearchQuery = function() end,
@@ -104,8 +107,9 @@ return {
         addon.Tooltip:add(tooltip(), { id = 36 })
         assert(addon.AuctionHouse:status().current == nil)
     end,
-    ["tooltip busca el precio de la variante indicada por data.hyperlink"] = function(addon)
+    ["tooltip busca el precio de la variante indicada por data.hyperlink"] = function(addon, mock)
         setup()
+        mock.items[25] = { class = 2 }
         GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = {
             ["25:111"] = { last = { t = 99900, min = 80, p50 = 100, qty = 1, src = "OBS" } },
         } } }
@@ -120,7 +124,7 @@ return {
     ["tooltip ligado solo muestra vendedor y no aconseja ni encola subasta"] = function(addon, mock)
         setup()
         ITEM_SOULBOUND = "Soulbound"
-        addon.DataItems[25] = "7;1;0;0;0"
+        mock.items[25] = { sell = 7, stack = 1, class = 0, bind = 0 }
         GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = {
             [25] = { last = { t = 99900, min = 80, p50 = 100, qty = 1 } },
         } } }
@@ -129,16 +133,27 @@ return {
         addon.Tooltip:add(frame, { id = 25, lines = { { leftText = "Soulbound" } } })
         assert(#frame.lines == 4 and find(frame.lines, "Vendor:") and not find(frame.lines, "Auction") and not find(frame.lines, "Last seen"))
         assert(addon.AuctionHouse:status().pending == 0)
-        addon.DataItems[25] = "0;1;0;0;0"
+        mock.items[25] = { class = 0, bind = 0 }
+        mock.fire("GET_ITEM_INFO_RECEIVED", 25, true)
         local noVendor = tooltip()
         addon.Tooltip:add(noVendor, { id = 25, lines = { { leftText = "Soulbound" } } })
         assert(#noVendor.lines == 0)
-        addon.DataItems = {}
+        mock.items = {}
         GoldPilotDB = { houses = { Horde = {} } }
         local unknown = tooltip()
         addon.Tooltip:add(unknown, { id = 2973, lines = { { leftText = "Soulbound" } } })
         assert(#unknown.lines == 0)
         ITEM_SOULBOUND = nil
+    end,
+    ["tooltip muestra precio de subasta para objeto nunca visto"] = function(addon, mock)
+        setup()
+        mock.items = {}
+        GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = {
+            [2973] = { last = { t = 99900, min = 400, p50 = 500, qty = 2 } },
+        } } }
+        local frame = tooltip()
+        addon.Tooltip:add(frame, { id = 2973 })
+        assert(find(frame.lines, "Last seen: 4s") or find(frame.lines, "Last seen: 0g 4s"))
     end,
     ["comando bags imprime el resumen"] = function(addon, mock)
         setup()
@@ -155,7 +170,7 @@ return {
         assert(#mock.output == 1 and string.find(mock.output[1], "Bags:", 1, true))
         assert(string.find(mock.output[1], "3s 80c", 1, true))
     end,
-    ["tooltip con Mayus añade la tendencia diaria"] = function(addon)
+    ["tooltip con Mayus añade la tendencia diaria"] = function(addon, mock)
         setup()
         GoldPilotDB = { houses = { Horde = {} }, prices = { Horde = { [25] = {
             last = { t = 99900, min = 80, p50 = 112, qty = 12, src = "OBS" }, d = "0:70:100:10" } } } }

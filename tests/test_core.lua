@@ -19,7 +19,6 @@ return {
             houses = { ["Alliance-unknown"] = { lastSeen = 30 }, Alliance = { lastSeen = 20 } },
             chars = { ["Warren-unknown"] = { seen = 10 }, Warren = { seen = 20 } },
         }
-        addon.DataItems = {}
         assert(addon.Migrations:run(db) and db.schema == 3)
         assert(addon.Prices.get(db, "Alliance", 25).t == 20 and addon.Prices.get(db, "Alliance", 36).t == 40)
         assert(addon.Prices.get(db, "Horde", 25).t == 60 and addon.Prices.get(db, "Horde", 35).t == 55)
@@ -28,8 +27,8 @@ return {
         assert(db.prices["Alliance-unknown"] == nil and db.prices["Alliance-Forever"] == nil)
         assert(db.houses.Alliance.lastSeen == 30 and db.chars.Warren.seen == 20)
     end,
-    ["migración 3 descarta equipo, conserva desconocidos y datos ajenos"] = function(addon)
-        addon.DataItems = { [100] = "1;1;0;2;7", [101] = "1;1;0;4;0", [102] = "1;1;0;0;0" }
+    ["migración 3 descarta equipo, conserva desconocidos y datos ajenos"] = function(addon, mock)
+        mock.items = { [100] = { sell = 1, stack = 1, class = 2 }, [101] = { sell = 1, stack = 1, class = 4 }, [102] = { sell = 1, stack = 1, class = 0 } }
         local db = { schema = 2, prices = { empty = {}, h = {
             [100] = { last = { t = 1, min = 2, p50 = 3, qty = 4 }, d = "10:2:3:4", w = "1:2:3:4" },
             [101] = { last = { t = 1, min = 2, p50 = 3, qty = 4 } },
@@ -86,7 +85,7 @@ return {
         assert(GoldPilotDB.schema == 3 and GoldPilotCharDB and addon.loaded)
     end,
     ["gp watch alterna el seguimiento con enlace o número"] = function(addon, mock)
-        addon.DataItems = { [25] = "1;1;0;0;0" }
+        mock.items = { [25] = { sell = 1, stack = 1, class = 0, bind = 0 } }
         GoldPilotDB = {}
         SlashCmdList.GOLDPILOT("watch |cff0070dd|Hitem:25::::|h[Algo]|h|r")
         assert(GoldPilotDB.watch[25] == true)
@@ -94,6 +93,8 @@ return {
         assert(GoldPilotDB.watch[25] == nil)
         SlashCmdList.GOLDPILOT("watch 999")
         SlashCmdList.GOLDPILOT("watch")
+        assert(GoldPilotDB.watch[999] == true)
+        SlashCmdList.GOLDPILOT("watch 999")
         assert(GoldPilotDB.watch[999] == nil)
     end,
 }

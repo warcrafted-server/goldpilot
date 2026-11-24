@@ -48,28 +48,7 @@ function Valuation.vendor(key)
         price = ok and tonumber(price) or nil
         if price and price > 0 then return { price = price, class = "GAME" } end
     end
-    local itemID = addon.ItemKey.itemID(key)
-    local value = itemID and addon.DataItems and addon.DataItems[itemID]
-    if not value then return nil end
-    local price = tonumber(string.match(value, "^([^;]+)"))
-    if not price or price == 0 then return nil end
-    return { price = price, class = "GAME" }
-end
-
-function Valuation.known(key)
-    local itemID = addon.ItemKey.itemID(key)
-    if itemID and addon.DataItems and addon.DataItems[itemID] then return true end
-    if vendorProvider then
-        local ok, price = pcall(vendorProvider, key)
-        return ok and price ~= nil
-    end
-    return false
-end
-
-function Valuation.stack(itemID)
-    local value = addon.DataItems and addon.DataItems[itemID]
-    if not value then return nil end
-    return tonumber(string.match(value, "^[^;]*;([^;]+)"))
+    return nil
 end
 
 local sources = {}

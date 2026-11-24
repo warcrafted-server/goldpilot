@@ -83,3 +83,9 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Contexto:** el jugador puede no tener Auctionator ni TSM instalados.
 - **Decisión:** GoldPilot obtiene precios mediante sus propias consultas y observaciones de la subasta.
 - **Descartado:** leer precios de Auctionator o TSM.
+
+
+## D15. Objetos solo del juego — aceptada (2026-11-24)
+
+- **Contexto:** wowdata no incluía objetos reales de Forever (2973, 9747).
+- **Decisión:** se descarta la lista de objetos generada. Los objetos salen solo del juego: subasta, bolsas, banco y equipo. Las semillas de nodos de D11 continúan generándose desde wowdata.

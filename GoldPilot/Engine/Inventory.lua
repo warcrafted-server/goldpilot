@@ -20,7 +20,7 @@ function Inventory.build(db, houseKey, scope, now, opts)
                 for key, quantity in pairs(character[where] or {}) do
                     local itemID = addon.ItemKey.itemID(key)
                     quantity = tonumber(quantity) or 0
-                    if itemID and quantity > 0 and (addon.Valuation.known(key) or addon.Prices.get(db, houseKey, key)) then
+                    if itemID and quantity > 0 then
                         local row = grouped[key] or { key = key, itemID = itemID, qty = 0, qtyBound = 0, breakdown = {} }
                         grouped[key] = row
                         addBreakdown(row, charName, where, quantity, character[where == "bags" and "bound" or "bankBound"] and character[where == "bags" and "bound" or "bankBound"][key])

@@ -19,7 +19,7 @@ GoldPilot/                 Carpeta del addon (lo que se instala en Interface/Add
   GoldPilot.toc
   Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations
   Locales/                 Locale.lua, enUS.lua, esES.lua
-  Data/                    Tablas curadas y Data/Generated/ (desde wowdata)
+  Data/                    Semillas de nodos generadas desde wowdata
   Store/                   Almacén de precios, historial, libro de operaciones (lógica pura)
   State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, Location
   Engine/                  Valoración, asesor y proveedores de recomendaciones (lógica pura)

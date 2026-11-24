@@ -47,9 +47,7 @@ addon.Migrations.steps[3] = function(db)
         local converted = {}
         for itemKey, value in pairs(house) do
             local itemID = addon.ItemKey.itemID(itemKey)
-            local data = itemID and addon.DataItems and addon.DataItems[itemID]
-            local classID = data and tonumber(string.match(data, "^[^;]*;[^;]*;[^;]*;([^;]+)"))
-            if classID ~= 2 and classID ~= 4 then
+            if not (itemID and addon.ItemKey.isGear(itemID)) then
                 local last, daily, weekly
                 if type(value) == "table" then
                     last, daily, weekly = value.last, value.d or "", value.w or ""

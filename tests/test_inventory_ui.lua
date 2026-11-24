@@ -1,6 +1,6 @@
 return {
     ["inventory construye lista, filtra, cambia ambito y reserva y sigue"] = function(addon, mock)
-        addon.DataItems = { [10] = "100;1;0;0;0", [11] = "50;1;0;0;0" }
+        mock.items = { [10] = { sell = 100, stack = 1, class = 0, bind = 0 }, [11] = { sell = 50, stack = 1, class = 0, bind = 0 } }
         GoldPilotDB = { chars = { Player = { bags = { [10] = 2 } }, Other = { bank = { [11] = 3 } } } }
         addon.Main:show()
         local ui = addon.InventoryUI
@@ -8,7 +8,7 @@ return {
         assert(page and ui.widgets.list.data[1].itemID == 10)
         ui.scopeButton.scripts.OnClick(ui.scopeButton)
         assert(#ui.widgets.list.data == 2)
-        ui.filterBox:SetText("[10]")
+        ui.filterBox:SetText("10")
         ui.filterBox.scripts.OnTextChanged(ui.filterBox)
         assert(#ui.widgets.list.data == 1)
         ui.filterBox:SetText("")
@@ -24,7 +24,7 @@ return {
         assert(#ui.widgets.detail.lines > 0)
     end,
     ["inventory muestra estado vacio y no cambia datos en combate"] = function(addon, mock)
-        addon.DataItems = { [10] = "100;1;0;0;0" }
+        mock.items = { [10] = { sell = 100, stack = 1, class = 0, bind = 0 } }
         GoldPilotDB = { chars = {} }
         addon.Main:show()
         local ui = addon.InventoryUI
@@ -35,8 +35,8 @@ return {
         assert(ui.account == original)
         assert(not ui:refresh())
     end,
-    ["inventory reserva variante por clave y limpia selección al desaparecer"] = function(addon)
-        addon.DataItems = { [100] = "1;1;0;4;0" }
+    ["inventory reserva variante por clave y limpia selección al desaparecer"] = function(addon, mock)
+        mock.items = { [100] = { sell = 1, stack = 1, class = 4, bind = 0 } }
         GoldPilotDB = { chars = { Player = { bags = { ["100:222"] = 2 } } }, links = {
             ["100:222"] = "item:100::::::::::::1:222",
         } }
