@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.10.0] - 2026-11-24
+
+### Añadido
+- Interruptor de ámbito en Ahora, recordado por personaje.
+
+### Corregido
+- El título de la tarjeta del banco ya no se parte en dos líneas.
+
 ## [0.9.0] - 2026-11-24
 
 ### Añadido

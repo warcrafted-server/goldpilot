@@ -88,7 +88,7 @@ function Advice.build(ctx)
         local money, items = tonumber(mail.money), tonumber(mail.items)
         if (money or 0) > 0 or (items or 0) > 0 then
             local expires = tonumber(mail.expires)
-            if not expires or expires > now then
+            if (ctx.account ~= false or char == ctx.char) and (not expires or expires > now) then
                 totals.mail = totals.mail + (money or 0)
                 local card = { id = char == ctx.char and "mail" or "mail_other", kind = "action", gain = money or 0,
                     confidence = char == ctx.char and 0.95 or 0.8, class = "OBS", count = items or 0, items = {},
@@ -104,7 +104,7 @@ function Advice.build(ctx)
     local places = {}
     for char, data in pairs(db.chars or {}) do
         for _, where in ipairs({ "bags", "bank" }) do
-            if char ~= ctx.char or where == "bank" then
+            if (char == ctx.char and where == "bank") or (char ~= ctx.char and ctx.account ~= false) then
                 local built = inventory(normalized, char, where, opts)
                 local seen = where == "bank" and data.bankSeen or data.seen
                 local card = summarize(built.rows, "auction", where, char, seen, normalized, opts)

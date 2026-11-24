@@ -144,6 +144,10 @@ end
 
 function NowUI:refresh()
     if combat() or not visible() or not self.page or addon.Main.activeTab ~= "now" then return false end
+    GoldPilotCharDB = GoldPilotCharDB or {}
+    if GoldPilotCharDB.nowAccount == nil then GoldPilotCharDB.nowAccount = false end
+    self.scopeButton:SetText(GoldPilotCharDB.nowAccount and addon.L.INVENTORY_SCOPE_ACCOUNT
+        or addon.L.INVENTORY_SCOPE_CHARACTER)
     local db, current = GoldPilotDB or {}, currentTime()
     local charOk, char = addon.Compat.call("UnitName", "player")
     if not charOk or type(char) ~= "string" then char = "unknown" end
@@ -154,7 +158,7 @@ function NowUI:refresh()
         return ok and itemQuality or nil
     end
     local built = addon.Advice.build({ db = db, houseKey = addon.AuctionHouse.houseKey(), char = char,
-        now = current, quality = quality })
+        now = current, quality = quality, account = GoldPilotCharDB.nowAccount })
     local data = {}
     for i, card in ipairs(built.cards or {}) do
         if i > 6 then break end
@@ -230,6 +234,21 @@ function NowUI:build(page)
         if addon.InventoryUI.filterBox then addon.InventoryUI.filterBox:SetText("") end
         addon.Main.tabsBar:select("inventory")
     end)
+    self.scopeButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
+    self.scopeButton:SetSize(150, 24)
+    self.scopeButton:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 16, 20)
+    self.scopeButton:SetScript("OnClick", function()
+        if combat() then return end
+        GoldPilotCharDB = GoldPilotCharDB or {}
+        GoldPilotCharDB.nowAccount = not (GoldPilotCharDB.nowAccount == true)
+        self:refresh()
+    end)
+    self.scopeButton:SetScript("OnEnter", function(button)
+        GameTooltip:SetOwner(button, "ANCHOR_TOP")
+        GameTooltip:AddLine(addon.L.NOW_SCOPE_HELP, 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    self.scopeButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
     self.widgets.cards.onSelect = function(item)
         self.selected = item
         self:refresh()

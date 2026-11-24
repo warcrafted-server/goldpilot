@@ -118,6 +118,36 @@ return {
         assert(card(result, "mail_other", nil, "B") and card(result, "mail_other").gain == 70)
         assert(result.totals.now == 50 and result.totals.mail == 120)
     end,
+    ["ámbito actual excluye otros y conserva banco propio"] = function(addon, mock)
+        mock.items[1] = { sell = 1, stack = 1, class = 0 }
+        local db = inventoryDB({}, { [1] = price(999, 1000, 10) }, nil, {
+            A = { bags = {}, bank = { [1] = 1 } }, B = { bags = { [1] = 2 }, bank = { [1] = 3 } },
+        })
+        db.mailPending = { A = { money = 10, items = 0 }, B = { money = 20, items = 0 } }
+        local current = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 1000, account = false })
+        assert(not card(current, "mail_other") and not card(current, "elsewhere", "bags", "B"))
+        assert(card(current, "elsewhere", "bank", "A"))
+        assert(current.totals.mail == 10 and current.totals.elsewhere == 950,
+            tostring(current.totals.mail) .. ":" .. tostring(current.totals.elsewhere))
+        local account = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 1000, account = true })
+        local default = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 1000 })
+        assert(card(account, "mail_other", nil, "B") and card(account, "elsewhere", "bags", "B"))
+        assert(account.totals.mail == 30 and account.totals.elsewhere == 5700)
+        assert(default.totals.mail == account.totals.mail and default.totals.elsewhere == account.totals.elsewhere)
+    end,
+    ["bolsas propias no aparecen en otros sitios"] = function(addon, mock)
+        mock.items[1] = { sell = 1, stack = 1, class = 0 }
+        local db = inventoryDB({ [1] = 4 }, { [1] = price(999, 1000, 10) }, nil)
+        for _, account in ipairs({ false, true }) do
+            local result = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 1000,
+                account = account })
+            assert(not card(result, "elsewhere", "bags", "A"))
+            assert(result.totals.elsewhere == 0)
+        end
+        local result = addon.Advice.build({ db = db, houseKey = "h", char = "A", now = 1000 })
+        assert(not card(result, "elsewhere", "bags", "A"))
+        assert(result.totals.elsewhere == 0)
+    end,
     ["tendencias usan unidades en venta y valor del cambio"] = function(addon, mock)
         mock.items[1] = { sell = 1, stack = 1, class = 0 }
         mock.items[2] = { sell = 1, stack = 1, class = 0 }

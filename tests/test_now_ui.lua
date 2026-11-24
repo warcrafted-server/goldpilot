@@ -1,5 +1,6 @@
 local function setCards(addon, cards)
-    addon.Advice.build = function()
+    addon.Advice.build = function(context)
+        addon.NowUI.lastAdviceContext = context
         return { cards = cards, totals = { now = 25, mail = 10, elsewhere = 15 } }
     end
     addon.NowUI:refresh()
@@ -30,7 +31,7 @@ return {
         addon.Main:show()
         assert(addon.Main.activeTab == "now")
         assert(addon.Main.pages.now.emptyText.value == addon.L.NOW_EMPTY_SCAN)
-        assert(addon.NowUI.widgets.cards.width == 420 and addon.NowUI.widgets.cards.height == 390)
+        assert(addon.NowUI.widgets.cards.width == 420 and addon.NowUI.widgets.cards.height == 356)
         assert(addon.NowUI.widgets.detail.lines and #addon.NowUI.widgets.detail.lines == 0)
         assert(addon.NowUI.inventoryButton.hidden)
         GoldPilotDB.prices = { h = { item = {} } }
@@ -44,6 +45,7 @@ return {
         assert(cards.selectedKey == "auction||")
         assert(cards.items[1].fill.color[1] == 0.2)
         assert(cards.items[2].fill.color[1] == 0.04)
+        assert(cards.items[1].title.wordWrap == false and cards.items[1].reason.wordWrap == false)
         cards.items[2].scripts.OnClick(cards.items[2])
         assert(cards.selectedKey == "vendor||")
         assert(cards.items[2].fill.color[1] == 0.2)
@@ -146,5 +148,33 @@ return {
         setCards(addon, { card("elsewhere", { char = "Alt", where = "bags" }) })
         addon.NowUI.inventoryButton.scripts.OnClick(addon.NowUI.inventoryButton)
         assert(addon.Main.activeTab == "inventory" and addon.InventoryUI.account == true)
+    end,
+    ["Now alterna el ámbito, lo guarda y refresca el texto"] = function(addon)
+        local original = GoldPilotCharDB
+        GoldPilotCharDB = nil
+        addon.Main:show()
+        setCards(addon, {})
+        local button = addon.NowUI.scopeButton
+        assert(GoldPilotCharDB.nowAccount == false)
+        assert(button.value == addon.L.INVENTORY_SCOPE_CHARACTER)
+        assert(button.width == 150 and button.height == 24 and button.x == 16 and button.y == 20)
+        assert(addon.NowUI.lastAdviceContext.account == false)
+        assert(button.scripts.OnEnter and button.scripts.OnLeave)
+        button.scripts.OnClick(button)
+        assert(GoldPilotCharDB.nowAccount == true and button.value == addon.L.INVENTORY_SCOPE_ACCOUNT)
+        assert(addon.NowUI.lastAdviceContext.account == true)
+        GoldPilotCharDB = original
+    end,
+    ["Now no alterna el ámbito en combate"] = function(addon, mock)
+        local original = GoldPilotCharDB
+        GoldPilotCharDB = { nowAccount = false }
+        addon.Main:show()
+        local button = addon.NowUI.scopeButton
+        mock.combat = true
+        button.scripts.OnClick(button)
+        assert(GoldPilotCharDB.nowAccount == false)
+        assert(button.value == addon.L.INVENTORY_SCOPE_CHARACTER)
+        mock.combat = false
+        GoldPilotCharDB = original
     end,
 }

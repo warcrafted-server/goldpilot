@@ -50,6 +50,7 @@ function CreateFrame(kind, name, parent, template)
         function font:SetFont(...) self.font = { ... } end
         function font:SetTextColor(...) self.color = { ... } end
         function font:SetText(value) self.value = value end
+        function font:SetWordWrap(value) self.wordWrap = value end
         function font:GetText() return self.value end
         function font:SetPoint(...) self.point = { ... } end
         function font:Hide() self.hidden = true end

@@ -278,11 +278,11 @@ end
 function Widgets.cards(parent, onSelect, width)
     width = width or 420
     local panel = frame("Frame", nil, parent)
-    panel:SetSize(width, 6 * 66 - 6)
+    panel:SetSize(width, 6 * 60 - 4)
     panel.items, panel.onSelect = {}, onSelect
     local function makeCard(index)
         local button = frame("Button", nil, panel)
-        button:SetSize(width, 60)
+        button:SetSize(width, 56)
         button.fill = button:CreateTexture(nil, "BACKGROUND")
         button.fill:SetAllPoints()
         button.icon = button:CreateTexture(nil, "ARTWORK")
@@ -311,9 +311,9 @@ function Widgets.cards(parent, onSelect, width)
         for i = 1, math.min(#self.data, 6) do
             local data = self.data[i]
             local button = self.items[i] or makeCard(i)
-            button:SetSize(width, 60)
+            button:SetSize(width, 56)
             if button.ClearAllPoints then button:ClearAllPoints() end
-            button:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -(i - 1) * 66)
+            button:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -(i - 1) * 60)
             button.data = data
             button.fill:SetColorTexture(data.key == self.selectedKey and 0.2 or 0.04,
                 data.key == self.selectedKey and 0.15 or 0.03,
@@ -329,15 +329,16 @@ function Widgets.cards(parent, onSelect, width)
             local textWidth = math.max(40, width - 52 - 120)
             for _, label in ipairs({ button.title, button.reason }) do
                 if label.ClearAllPoints then label:ClearAllPoints() end
-                label:SetPoint("TOPLEFT", button, "TOPLEFT", 52, label == button.title and -10 or -34)
+                label:SetPoint("TOPLEFT", button, "TOPLEFT", 52, label == button.title and -8 or -31)
                 if label.SetWidth then label:SetWidth(textWidth) end
                 if label.SetJustifyH then label:SetJustifyH("LEFT") end
             end
             if button.amount.ClearAllPoints then button.amount:ClearAllPoints() end
             button.amount:SetPoint("TOPRIGHT", button, "TOPRIGHT", -10, -10)
             if button.confidence.ClearAllPoints then button.confidence:ClearAllPoints() end
-            button.confidence:SetPoint("TOPRIGHT", button, "TOPRIGHT", -10, -34)
+            button.confidence:SetPoint("TOPRIGHT", button, "TOPRIGHT", -10, -31)
             if button.reason.SetWordWrap then button.reason:SetWordWrap(false) end
+            if button.title.SetWordWrap then button.title:SetWordWrap(false) end
             button:Show()
         end
         for i = math.min(#self.data, 6) + 1, #self.items do self.items[i]:Hide() end

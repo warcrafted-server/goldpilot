@@ -4,7 +4,7 @@ Addon de economía para **World of Warcraft: Forever**. Muestra precios de vende
 
 Comandos disponibles: `/gp` abre o cierra la ventana principal, `/gp window` hace lo mismo y `/gp help` muestra la ayuda. `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gp bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo. `/gp watch <enlace>` sigue o deja de seguir un objeto; `/gp scan` hace un escaneo completo de la subasta abierta; `/gp ledger` resume las operaciones del mes.
 
-> **Versión 0.9.0.** Los objetos proceden del juego: subasta, bolsas, banco y equipo. wowdata continúa aportando semillas de nodos.
+> **Versión 0.10.0.** Los objetos proceden del juego: subasta, bolsas, banco y equipo. wowdata continúa aportando semillas de nodos.
 
 ## Documentación
 
@@ -29,6 +29,7 @@ Comandos disponibles: `/gp` abre o cierra la ventana principal, `/gp window` hac
 - Pasa el cursor por un objeto compatible para ver su precio de vendedor y, si se ha observado, su precio de subasta, antigüedad y recomendación. Mantén **Mayús** para ver más detalle.
 - Al abrir la subasta, GoldPilot consulta objetos seguidos, bolsas y bancos de los personajes guardados; al pasar el cursor prioriza objetos sin observación reciente. El banco se registra al abrirlo. Al terminar muestra `Subasta: N objetos leídos`.
 - Usa `/gp` para abrir la pestaña Ahora. Reúne consejos para vender, recoger correo y revisar objetos guardados en otros personajes. Selecciona una tarjeta para ver el motivo y los objetos más valiosos; desde las tarjetas de venta puedes abrir Inventario.
+- Cambia entre el personaje actual y toda la cuenta con el botón de ámbito de Ahora.
 - Inventario muestra el valor neto de lo vendible, el valor si todo se vende al vendedor, los objetos sin precio y las observaciones viejas. Cambia entre el personaje actual y toda la cuenta, filtra por nombre, oculta reservados y selecciona un objeto para ver cantidades por personaje y ubicación, precios y recomendación. Reservar aparta toda la cantidad (Mayús reserva una unidad más); Seguir añade el objeto a las consultas de subasta. Ajustes permite configurar la interfaz.
 - Usa `/gp bags` para ver el valor de las bolsas al vendedor, en subasta neta y con la mejor combinación; `/gp diag` para el diagnóstico; `/gp minimap` para mostrar u ocultar el botón; y `/gp version` para ver la versión. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho.
 

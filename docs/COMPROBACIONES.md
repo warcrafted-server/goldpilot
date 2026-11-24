@@ -83,3 +83,9 @@
 - [ ] Ver en Inventario abre Inventario desde consejos de subasta, vendedor y otros sitios.
 - [ ] Las tarjetas de correo, tendencias y actualización muestran sus detalles.
 - [ ] La ventana no se redibuja durante el combate.
+
+## 0.10.0
+
+- [ ] Ahora permite alternar entre el personaje actual y toda la cuenta, y recuerda el ámbito por personaje.
+- [ ] El ámbito de personaje excluye correo y objetos de otros personajes, pero conserva el banco propio.
+- [ ] Los títulos largos de las tarjetas permanecen en una línea.
