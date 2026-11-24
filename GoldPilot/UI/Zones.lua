@@ -119,8 +119,8 @@ function ZonesUI:zoneDetail(row)
     local zone = row.zone
     if zone and zone.active >= MEASURED and zone.rate then
         addLine(lines, L.ZONES_MEASURED, addon.Theme.money(zone.rate) .. L.NOW_PER_HOUR, GREEN)
-        addLine(lines, string.format(L.ZONES_ACTIVE_MIN, minutes(zone.active)))
-        addLine(lines, string.format(L.ZONES_SESSIONS_COUNT, zone.sessions))
+        addLine(lines, L.ZONES_ACTIVE, string.format(L.ZONES_ACTIVE_MIN, minutes(zone.active)))
+        addLine(lines, L.ZONES_METRIC_SESSIONS, tostring(zone.sessions))
     else
         lines[#lines + 1] = { text = L.ZONES_NO_DATA, color = SOFT, size = 12, gap = 6 }
     end
@@ -144,7 +144,7 @@ function ZonesUI:sessionDetail(entry, now)
     local value = sessionValue(session, now)
     local active = entry.current and addon.Sessions.active(session, now) or (tonumber(session.active) or 0)
     addLine(lines, L.ZONES_SESSION_CHAR, tostring(session.char or "unknown"))
-    addLine(lines, string.format(L.ZONES_ACTIVE_MIN, minutes(active)))
+    addLine(lines, L.ZONES_ACTIVE, string.format(L.ZONES_ACTIVE_MIN, minutes(active)))
     addLine(lines, L.ZONES_SESSION_TOTAL, addon.Theme.money(value.total))
     local rate = addon.Sessions.rate(value.total, active)
     addLine(lines, L.ZONES_SESSION_RATE, rate and addon.Theme.money(rate) .. L.NOW_PER_HOUR or L.ZONES_NONE)
@@ -362,32 +362,21 @@ function ZonesUI:build(page)
     self.widgets.list:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 20, 20)
     self.widgets.list:SetWidth(372)
     self.widgets.detail:ClearAllPoints()
-    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", 418, -104)
+    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", 424, -104)
     self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -14, 16)
-    self.widgets.detail.contentWidth = 306
+    self.widgets.detail.contentWidth = 298
     self.widgets.metrics:ClearAllPoints()
     self.widgets.metrics:SetPoint("TOPLEFT", page, "TOPLEFT", 76, -12)
     self.widgets.metrics.contentWidth = 668
-    local background = addon.Widgets.frame("Frame", nil, page, "BackdropTemplate")
+    local list = self.widgets.list
+    local background = addon.Widgets.panel(page, list.GetFrameLevel and list:GetFrameLevel() - 1)
     background:SetPoint("TOPLEFT", page, "TOPLEFT", 14, -104)
     background:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", 418, 16)
-    if background.SetFrameLevel and self.widgets.list.GetFrameLevel then
-        background:SetFrameLevel(math.max(0, self.widgets.list:GetFrameLevel() - 1))
-    end
-    if background.SetBackdrop then
-        pcall(background.SetBackdrop, background, { edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 12 })
-    end
-    if background.CreateTexture then
-        local fill = background:CreateTexture(nil, "BACKGROUND")
-        fill:SetAllPoints()
-        fill:SetColorTexture(0.09, 0.07, 0.05, 1)
-    end
     page.emptyText = background:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     page.emptyText:SetPoint("CENTER", background, "CENTER", 0, 0)
     if page.emptyText.SetWidth then page.emptyText:SetWidth(340) end
     page.emptyText:Hide()
-    self.viewButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
-    self.viewButton:SetSize(150, 24)
+    self.viewButton = addon.Widgets.selector(page, 150)
     self.viewButton:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -72)
     self.viewButton:SetScript("OnClick", function()
         if combat() then return end
@@ -396,8 +385,7 @@ function ZonesUI:build(page)
         GoldPilotCharDB.zonesView = VIEWS[index % #VIEWS + 1]
         self:refresh()
     end)
-    self.kindButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
-    self.kindButton:SetSize(170, 24)
+    self.kindButton = addon.Widgets.selector(page, 170)
     self.kindButton:SetPoint("TOPLEFT", page, "TOPLEFT", 176, -72)
     self.kindButton:SetScript("OnClick", function()
         if combat() then return end

@@ -81,22 +81,34 @@ local function buildWindow()
     addPage("settings", addon.L.TAB_SETTINGS, function(page)
         local dbSettings = settings()
         if not page.minimapCheckbox then
+            local function column(left, right)
+                local panel = addon.Widgets.panel(page, page.GetFrameLevel and page:GetFrameLevel())
+                panel:SetPoint("TOPLEFT", page, "TOPLEFT", left, -52)
+                panel:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", right, 16)
+                return panel
+            end
+            local function heading(panel, y, label)
+                local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, y)
+                title:SetText(label)
+            end
+            local left, right = column(14, 376), column(384, 746)
+            heading(left, -16, addon.L.SETTING_GENERAL)
+            heading(left, -132, addon.L.SETTING_GATHERING)
+            heading(right, -16, addon.L.SETTING_FIELDS)
             page.minimapCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_MINIMAP,
                 not dbSettings.minimap.hidden, function(checked)
                     if inCombat() then return end
                     dbSettings.minimap.hidden = not checked
                     if addon.Minimap and addon.Minimap.setVisible then addon.Minimap:setVisible(checked) end
                 end)
-            page.minimapCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -64)
+            page.minimapCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -92)
             page.tooltipCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_TOOLTIP,
                 dbSettings.tooltip ~= false, function(checked)
                     if inCombat() then return end
                     dbSettings.tooltip = checked
                 end)
-            page.tooltipCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -100)
-            local fieldsTitle = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            fieldsTitle:SetPoint("TOPLEFT", page, "TOPLEFT", 32, -148)
-            fieldsTitle:SetText(addon.L.SETTING_FIELDS)
+            page.tooltipCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 394, -92)
             page.fieldCheckboxes = {}
             dbSettings.tooltipFields = dbSettings.tooltipFields or {}
             for i, field in ipairs({ "vendor", "last", "median", "advice" }) do
@@ -105,7 +117,7 @@ local function buildWindow()
                         if inCombat() then return end
                         dbSettings.tooltipFields[field] = checked
                     end)
-                box:SetPoint("TOPLEFT", page, "TOPLEFT", 44, -172 - (i - 1) * 32)
+                box:SetPoint("TOPLEFT", page, "TOPLEFT", 412, -128 - (i - 1) * 32)
                 page.fieldCheckboxes[field] = box
             end
             page.scanCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_FULLSCAN,
@@ -113,14 +125,14 @@ local function buildWindow()
                     if inCombat() then return end
                     dbSettings.fullScan = checked
                 end)
-            page.scanCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -314)
+            page.scanCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -128)
             page.hudCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_HUD,
                 dbSettings.hud ~= false, function(checked)
                     if inCombat() then return end
                     if addon.SessionHUD then addon.SessionHUD:setEnabled(checked)
                     else dbSettings.hud = checked end
                 end)
-            page.hudCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -350)
+            page.hudCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -208)
             page.waypointCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_WAYPOINT,
                 dbSettings.routeWaypoint ~= false, function(checked)
                     if inCombat() then return end
@@ -129,7 +141,7 @@ local function buildWindow()
                         addon.RouteFollow:setWaypoint(checked)
                     end
                 end)
-            page.waypointCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -386)
+            page.waypointCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -244)
         else
             page.minimapCheckbox:SetChecked(not dbSettings.minimap.hidden)
             page.tooltipCheckbox:SetChecked(dbSettings.tooltip ~= false)

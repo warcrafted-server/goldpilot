@@ -146,3 +146,12 @@
 - [ ] Al reordenarse la lista, la fila resaltada es la de la ficha.
 - [ ] Libro: las ventas muestran icono tras un escaneo completo (o antes, si el objeto está en bolsas).
 - [ ] Ahora: la ficha de correo lista los correos; con correo solo de objetos la confianza queda alineada a la izquierda.
+
+## 0.15.3
+
+- [ ] Los selectores oscuros muestran su texto y la flecha, y cambian al pulsarlos (Ahora, Inventario, Libro y Zonas).
+- [ ] En Ahora, seis tarjetas caben sin tocar el borde inferior.
+- [ ] La ficha y la lista tienen borde bronce; nada lo tapa ni lo pisa.
+- [ ] La barra de desplazamiento sale en Inventario con muchos objetos y se oculta en Zonas.
+- [ ] Ajustes: los textos caben en su columna y las casillas responden.
+- [ ] «Subasta del banco» con un objeto dice «visto hace…».

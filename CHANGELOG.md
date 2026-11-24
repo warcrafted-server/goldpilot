@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.15.3] - 2026-11-25
+
+Parche: segunda pasada visual y correcciones de texto, sin función nueva.
+
+### Cambiado
+- Los selectores de ámbito, periodo y vista son oscuros y con flecha; los botones rojos quedan solo para acciones. En Ahora, el de ámbito pasa arriba, como en el resto.
+- La ficha tiene el mismo borde que la lista, ahora bronce, y la barra de desplazamiento solo aparece si hace falta.
+- Ajustes en dos columnas: General y Recolección, y Tooltip.
+- Zonas: el tiempo activo y las sesiones se alinean como el resto de datos. Tooltip: la comisión supuesta ya no repite la palabra.
+
+### Corregido
+- Ahora: con un solo objeto, «visto» mostraba el número de objetos en vez de la antigüedad, y la tendencia, en vez del porcentaje.
+- Los nombres y motivos usan todo el hueco libre: se cortan o pasan de línea menos.
+- Textos en plural con una sola unidad («1 objetos», «1 sesiones»).
+
 ## [0.15.2] - 2026-11-25
 
 Parche: correcciones y retoques visuales, sin función nueva.

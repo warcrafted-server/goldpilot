@@ -69,7 +69,7 @@ return {
         tooltipSetting.scripts.OnClick(tooltipSetting)
         assert(GoldPilotDB.settings.tooltip == false)
         local waypoint = page.waypointCheckbox
-        assert(waypoint and waypoint.x == 28 and waypoint.y == -386)
+        assert(waypoint and waypoint.x == 24 and waypoint.y == -244)
         assert(waypoint:GetChecked() == true)
         waypoint:SetChecked(false)
         waypoint.scripts.OnClick(waypoint)

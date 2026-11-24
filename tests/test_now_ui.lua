@@ -122,6 +122,13 @@ return {
             local bank = addon.L.NOW_PLACE_BANK
             local whereText = string.format(addon.L.NOW_WHY_ELSEWHERE_NEVER, "Alt", bank)
             assert(lines(addon.NowUI.widgets.detail):find(whereText, 1, true))
+            local once = card("elsewhere", { char = "Alt", where = "bank", count = 1, seen = 199000 })
+            setCards(addon, { once })
+            assert(addon.NowUI.widgets.cards.items[1].reason.value
+                == string.format(addon.L.NOW_REASON_ELSEWHERE_SEEN_ONE, addon.Theme.age(1000)))
+            setCards(addon, { card("trend_up", { kind = "info", gain = 12, count = 1 }) })
+            assert(addon.NowUI.widgets.cards.items[1].reason.value
+                == string.format(addon.L.NOW_REASON_TREND_ONE, addon.Advice.defaults.trendPercent))
             seen.count = 3
             setCards(addon, { seen })
             assert(addon.NowUI.widgets.cards.items[1].reason.value == string.format(addon.L.NOW_REASON_ELSEWHERE, 3))
@@ -159,7 +166,7 @@ return {
         local button = addon.NowUI.scopeButton
         assert(GoldPilotCharDB.nowAccount == false)
         assert(button.value == addon.L.INVENTORY_SCOPE_CHARACTER)
-        assert(button.width == 150 and button.height == 24 and button.x == 16 and button.y == 20)
+        assert(button.width == 150 and button.height == 24 and button.x == 16 and button.y == -72)
         assert(addon.NowUI.lastAdviceContext.account == false)
         assert(button.scripts.OnEnter and button.scripts.OnLeave)
         button.scripts.OnClick(button)

@@ -56,6 +56,7 @@ local function backdrop(object, color)
         })
     end
     if object.SetBackdropColor then pcall(object.SetBackdropColor, object, unpack(color)) end
+    if object.SetBackdropBorderColor then pcall(object.SetBackdropBorderColor, object, 0.5, 0.4, 0.26, 1) end
 end
 
 local TEXT_COLOR = { 0.92, 0.86, 0.72 }
@@ -167,6 +168,34 @@ function Widgets.tabs(parent, onChange)
     return bar
 end
 
+-- Recuadro oscuro con borde bronce, por detrás de los controles de la página.
+function Widgets.panel(parent, level)
+    local panel = frame("Frame", nil, parent, "BackdropTemplate")
+    if panel.SetFrameLevel and level then panel:SetFrameLevel(math.max(0, level)) end
+    backdrop(panel, { 0.09, 0.07, 0.05, 1 })
+    return panel
+end
+
+-- Selector de vista o filtro: oscuro y con flecha, para no confundirlo con un botón de acción.
+function Widgets.selector(parent, width)
+    local button = frame("Button", nil, parent)
+    button:SetSize(width, 24)
+    local border = button:CreateTexture(nil, "BACKGROUND")
+    border:SetAllPoints()
+    border:SetColorTexture(0.42, 0.33, 0.2, 1)
+    local fill = button:CreateTexture(nil, "BORDER")
+    fill:SetPoint("TOPLEFT", button, "TOPLEFT", 1, -1)
+    fill:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -1, 1)
+    fill:SetColorTexture(0.1, 0.075, 0.05, 1)
+    local arrow = button:CreateTexture(nil, "ARTWORK")
+    arrow:SetSize(14, 14)
+    arrow:SetPoint("RIGHT", button, "RIGHT", -5, 0)
+    arrow:SetTexture("Interface/ChatFrame/ChatFrameExpandArrow")
+    hoverGlow(button)
+    if button.SetNormalFontObject then button:SetNormalFontObject("GameFontNormal") end
+    return button
+end
+
 function Widgets.list(parent, onSelect, width)
     width = width or 320
     local scroll = frame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
@@ -246,6 +275,10 @@ function Widgets.list(parent, onSelect, width)
         self.data = rows or {}
         local height = #self.data * 28
         content:SetHeight(math.max(1, height))
+        local bar = self.ScrollBar
+        if bar and bar.Show then
+            if height > (self.GetHeight and self:GetHeight() or 360) then bar:Show() else bar:Hide() end
+        end
         -- Refrescar no debe perder la posición; si la lista se acorta, se ajusta al nuevo final.
         local limit = math.max(0, height - (scroll.GetHeight and scroll:GetHeight() or 360))
         if offset > limit then
@@ -261,8 +294,14 @@ function Widgets.list(parent, onSelect, width)
     return scroll
 end
 
+-- Ancho real del texto ya puesto; nil si el cliente aún no lo sabe.
+local function stringWidth(label)
+    local value = label.GetStringWidth and label:GetStringWidth() or 0
+    return value > 0 and value or nil
+end
+
 function Widgets.detail(parent)
-    local panel = frame("Frame", nil, parent)
+    local panel = frame("Frame", nil, parent, "BackdropTemplate")
     panel:SetPoint("TOPLEFT", parent, "TOPLEFT", 352, -84)
     panel:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -16, 16)
     backdrop(panel, { 0.09, 0.07, 0.05, 0.95 })
@@ -302,6 +341,8 @@ function Widgets.detail(parent)
                 if right.ClearAllPoints then right:ClearAllPoints() end
                 right:SetPoint("TOPRIGHT", label, "TOPLEFT", width, 0)
                 right:SetText(line.right)
+                local used = stringWidth(right)
+                if used and label.SetWidth then label:SetWidth(math.max(width * 0.4, width - used - 8)) end
                 if right.SetTextColor then right:SetTextColor(unpack(line.rightColor or { 1, 1, 1 })) end
                 right:Show()
             end
@@ -368,7 +409,8 @@ function Widgets.cards(parent, onSelect, width)
             for _, label in ipairs({ button.title, button.reason }) do
                 if label.ClearAllPoints then label:ClearAllPoints() end
                 label:SetPoint("TOPLEFT", button, "TOPLEFT", 52, label == button.title and -8 or -31)
-                if label.SetWidth then label:SetWidth(textWidth) end
+                local used = stringWidth(label == button.title and button.amount or button.confidence)
+                if label.SetWidth then label:SetWidth(used and math.max(40, width - 72 - used) or textWidth) end
                 if label.SetJustifyH then label:SetJustifyH("LEFT") end
             end
             if button.amount.ClearAllPoints then button.amount:ClearAllPoints() end

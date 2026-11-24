@@ -160,32 +160,21 @@ function LedgerUI:build(page)
     self.widgets.list:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 20, 20)
     self.widgets.list:SetWidth(372)
     self.widgets.detail:ClearAllPoints()
-    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", 418, -104)
+    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", 424, -104)
     self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -14, 16)
-    self.widgets.detail.contentWidth = 306
+    self.widgets.detail.contentWidth = 298
     self.widgets.metrics:ClearAllPoints()
     self.widgets.metrics:SetPoint("TOPLEFT", page, "TOPLEFT", 76, -12)
     self.widgets.metrics.contentWidth = 668
-    local background = addon.Widgets.frame("Frame", nil, page, "BackdropTemplate")
+    local list = self.widgets.list
+    local background = addon.Widgets.panel(page, list.GetFrameLevel and list:GetFrameLevel() - 1)
     background:SetPoint("TOPLEFT", page, "TOPLEFT", 14, -104)
     background:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", 418, 16)
-    if background.SetFrameLevel and self.widgets.list.GetFrameLevel then
-        background:SetFrameLevel(math.max(0, self.widgets.list:GetFrameLevel() - 1))
-    end
-    if background.SetBackdrop then
-        pcall(background.SetBackdrop, background, { edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 12 })
-    end
-    if background.CreateTexture then
-        local fill = background:CreateTexture(nil, "BACKGROUND")
-        fill:SetAllPoints()
-        fill:SetColorTexture(0.09, 0.07, 0.05, 1)
-    end
     page.emptyText = background:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     page.emptyText:SetPoint("CENTER", background, "CENTER", 0, 0)
     if page.emptyText.SetWidth then page.emptyText:SetWidth(340) end
     page.emptyText:Hide()
-    self.scopeButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
-    self.scopeButton:SetSize(150, 24)
+    self.scopeButton = addon.Widgets.selector(page, 150)
     self.scopeButton:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -72)
     self.scopeButton:SetScript("OnClick", function()
         if combat() then return end
@@ -193,8 +182,7 @@ function LedgerUI:build(page)
         GoldPilotCharDB.ledgerAccount = not (GoldPilotCharDB.ledgerAccount == true)
         self:refresh()
     end)
-    self.periodButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
-    self.periodButton:SetSize(150, 24)
+    self.periodButton = addon.Widgets.selector(page, 150)
     self.periodButton:SetPoint("TOPLEFT", page, "TOPLEFT", 176, -72)
     self.periodButton:SetScript("OnClick", function()
         if combat() then return end

@@ -86,12 +86,14 @@ local function reason(card, current)
         if not card.seen or card.seen == 0 then
             return string.format(card.count == 1 and L.NOW_REASON_ELSEWHERE_ONE or L.NOW_REASON_ELSEWHERE, card.count)
         end
-        return string.format(card.count == 1 and L.NOW_REASON_ELSEWHERE_SEEN_ONE or L.NOW_REASON_ELSEWHERE_SEEN,
-            card.count, addon.Theme.age(current - card.seen))
+        local age = addon.Theme.age(current - card.seen)
+        if card.count == 1 then return string.format(L.NOW_REASON_ELSEWHERE_SEEN_ONE, age) end
+        return string.format(L.NOW_REASON_ELSEWHERE_SEEN, card.count, age)
     end
     if id == "trend_up" or id == "trend_down" then
-        return string.format(card.count == 1 and L.NOW_REASON_TREND_ONE or L.NOW_REASON_TREND,
-            card.count, addon.Advice.defaults.trendPercent)
+        local percent = addon.Advice.defaults.trendPercent
+        if card.count == 1 then return string.format(L.NOW_REASON_TREND_ONE, percent) end
+        return string.format(L.NOW_REASON_TREND, card.count, percent)
     end
     if id == "zone" then
         return string.format(L.NOW_REASON_ZONE, math.floor((tonumber(card.active) or 0) / 60))
@@ -240,9 +242,9 @@ function NowUI:build(page)
     self.page, page._nowBuilt = page, true
     self.widgets = { cards = addon.Widgets.cards(page, nil, 420), detail = addon.Widgets.detail(page),
         metrics = addon.Widgets.metrics(page, {}) }
-    self.widgets.cards:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -76)
+    self.widgets.cards:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -104)
     self.widgets.detail:ClearAllPoints()
-    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", 450, -72)
+    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", 450, -104)
     self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -14, 52)
     self.widgets.detail.contentWidth = 272
     self.widgets.metrics:ClearAllPoints()
@@ -255,7 +257,7 @@ function NowUI:build(page)
     page.emptyText:Hide()
     self.inventoryButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
     self.inventoryButton:SetSize(150, 24)
-    self.inventoryButton:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 458, 20)
+    self.inventoryButton:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 450, 20)
     self.inventoryButton:SetText(addon.L.NOW_VIEW_INVENTORY)
     self.inventoryButton:SetScript("OnClick", function()
         if combat() then return end
@@ -266,9 +268,8 @@ function NowUI:build(page)
         if addon.InventoryUI.filterBox then addon.InventoryUI.filterBox:SetText("") end
         addon.Main.tabsBar:select("inventory")
     end)
-    self.scopeButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
-    self.scopeButton:SetSize(150, 24)
-    self.scopeButton:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 16, 20)
+    self.scopeButton = addon.Widgets.selector(page, 150)
+    self.scopeButton:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -72)
     self.scopeButton:SetScript("OnClick", function()
         if combat() then return end
         GoldPilotCharDB = GoldPilotCharDB or {}

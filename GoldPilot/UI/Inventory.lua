@@ -1,6 +1,6 @@
 local _, addon = ...
 
-local LIST_WIDTH, DETAIL_X = 372, 418
+local LIST_WIDTH, DETAIL_X = 372, 424
 
 local InventoryUI = { account = false, hideReserved = false, onlyWatched = false, filter = "" }
 addon.InventoryUI = InventoryUI
@@ -78,7 +78,7 @@ local function detailLines(row, name)
     local function section(title) lines[#lines + 1] = { text = title, color = MUTED, size = 11, gap = 10 } end
     local function dim(value) return "|cff8a8a8a" .. value .. "|r" end
 
-    lines[1] = { text = name .. "  ×" .. row.qty, color = GOLD, size = 14 }
+    lines[1] = { text = name .. " ×" .. row.qty, color = GOLD, size = 14 }
     lines[2] = { text = L.INVENTORY_BEST_OPTION, right = L["INVENTORY_ACTION_" .. string.upper(row.action)], size = 13, gap = 8,
         color = { 0.92, 0.86, 0.72 }, rightColor = ACTION_COLORS[row.action] }
     if row.action ~= "none" then
@@ -210,30 +210,19 @@ function InventoryUI:build(page)
     self.widgets.detail:ClearAllPoints()
     self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", DETAIL_X, -104)
     self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -14, 52)
-    self.widgets.detail.contentWidth = 330 - 24
+    self.widgets.detail.contentWidth = 298
     self.widgets.metrics:ClearAllPoints()
     self.widgets.metrics:SetPoint("TOPLEFT", page, "TOPLEFT", 76, -12)
     self.widgets.metrics.contentWidth = 668
-    local listBackground = addon.Widgets.frame("Frame", nil, page, "BackdropTemplate")
+    local list = self.widgets.list
+    local listBackground = addon.Widgets.panel(page, list.GetFrameLevel and list:GetFrameLevel() - 1)
     listBackground:SetPoint("TOPLEFT", page, "TOPLEFT", 14, -104)
     listBackground:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", 20 + LIST_WIDTH + 26, 16)
-    if listBackground.SetFrameLevel and self.widgets.list.GetFrameLevel then
-        listBackground:SetFrameLevel(math.max(0, self.widgets.list:GetFrameLevel() - 1))
-    end
-    if listBackground.SetBackdrop then
-        pcall(listBackground.SetBackdrop, listBackground, { edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 12 })
-    end
-    if listBackground.CreateTexture then
-        local fill = listBackground:CreateTexture(nil, "BACKGROUND")
-        fill:SetAllPoints()
-        fill:SetColorTexture(0.09, 0.07, 0.05, 1)
-    end
     page.emptyText = listBackground:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     page.emptyText:SetPoint("CENTER", listBackground, "CENTER", 0, 0)
     if page.emptyText.SetWidth then page.emptyText:SetWidth(340) end
     page.emptyText:Hide()
-    self.scopeButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
-    self.scopeButton:SetSize(150, 24)
+    self.scopeButton = addon.Widgets.selector(page, 150)
     self.scopeButton:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -72)
     self.scopeButton:SetScript("OnClick", function() if not inCombat() then self.account = not self.account; self:refresh() end end)
     self.hideCheckbox = addon.Widgets.checkbox(page, addon.L.INVENTORY_HIDE_RESERVED, self.hideReserved, function(value)
@@ -274,7 +263,7 @@ function InventoryUI:build(page)
         self.widgets.detail:setLines(detailLines(self.selected, formatted.name))
         self:refresh()
     end
-    self.reserveButton = makeButton(page, addon.L.INVENTORY_RESERVE, DETAIL_X + 8, function()
+    self.reserveButton = makeButton(page, addon.L.INVENTORY_RESERVE, DETAIL_X, function()
         GoldPilotDB.reserved = GoldPilotDB.reserved or {}
         if self.selected.reserved then
             GoldPilotDB.reserved[self.selected.key] = nil
@@ -286,7 +275,7 @@ function InventoryUI:build(page)
             (tonumber(GoldPilotDB.reserved[self.selected.key]) or 0) + amount)
         self:refresh()
     end)
-    self.watchButton = makeButton(page, addon.L.INVENTORY_WATCH, DETAIL_X + 138, function()
+    self.watchButton = makeButton(page, addon.L.INVENTORY_WATCH, DETAIL_X + 130, function()
         GoldPilotDB.watch = GoldPilotDB.watch or {}
         GoldPilotDB.watch[self.selected.itemID] = not GoldPilotDB.watch[self.selected.itemID] or nil
         self:refresh()
