@@ -4,6 +4,20 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.5.0] - 2026-11-24
+
+### Añadido
+- Versión menor: libro de operaciones con ventas y compras confirmadas y devoluciones detectadas en el buzón, consultable con `/gp ledger`.
+
+### Cambiado
+- El escaneo completo al abrir la subasta queda activado por defecto (comprobado en juego: 30-40 s sin tirones) y la cola no repite lo leído hace menos de 15 min.
+
+### Corregido
+- La cola de subasta carga los datos de cada objeto antes de buscarlo: los de otros personajes agotaban 8 s cada uno.
+- El diagnóstico de subasta ya no escribe cada evento en el chat.
+- El diagnóstico del buzón avisa una sola vez por apertura.
+- El dinero usa los iconos de moneda del juego también cuando la función está en `C_CurrencyInfo`.
+
 ## [0.4.0] - 2026-11-24
 
 Menor: funcionalidad nueva y compatible (los datos guardados siguen valiendo; las nuevas opciones tienen valores por defecto).

@@ -5,6 +5,8 @@ local AuctionHouse = addon.AuctionHouse
 local MAX_QUEUE, PROGRESS_EVERY = 1000, 10
 local queue, current, done, finished, generation = {}, nil, 0, 0, 0
 local retryScheduled = false
+local MAX_LOADS, FRESH = 4, 15 * 60
+local loads = {}
 local sessionActive = false
 local isOpen = false
 
@@ -81,6 +83,7 @@ function AuctionHouse:resolveQueue(seen)
         finished = finished + 1
     end
     queue = {}
+    sessionActive = false
 end
 
 function AuctionHouse:status()
@@ -192,6 +195,23 @@ function AuctionHouse:_pump()
     local itemID = current
     local key = itemKey(itemID)
     if not key then finishCurrent("senderror"); return end
+    -- El cliente ignora la búsqueda de un objeto cuyos datos no tiene cargados (típico de otros personajes):
+    -- se piden, el objeto pasa al final y se reintenta.
+    if addon.Compat.has("C_AuctionHouse.GetItemKeyInfo") then
+        local infoOk, info = addon.Compat.call("C_AuctionHouse.GetItemKeyInfo", key)
+        if infoOk and not info then
+            loads[itemID] = (loads[itemID] or 0) + 1
+            if loads[itemID] > MAX_LOADS then finishCurrent("noinfo"); return end
+            addon.Compat.call("C_Item.RequestLoadItemDataByID", itemID)
+            current = nil
+            queue[#queue + 1] = itemID
+            if not retryScheduled then
+                retryScheduled = true
+                addon.Compat.call("C_Timer.After", 0.3, function() retryScheduled = false; AuctionHouse:_pump() end)
+            end
+            return
+        end
+    end
     local sendOk = addon.Compat.call("C_AuctionHouse.SendSearchQuery", key, {}, false)
     if not sendOk then finishCurrent("senderror"); return end
     generation = generation + 1
@@ -252,7 +272,16 @@ local function buildQueue()
         end
     end
     append(otherItems, true)
+    -- Lo leído hace poco (por un escaneo o una búsqueda) no se vuelve a pedir.
+    local limit = now() - FRESH
+    for index = #queue, 1, -1 do
+        local price = addon.Prices.get(GoldPilotDB, houseKey(), queue[index])
+        if price and (tonumber(price.t) or 0) > limit then table.remove(queue, index) end
+    end
     while #queue > MAX_QUEUE do table.remove(queue) end
+    loads = {}
+    sessionActive = #queue > 0
+    for _, itemID in ipairs(queue) do addon.Compat.call("C_Item.RequestLoadItemDataByID", itemID) end
     local last = GoldPilotDB.ahLast
     for _, itemID in ipairs(queue) do last.queued[#last.queued + 1] = itemID end
 end

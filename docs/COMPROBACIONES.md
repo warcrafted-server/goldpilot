@@ -1,7 +1,7 @@
 # Comprobaciones manuales en juego — 0.3.0
 
 - [ ] GoldPilot carga sin errores.
-- [ ] `/gp version` muestra `0.4.0`.
+- [ ] `/gp version` muestra `0.5.0`.
 - [ ] Abrir Inventario con `/gp` y con clic izquierdo en el minimapa.
 - [ ] Cambiar entre Personaje actual y Toda la cuenta.
 - [ ] Filtrar objetos por nombre y comprobar la lista.
@@ -31,9 +31,20 @@
 
 ## 0.4.0
 
-- [ ] Con la casilla de escaneo completo activada en Ajustes (desactivada por defecto), al abrir la subasta el chat dice «Escaneo completo…» y después «Escaneo completo: N objetos…»; `/gp scan` antes de 15 min avisa del límite. Si no devuelve datos, vuelve a la cola por objetos.
+- [ ] Con la casilla de escaneo completo activada en Ajustes, al abrir la subasta el chat dice «Escaneo completo…» y después «Escaneo completo: N objetos…»; `/gp scan` antes de 15 min avisa del límite. Si no devuelve datos, vuelve a la cola por objetos.
 - [ ] Tras el escaneo, el tooltip de objetos que no estaban en las bolsas muestra precio reciente; el tamaño de `GoldPilotDev.lua` tras un escaneo completo (se guardan todos los objetos con ofertas, decenas de miles; anotar el tamaño y el tiempo de carga al entrar).
 - [ ] Una búsqueda a mano en la subasta actualiza el «último visto» del objeto.
 - [ ] El tooltip se ve ordenado en dos columnas (cabecera GoldPilot con antigüedad, Vendedor, Último visto, Mediana, Mejor opción); con Mayús añade En venta y Tendencia.
 - [ ] Ajustes: cada casilla de línea del tooltip la muestra u oculta; la del escaneo completo lo desactiva.
 - [ ] Buzón: abrir el buzón con una compra y con una devolución, `/reload`, y revisar `GoldPilotDB.diag.mail.cabeceras`.
+
+## 0.5.0
+
+- [x] Abrir el buzón con facturas de venta y compra; comprobar el aviso de registros nuevos y `GoldPilotDB.ledger`.
+- [x] Reabrir el buzón no duplica operaciones (2026-11-24, totales comprobados con las seis facturas).
+- [x] Con el buzón abierto un rato y tras `/reload` tampoco se duplican (2026-11-24).
+- [x] Las dos devoluciones de Charman se registran (2026-11-24).
+- [ ] Reabrir el buzón de Charman no repite las devoluciones.
+- [ ] Al abrir la subasta arranca el escaneo completo; al reabrir antes de 15 min no hay cola de objetos ya leídos.
+- [ ] `/gp ledger` muestra el resumen de 30 días y representa los balances negativos con signo menos.
+- [ ] El buzón no escribe registros en combate ni en modo seguro.

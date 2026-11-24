@@ -12,6 +12,16 @@ local function command(input)
     elseif subcommand == "help" then
         addon.Log:info(addon.L.HELP)
         return
+    elseif subcommand == "ledger" or subcommand == "libro" then
+        local ok, now = addon.Compat.call("time")
+        if not ok or not tonumber(now) then now = 0 end
+        local summary = addon.Ledger.summary(GoldPilotDB or {}, now - 30 * 86400)
+        local balance = summary.balance < 0 and "-" .. addon.Theme.money(math.abs(summary.balance)) or addon.Theme.money(summary.balance)
+        addon.Log:info(string.format(addon.L.LEDGER_SUMMARY, summary.sales,
+            addon.Theme.money(summary.gross), addon.Theme.money(summary.deposit), addon.Theme.money(summary.cut),
+            addon.Theme.money(summary.net), summary.purchases, addon.Theme.money(summary.spent),
+            summary.returns, balance))
+        return
     end
     if subcommand == "diag" then
         local action, itemID = string.match(input or "", "^%s*%S+%s*(%S*)%s*(%S*)")

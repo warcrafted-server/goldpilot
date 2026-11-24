@@ -1,6 +1,8 @@
 local _, addon = ...
 addon.LocaleRegister("esES", {
-    HELP = "Comandos: /gp [window], /gp help, /gp version, /gp diag, /gp minimap, /gp bags, /gp scan, /gp watch <enlace>",
+    HELP = "Comandos: /gp [window], /gp help, /gp version, /gp diag, /gp minimap, /gp bags, /gp scan, /gp watch <enlace>, /gp ledger",
+    LEDGER_ADDED = "Libro: %d registros nuevos.",
+    LEDGER_SUMMARY = "Últimos 30 días: vendidos %d objetos, bruto %s, depósito %s, comisión %s, neto %s; comprados %d (%s gastados); devueltos %d; balance %s.",
     MINIMAP_TITLE = "GoldPilot",
     MINIMAP_LEFT = "Clic izquierdo: abrir o cerrar GoldPilot",
     MINIMAP_RIGHT = "Clic derecho: ejecutar diagnóstico",
@@ -11,7 +13,6 @@ addon.LocaleRegister("esES", {
     DIAG_MAIL = "Diagnóstico: buzón abierto.",
     DIAG_LOOT = "Diagnóstico: botín observado.",
     DIAG_PROFS = "Diagnóstico: ventana de profesión abierta.",
-    DIAG_AUCTION_EVENT = "Evento de subasta diagnosticado: ",
     AH_PROGRESS = "Subasta: %d/%d objetos",
     WATCH_USAGE = "Uso: /gp watch <enlace del objeto o su número>",
     WATCH_UNKNOWN = "GoldPilot no conoce el objeto %s.",

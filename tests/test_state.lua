@@ -1,4 +1,5 @@
 local function setup()
+    GetInventoryItemID = nil
     NUM_BAG_SLOTS = 2
     NUM_TOTAL_EQUIPPED_BAG_SLOTS = nil
     NUM_BANKBAGSLOTS = nil
@@ -236,5 +237,40 @@ return {
         local found
         for _, id in ipairs(last.queued) do if id == 36 then found = true end end
         assert(found)
+    end,
+    ["un objeto sin datos cargados pasa al final, se reintenta y no bloquea la cola"] = function(addon, mock)
+        setup()
+        GoldPilotDB = { watch = { [25] = true, [35] = true } }
+        addon.Bags.scan = function() return {} end
+        local loaded, sent = {}, {}
+        C_AuctionHouse.GetItemKeyInfo = function(key) if key.itemID ~= 25 or loaded[25] then return { itemName = "x" } end end
+        C_AuctionHouse.SendSearchQuery = function(key) sent[#sent + 1] = key.itemID end
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(#sent == 0)
+        mock.flushTimers()
+        assert(#sent == 1 and sent[1] == 35)
+        loaded[25] = true
+        mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 35)
+        assert(sent[2] == 25)
+    end,
+    ["un objeto que nunca carga se abandona"] = function(addon, mock)
+        setup()
+        GoldPilotDB = { watch = { [25] = true } }
+        addon.Bags.scan = function() return {} end
+        C_AuctionHouse.GetItemKeyInfo = function() end
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        for _ = 1, 8 do mock.flushTimers() end
+        assert(GoldPilotDB.ahLast.result[25] == "noinfo" and addon.AuctionHouse:status().pending == 0)
+    end,
+    ["lo leído hace menos de 15 minutos no vuelve a la cola"] = function(addon, mock)
+        setup()
+        GoldPilotDB = { watch = { [25] = true, [35] = true }, prices = { Horde = {
+            [25] = { last = { t = 99900, min = 1, p50 = 1, qty = 1 } } } } }
+        addon.Bags.scan = function() return {} end
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(addon.AuctionHouse:status().current == 35 and addon.AuctionHouse:status().pending == 0)
     end,
 }

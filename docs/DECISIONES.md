@@ -6,7 +6,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 
 - **Contexto:** TSM (con app de escritorio), Auctionator y una decena de contadores de oro/hora ya funcionan en Forever.
 - **Decisión:** GoldPilot se centra en recomendar, explicar y medir el beneficio real; obtiene precios de sus propias observaciones y de su aplicación opcional.
-- **Descartado:** competir en escaneo completo (además está limitado por el servidor).
+- **Actualización (2026-11-24):** a petición del autor se hace escaneo completo al abrir la subasta (30-40 s, límite de 15 min), como fuente de datos propia; la diferencia sigue siendo la recomendación.
 
 ## D2. Clase de dato obligatoria en cada cifra — propuesta
 

@@ -39,7 +39,7 @@ local function saveSection(name, value, message)
     GoldPilotDB.diag = GoldPilotDB.diag or { caps = {} }
     value.fecha = now()
     GoldPilotDB.diag[name] = value
-    addon.Log:info(message)
+    if message then addon.Log:info(message) end
 end
 
 function addon.Diag:run()
@@ -92,7 +92,7 @@ local function observeAuction()
     saveSection("auction", { abierta = true, cut = cutOK and cut or nil, eventos = {} }, addon.L.DIAG_AUCTION)
 end
 
-local function observeMail()
+local function observeMail(quiet)
     if inCombat() then return end
     local nOK, n = addon.Compat.call("GetInboxNumItems")
     local invoices, headers = {}, {}
@@ -125,7 +125,7 @@ local function observeMail()
         end
         headers[i] = header
     end
-    saveSection("mail", { abierto = true, n = nOK and n or nil, facturas = invoices, cabeceras = headers }, addon.L.DIAG_MAIL)
+    saveSection("mail", { abierto = true, n = nOK and n or nil, facturas = invoices, cabeceras = headers }, quiet ~= true and addon.L.DIAG_MAIL or nil)
     -- El archivo es de toda la cuenta: una copia por personaje evita que el último buzón borre los anteriores.
     local _, name = addon.Compat.call("UnitName", "player")
     if type(name) == "string" and name ~= "" and GoldPilotDB.diag then
@@ -166,6 +166,10 @@ local function observeLoot()
         }
     end
     local log = GoldPilotDB.diag.botin or {}
+    -- LOOT_READY se dispara dos veces por cada ventana de botín.
+    local before, first = log[#log], entry.objetos[1]
+    if before and first and before.objetos[1] and first.guid and before.objetos[1].guid == first.guid
+        and before.objetos[1].itemID == first.itemID and (entry.t or 0) - (before.t or 0) <= 2 then return end
     GoldPilotDB.diag.botin = log
     log[#log + 1] = entry
     while #log > 300 do table.remove(log, 1) end
@@ -220,7 +224,7 @@ addon.Modules:register("diag", {
         addon.Events:subscribe("diag", "AUCTION_HOUSE_SHOW", observeAuction)
         addon.Events:subscribe("diag", "AUCTION_HOUSE_CLOSED", function() addon.Diag.auctionOpen = false end)
         addon.Events:subscribe("diag", "MAIL_SHOW", observeMail)
-        addon.Events:subscribe("diag", "MAIL_INBOX_UPDATE", observeMail, 1)
+        addon.Events:subscribe("diag", "MAIL_INBOX_UPDATE", function() observeMail(true) end, 1)
         addon.Events:subscribe("diag", "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", observeBrowse, 2)
         addon.Events:subscribe("diag", "AUCTION_HOUSE_BROWSE_RESULTS_ADDED", observeBrowse, 2)
         addon.Events:subscribe("diag", "LOOT_READY", observeLoot)
@@ -248,11 +252,6 @@ addon.Modules:register("diag", {
                 auction.fecha = now()
                 if #auction.eventos >= 40 then return end
                 auction.eventos[#auction.eventos + 1] = entry
-                if not auction.logged then auction.logged = {} end
-                if not auction.logged[eventName] then
-                    auction.logged[eventName] = true
-                    addon.Log:info(addon.L.DIAG_AUCTION_EVENT .. eventName)
-                end
             end)
         end
     end,

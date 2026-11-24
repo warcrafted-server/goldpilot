@@ -111,7 +111,7 @@ local function buildWindow()
                 page.fieldCheckboxes[field] = box
             end
             page.scanCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_FULLSCAN,
-                dbSettings.fullScan == true, function(checked)
+                dbSettings.fullScan ~= false, function(checked)
                     if inCombat() then return end
                     dbSettings.fullScan = checked
                 end)
@@ -122,7 +122,7 @@ local function buildWindow()
             for field, box in pairs(page.fieldCheckboxes) do
                 box:SetChecked((dbSettings.tooltipFields or {})[field] ~= false)
             end
-            page.scanCheckbox:SetChecked(dbSettings.fullScan == true)
+            page.scanCheckbox:SetChecked(dbSettings.fullScan ~= false)
         end
     end)
     for _, tab in ipairs(Main.registeredTabs) do

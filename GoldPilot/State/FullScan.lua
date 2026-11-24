@@ -18,7 +18,7 @@ end
 
 local function enabledByUser()
     local settings = GoldPilotDB and GoldPilotDB.settings
-    return settings and settings.fullScan == true
+    return not (settings and settings.fullScan == false)
 end
 
 -- Sin reloj de alta resolución (pruebas) se procesa un número fijo de elementos por trozo.

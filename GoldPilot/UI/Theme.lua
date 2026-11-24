@@ -14,6 +14,11 @@ function addon.Theme.money(copper)
         local ok, value = addon.Compat.call("GetCoinTextureString", copper)
         if ok and type(value) == "string" then return value end
     end
+    -- En clientes modernos la función de monedas está en C_CurrencyInfo.
+    if addon.Compat and addon.Compat.has("C_CurrencyInfo.GetCoinTextureString") then
+        local ok, value = addon.Compat.call("C_CurrencyInfo.GetCoinTextureString", copper)
+        if ok and type(value) == "string" then return value end
+    end
     local gold = math.floor(copper / 10000)
     local silver = math.floor(copper / 100) % 100
     return string.format("%dg %ds %dc", gold, silver, copper % 100)

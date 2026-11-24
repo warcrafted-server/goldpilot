@@ -28,4 +28,19 @@ El asunto está localizado (esES): para otros idiomas habrá que apoyarse en el 
 
 - El libro de operaciones puede registrar ventas, compras y devoluciones sin leer el chat, con precio bruto, depósito y comisión reales.
 - `GetAuctionHouseCut` no existe en este cliente: el 5 % se mantiene como valor supuesto, ahora confirmado por las facturas.
-- Pendiente: correos de subastas **caducadas** o **canceladas** (no observados) y el botín/nodos de recolección.
+- Pendiente: correos de subastas **canceladas** a mano (no observados).
+
+## Variantes de equipo
+
+El enlace de `GetReplicateItemLink` identifica el sufijo con un **bonus**: `item:15520::::::::16:1489::1:1:12726:…` → tras el contexto van el número de bonus (1) y el bonus (12726 = «del lobo», 12733 = «de poder»). El campo clásico de sufijo viene vacío. El contexto puede ir vacío o a 1 para la misma variante (10057 con bonus 12747), así que la clave es `itemID:bonus`, sin el contexto.
+
+## Cola de búsquedas
+
+De 66 objetos, 33 agotaron 8 s: **todos de otros personajes**, sin datos cargados en el cliente. Hay que cargar el objeto antes de `SendSearchQuery` (Auctionator espera a `GetItemKeyInfo`).
+
+## Botín y nodos (74 lecturas en el mapa 1438)
+
+- `LOOT_READY` llega **dos veces** por ventana: hay que descartar la repetida por GUID.
+- El ID de objeto del mundo o criatura se lee en el **sexto campo** del GUID: `GameObject-0-62428-1-5736460-1618-…` (1618 da Flor de paz, 1617 Hojaplata, 1619 2449). Servidor e instancia van ofuscados.
+- Hierba = `GameObject`; criatura y desuello = `Creature` (el desuello es un segundo botín del mismo GUID). Dinero: ranura sin objeto, con el cobre en la cantidad de `GetLootSourceInfo`.
+- Sin observar: mineral.

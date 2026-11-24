@@ -19,13 +19,12 @@
 ## Alta: precios por variante (ver el plan, pasos A y B)
 
 - [ ] El equipo con sufijo («del oso»…) comparte un solo precio por objeto: las variantes se mezclan y su mediana no es fiable.
-- [ ] Escaneo de resumen como el de Auctionator (sin `ReplicateItems`), aprovechando el suyo si ya está en marcha.
 
 ## Media: escenario con API de Blizzard (tras D12)
 
 - [ ] Aplicación de escritorio que descargue los precios actuales con la API web y los deje en SavedVariables (el addon no puede hacer peticiones web); el tooltip pasaría a «Vendedor, precio actual (API) y mediana», con su propia clase de dato.
 - [ ] Afinado visual final del tooltip y de la ventana con Opus, cuando todo esté hecho.
-- [ ] Diagnóstico pendiente en juego: botín y nodos de recolección (`/gp diag`) y correos de subastas caducadas o canceladas.
+- [ ] Diagnóstico pendiente en juego: botín de mineral y correos de subastas canceladas a mano.
 
 ## Alta: 0.1.0
 
@@ -33,7 +32,8 @@
 
 ## Media
 
-- [ ] 0.2.0: asistente de venta y libro de operaciones.
+- [ ] 0.2.0: asistente de venta.
+- [ ] Pestaña Libro para consultar y filtrar operaciones.
 - [ ] 0.3.0: verificar en juego la pestaña Inventario (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
 - [ ] Precio externo opcional: no se usa Auctionator ni TSM; solo se revisará más adelante si hay demanda.
 - [ ] Probar la API web de Blizzard para Forever (rutas, frecuencia, términos de uso).
@@ -41,7 +41,7 @@
 ## Descartado
 
 - Tiempos de reaparición de nodos: la observación propia no los predice con muchos jugadores por capa (D8).
-- Escaneo completo periódico en juego: limitado por el servidor y ya cubierto por TSM y Auctionator.
+- Escaneo de resumen como el de Auctionator: el completo da también la mediana, en 30-40 s sin tirones.
 - Automatizar acciones de subasta: requiere clic del jugador y rozaría las normas.
 - Rutas de recolección dibujadas: ya las ofrecen Gatherer Reforged y GatherMate; GoldPilot recomienda la zona.
 - Base de precios empaquetada en el addon: datos viejos presentados como actuales.
