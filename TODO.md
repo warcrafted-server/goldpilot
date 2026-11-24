@@ -20,6 +20,9 @@
 
 - [ ] El inventario aún no distingue variantes de equipo en bolsas y banco
 
+- [ ] `DataItems` no incluye objetos que existen en el juego (2973, 9747): revisar el origen en wowdata; además `tools/generar_desde_wowdata.py` apunta a una ruta antigua (ahora `Projectes/Wow/wowdata`).
+- [ ] Libro: elegir entre el personaje actual y toda la cuenta (ahora es siempre toda la cuenta).
+
 ## Media: escenario con API de Blizzard (tras D12)
 
 - [ ] Aplicación de escritorio que descargue los precios actuales con la API web y los deje en SavedVariables (el addon no puede hacer peticiones web); el tooltip pasaría a «Vendedor, precio actual (API) y mediana», con su propia clase de dato.

@@ -7,6 +7,8 @@ local FullScan = { inProgress = false }
 addon.FullScan = FullScan
 
 local COOLDOWN, TIMEOUT, SLICE_MS, SLICE_ITEMS = 15 * 60, 120, 6, 200
+-- El cliente carga los objetos poco a poco: se insiste mientras sigan llegando enlaces.
+local MAX_ROUNDS, MAX_STALLED, ROUND_DELAY = 15, 3, 2
 local ticket = 0
 local PET_CAGE = 82800 -- todas las mascotas comparten este identificador: un precio medio no significa nada
 
@@ -117,26 +119,33 @@ local function process(count)
         sliced(#order, record, complete, mine)
     end
 
-    local function retry(round)
+    local function retry(round, stalled)
         if mine ~= ticket then return end
-        local unresolved = {}
+        local unresolved, before, asked = {}, #pending, {}
         sliced(#pending, function(index)
             local ad = pending[index]
             local linkOK, link = false, nil
             if type(getLink) == "function" then linkOK, link = pcall(getLink, ad.position - 1) end
             local key = linkOK and addon.ItemKey.fromLink(link, true)
             if key then add(ad.itemID, key, ad.price, ad.qty)
-            else unresolved[#unresolved + 1] = ad end
+            else
+                unresolved[#unresolved + 1] = ad
+                if not asked[ad.itemID] then
+                    asked[ad.itemID] = true
+                    addon.Compat.call("C_Item.RequestLoadItemDataByID", ad.itemID)
+                end
+            end
         end, function()
             pending = unresolved
-            if #pending == 0 or round >= 3 then recordAndFinish()
-            else addon.Compat.call("C_Timer.After", 1, function() retry(round + 1) end) end
+            stalled = #pending < before and 0 or stalled + 1
+            if #pending == 0 or round >= MAX_ROUNDS or stalled >= MAX_STALLED then recordAndFinish()
+            else addon.Compat.call("C_Timer.After", ROUND_DELAY, function() retry(round + 1, stalled) end) end
         end, mine)
     end
 
     sliced(count, read, function()
         if #pending == 0 then recordAndFinish()
-        else addon.Compat.call("C_Timer.After", 1, function() retry(1) end) end
+        else addon.Compat.call("C_Timer.After", 1, function() retry(1, 0) end) end
     end, mine)
 end
 

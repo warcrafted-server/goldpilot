@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.6.2] - 2026-11-24
+
+### Corregido
+- Parche: el escaneo insiste mientras el cliente siga cargando equipo (en juego se descartaban 20 547 anuncios de 314 675 por falta de enlace).
+
 ## [0.6.1] - 2026-11-24
 
 ### Corregido
