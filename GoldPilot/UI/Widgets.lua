@@ -46,72 +46,101 @@ local function text(parent, value, size, color)
     return label
 end
 
+-- Marco nativo con retrato; si el cliente no tiene la plantilla, marco propio con título y cierre.
 function Widgets.window(name, title, width, height)
-    local root = frame("Frame", name, UIParent, "BackdropTemplate")
+    local root = frame("Frame", name, UIParent, "PortraitFrameTemplate")
+    local native = root.SetPortraitToAsset ~= nil or root.PortraitContainer ~= nil
     root:SetSize(width, height)
     root:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-    root:SetFrameStrata("DIALOG")
+    root:SetFrameStrata("HIGH")
     root:SetMovable(true)
     root:EnableMouse(true)
     root:SetClampedToScreen(true)
-    backdrop(root)
     root:RegisterForDrag("LeftButton")
     root:SetScript("OnDragStart", function(self) if not inCombat() then self:StartMoving() end end)
     root:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+    root.native = native
 
-    local heading = text(root, title, 16, { 1, 0.82, 0.2 })
-    heading:SetPoint("TOPLEFT", root, "TOPLEFT", 16, -12)
-    local close = frame("Button", nil, root, "UIPanelCloseButton")
-    close:SetSize(24, 24)
-    close:SetPoint("TOPRIGHT", root, "TOPRIGHT", -4, -4)
-    close:SetScript("OnClick", function() root:Hide() end)
-    root.closeButton = close
-    root.title = heading
+    if native then
+        if root.SetTitle then pcall(root.SetTitle, root, title) end
+        if root.SetPortraitToAsset then pcall(root.SetPortraitToAsset, root, addon.Theme.iconPath()) end
+        solidBackground(root, { 0.082, 0.063, 0.043, 0.92 })
+        -- El relleno no debe asomar por fuera del marco.
+        if root.solidFill and root.solidFill.ClearAllPoints then
+            root.solidFill:ClearAllPoints()
+            root.solidFill:SetPoint("TOPLEFT", root, "TOPLEFT", 3, -22)
+            root.solidFill:SetPoint("BOTTOMRIGHT", root, "BOTTOMRIGHT", -3, 3)
+        end
+        root.closeButton = root.CloseButton
+    else
+        backdrop(root)
+        local heading = text(root, title, 14, { 0.9, 0.72, 0.29 })
+        heading:SetPoint("TOPLEFT", root, "TOPLEFT", 16, -8)
+        root.title = heading
+    end
+    if not root.closeButton then
+        local close = frame("Button", nil, root, "UIPanelCloseButton")
+        close:SetSize(24, 24)
+        close:SetPoint("TOPRIGHT", root, "TOPRIGHT", -4, -4)
+        root.closeButton = close
+    end
+    root.closeButton:SetScript("OnClick", function() root:Hide() end)
     return root
 end
 
--- Un botón sin plantilla no tiene texto visible: se le da fuente, fondo y línea de selección.
-function Widgets.tabButton(parent, name, label, index)
-    local button = frame("Button", nil, parent)
-    button:SetSize(140, 28)
-    button:SetPoint("LEFT", parent, "LEFT", (index - 1) * 146, 0)
+-- Pestaña nativa colgada bajo la ventana; sin la plantilla, botón propio con fuente, fondo y línea.
+function Widgets.tabButton(bar, name, label)
+    local button = frame("Button", nil, bar, "PanelTabButtonTemplate")
+    local previous = bar.buttons[#bar.buttons]
     button.name, button.label = name, label
-    local fill = button:CreateTexture(nil, "BACKGROUND")
-    fill:SetAllPoints()
-    fill:SetColorTexture(0.2, 0.15, 0.09, 0.9)
-    button.fill = fill
-    local line = button:CreateTexture(nil, "ARTWORK")
-    line:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
-    line:SetSize(140, 2)
-    line:SetColorTexture(1, 0.82, 0.2, 1)
-    line:Hide()
-    button.line = line
-    if button.SetNormalFontObject then button:SetNormalFontObject("GameFontNormal") end
-    button:SetText(label)
+    button.native = button.Left ~= nil or button.LeftActive ~= nil
+    if button.native then
+        button:SetText(label)
+        if PanelTemplates_TabResize then pcall(PanelTemplates_TabResize, button, 0) end
+        if button.GetWidth and (button:GetWidth() or 0) <= 0 then button:SetWidth(100) end
+        if previous then button:SetPoint("TOPLEFT", previous, "TOPRIGHT", -12, 0)
+        else button:SetPoint("TOPLEFT", bar, "TOPLEFT", 0, 0) end
+    else
+        button:SetSize(120, 28)
+        if previous then button:SetPoint("TOPLEFT", previous, "TOPRIGHT", 4, 0)
+        else button:SetPoint("TOPLEFT", bar, "TOPLEFT", 0, 0) end
+        local fill = button:CreateTexture(nil, "BACKGROUND")
+        fill:SetAllPoints()
+        button.fill = fill
+        if button.SetNormalFontObject then button:SetNormalFontObject("GameFontNormal") end
+        button:SetText(label)
+    end
     return button
 end
 
-function Widgets.tabs(parent, definitions, onChange)
+function Widgets.tabs(parent, onChange)
     local bar = frame("Frame", nil, parent)
-    bar:SetSize(720, 34)
-    bar:SetPoint("TOPLEFT", parent, "TOPLEFT", 16, -42)
+    bar:SetSize(720, 32)
+    bar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 12, 2)
     bar.buttons, bar.selected = {}, nil
+    function bar:mark(name)
+        self.selected = name
+        for _, button in ipairs(self.buttons) do
+            local active = button.name == name
+            if button.native then
+                local paint = active and PanelTemplates_SelectTab or PanelTemplates_DeselectTab
+                if paint then pcall(paint, button) end
+            elseif button.fill then
+                button.fill:SetColorTexture(active and 0.42 or 0.13, active and 0.31 or 0.1, active and 0.12 or 0.07, 0.96)
+            end
+        end
+    end
     function bar:select(name)
         if inCombat() then return false end
-        self.selected = name
-        for _, item in ipairs(self.buttons) do
-            local active = item.name == name
-            if item.fill then item.fill:SetColorTexture(active and 0.32 or 0.2, active and 0.24 or 0.15, active and 0.13 or 0.09, 1) end
-            if item.line then if active then item.line:Show() else item.line:Hide() end end
-            if active then item:SetText("|cffffd100" .. item.label .. "|r")
-            else item:SetText("|cffd8c7a3" .. item.label .. "|r") end
-        end
+        self:mark(name)
         if onChange then onChange(name) end
     end
-    for i, item in ipairs(definitions) do
-        local button = Widgets.tabButton(bar, item.name, item.label, i)
-        button:SetScript("OnClick", function() bar:select(item.name) end)
-        bar.buttons[#bar.buttons + 1] = button
+    function bar:add(name, label)
+        local button = Widgets.tabButton(self, name, label)
+        button:SetScript("OnClick", function() bar:select(name) end)
+        self.buttons[#self.buttons + 1] = button
+        if self.selected then self:mark(self.selected) end
+        return button
     end
     return bar
 end
@@ -246,25 +275,43 @@ function Widgets.detail(parent)
     return panel
 end
 
+-- Tarjetas de métricas: valor grande y etiqueta debajo.
 function Widgets.metrics(parent, values)
     local strip = frame("Frame", nil, parent)
     strip:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 16, 16)
-    strip:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -16, 16)
-    strip:SetHeight(42)
+    strip:SetSize(664, 50)
     strip.items = {}
+    local function card(index)
+        local item = frame("Frame", nil, strip)
+        local fill = item:CreateTexture(nil, "BACKGROUND")
+        fill:SetAllPoints()
+        fill:SetColorTexture(0.04, 0.03, 0.02, 0.75)
+        local edge = item:CreateTexture(nil, "BORDER")
+        edge:SetPoint("BOTTOMLEFT", item, "BOTTOMLEFT", 0, 0)
+        edge:SetPoint("BOTTOMRIGHT", item, "BOTTOMRIGHT", 0, 0)
+        edge:SetSize(10, 1)
+        edge:SetColorTexture(0.35, 0.27, 0.19, 1)
+        item.value = text(item, "", 15, { 1, 1, 1 })
+        item.value:SetPoint("TOP", item, "TOP", 0, -8)
+        item.label = text(item, "", 11, { 0.64, 0.58, 0.49 })
+        item.label:SetPoint("BOTTOM", item, "BOTTOM", 0, 7)
+        strip.items[index] = item
+        return item
+    end
     function strip:setItems(items)
         if inCombat() then return false end
         items = items or {}
-        local step = (self.contentWidth or 728) / math.max(1, #items)
-        for i, item in ipairs(items) do
-            local label = self.items[i]
-            if not label then
-                label = text(self, "", 11)
-                self.items[i] = label
-            end
-            label:SetText("|cffa89878" .. (item.label or "") .. "|r  " .. (item.value or ""))
-            label:SetPoint("LEFT", self, "LEFT", (i - 1) * step, 0)
-            label:Show()
+        local gap, total = 8, self.contentWidth or 664
+        local width = (total - gap * math.max(0, #items - 1)) / math.max(1, #items)
+        for i, data in ipairs(items) do
+            local item = self.items[i] or card(i)
+            item:SetSize(width, 50)
+            item:ClearAllPoints()
+            item:SetPoint("TOPLEFT", self, "TOPLEFT", (i - 1) * (width + gap), 0)
+            item.value:SetText(data.value or "")
+            item.label:SetText(data.label or "")
+            if item.value.SetTextColor then item.value:SetTextColor(unpack(data.color or { 1, 1, 1 })) end
+            item:Show()
         end
         for i = #items + 1, #self.items do self.items[i]:Hide() end
         return true

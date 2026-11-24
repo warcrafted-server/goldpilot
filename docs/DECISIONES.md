@@ -89,3 +89,15 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 
 - **Contexto:** wowdata no incluía objetos reales de Forever (2973, 9747).
 - **Decisión:** se descarta la lista de objetos generada. Los objetos salen solo del juego: subasta, bolsas, banco y equipo. Las semillas de nodos de D11 continúan generándose desde wowdata.
+
+## D16. Rutas de recolección — aceptada (2026-11-24)
+
+- **Contexto:** la propuesta las descartaba porque Gatherer Reforged y GatherMate ya muestran nodos.
+- **Decisión:** GoldPilot propone un circuito por zona ordenado por oro por hora con los precios observados y la habilidad del jugador. Las posiciones propias mandan; las de wowdata solo son semilla (D11) y no se publican hasta revisar si su licencia permite redistribuirlas.
+- **Límite:** no se conoce el terreno (montañas, agua, enemigos): la ruta es orientativa y se corrige con el recorrido real.
+- **Descartado:** copiar rutas o imágenes de guías de terceros.
+
+## D17. Asistente: «qué hago ahora» es el centro — aceptada (2026-11-24)
+
+- **Decisión:** la pestaña principal será «Ahora»: una lista corta de acciones ordenadas por oro por hora o por ganancia, cada una con su porqué y su confianza. Las demás pestañas (Inventario, Libro, Rutas) la alimentan.
+- **Orden:** primero lo que ya se puede aconsejar con datos (vender, recoger correo, reservar), y se amplía según haya sesión de recolección y rutas.

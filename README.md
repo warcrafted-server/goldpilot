@@ -4,7 +4,7 @@ Addon de economía para **World of Warcraft: Forever**. Muestra precios de vende
 
 Comandos disponibles: `/gp` abre o cierra la ventana principal, `/gp window` hace lo mismo y `/gp help` muestra la ayuda. `/gp diag` genera un diagnóstico del cliente y de las ventanas abiertas; `/gp bags` muestra el valor estimado de las bolsas como vendedor, subasta neta y mejor combinación. El botón del minimapa abre la ventana con clic izquierdo y ejecuta el diagnóstico con clic derecho. Usa `/gp minimap` para ocultarlo o mostrarlo. `/gp watch <enlace>` sigue o deja de seguir un objeto; `/gp scan` hace un escaneo completo de la subasta abierta; `/gp ledger` resume las operaciones del mes.
 
-> **Versión 0.8.2.** Los objetos proceden del juego: subasta, bolsas, banco y equipo. wowdata continúa aportando semillas de nodos.
+> **Versión 0.8.3.** Los objetos proceden del juego: subasta, bolsas, banco y equipo. wowdata continúa aportando semillas de nodos.
 
 ## Documentación
 

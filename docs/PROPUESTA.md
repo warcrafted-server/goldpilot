@@ -58,7 +58,6 @@ Un **addon autosuficiente** con la misma estructura probada en LoreWake (núcleo
 | Escaneo completo periódico dentro del juego | Limitado por el servidor y devuelve vacío; además TSM y Auctionator ya lo hacen. La visión completa del mercado viene de la aplicación |
 | Cualquier automatización (publicar, comprar, cancelar en bloque sin clic) | Exige pulsación del jugador por diseño del juego y rozaría las normas. El asistente rellena precios; el jugador confirma cada acción |
 | Alertas de chollos en tiempo real | Imposible sin escanear continuamente; la aplicación solo ve instantáneas |
-| Rutas de recolección dibujadas | Gatherer Reforged y GatherMate ya lo hacen con miles de nodos. GoldPilot recomienda la **zona** y se integra con TomTom para marcar puntos de entrada |
 | Base de precios propia empaquetada en el addon | Datos de días de antigüedad presentados como actuales; posible conflicto con los términos de la API. La aplicación la genera para cada usuario con su propia clave |
 | Gráficas detalladas dentro del juego | Caras de dibujar y poco legibles en la interfaz del juego; en el juego basta una mini tendencia (subiendo, estable, bajando) y el detalle va a la aplicación |
 

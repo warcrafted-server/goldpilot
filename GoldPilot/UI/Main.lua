@@ -50,20 +50,18 @@ local function buildWindow()
         local builder = Main.tabs[name]
         if builder then builder(pages[name], frame) end
     end
-    Main.tabsBar = addon.Widgets.tabs(frame, {}, showTab)
+    Main.tabsBar = addon.Widgets.tabs(frame, showTab)
     Main.pages = pages
     Main.selectTab = showTab
 
     local function addPage(name, label, builder)
         local page = CreateFrame("Frame", nil, frame)
-        page:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -76)
+        page:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -24)
         page:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
         page:Hide()
         pages[name] = page
         Main.tabs[name] = builder
-        local button = addon.Widgets.tabButton(Main.tabsBar, name, label, #Main.tabsBar.buttons + 1)
-        button:SetScript("OnClick", function() Main.tabsBar:select(name) end)
-        Main.tabsBar.buttons[#Main.tabsBar.buttons + 1] = button
+        Main.tabsBar:add(name, label)
         Main.tabOrder[#Main.tabOrder + 1] = name
     end
 
@@ -85,15 +83,15 @@ local function buildWindow()
                     dbSettings.minimap.hidden = not checked
                     if addon.Minimap and addon.Minimap.setVisible then addon.Minimap:setVisible(checked) end
                 end)
-            page.minimapCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -24)
+            page.minimapCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -64)
             page.tooltipCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_TOOLTIP,
                 dbSettings.tooltip ~= false, function(checked)
                     if inCombat() then return end
                     dbSettings.tooltip = checked
                 end)
-            page.tooltipCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -68)
+            page.tooltipCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -100)
             local fieldsTitle = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            fieldsTitle:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -118)
+            fieldsTitle:SetPoint("TOPLEFT", page, "TOPLEFT", 32, -148)
             fieldsTitle:SetText(addon.L.SETTING_FIELDS)
             page.fieldCheckboxes = {}
             dbSettings.tooltipFields = dbSettings.tooltipFields or {}
@@ -103,7 +101,7 @@ local function buildWindow()
                         if inCombat() then return end
                         dbSettings.tooltipFields[field] = checked
                     end)
-                box:SetPoint("TOPLEFT", page, "TOPLEFT", 40, -142 - (i - 1) * 32)
+                box:SetPoint("TOPLEFT", page, "TOPLEFT", 44, -172 - (i - 1) * 32)
                 page.fieldCheckboxes[field] = box
             end
             page.scanCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_FULLSCAN,
@@ -111,7 +109,7 @@ local function buildWindow()
                     if inCombat() then return end
                     dbSettings.fullScan = checked
                 end)
-            page.scanCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -290)
+            page.scanCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 28, -314)
         else
             page.minimapCheckbox:SetChecked(not dbSettings.minimap.hidden)
             page.tooltipCheckbox:SetChecked(dbSettings.tooltip ~= false)
@@ -146,13 +144,11 @@ function Main:registerTab(name, builder)
     if not found then self.registeredTabs[#self.registeredTabs + 1] = { name = name, builder = builder } end
     if self.frame and not self.pages[name] then
         local page = CreateFrame("Frame", nil, self.frame)
-        page:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -76)
+        page:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -24)
         page:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", 0, 0)
         page:Hide()
         self.pages[name] = page
-        local button = addon.Widgets.tabButton(self.tabsBar, name, name, #self.tabsBar.buttons + 1)
-        button:SetScript("OnClick", function() self.tabsBar:select(name) end)
-        self.tabsBar.buttons[#self.tabsBar.buttons + 1] = button
+        self.tabsBar:add(name, name)
         self.tabOrder[#self.tabOrder + 1] = name
     end
     return true
@@ -162,7 +158,7 @@ function Main:show()
     if inCombat() then addon.Log:info(addon.L.COMBAT_BLOCKED); return false end
     local frame = buildWindow()
     frame:Show()
-    if self.selectTab then self.selectTab(self.activeTab or "inventory") end
+    if self.tabsBar then self.tabsBar:select(self.activeTab or "inventory") end
     return true
 end
 
@@ -173,6 +169,6 @@ end
 function Main:toggle()
     if inCombat() then addon.Log:info(addon.L.COMBAT_BLOCKED); return false end
     local frame = buildWindow()
-    if frame.IsShown and frame:IsShown() then frame:Hide() else frame:Show() end
-    return true
+    if frame.IsShown and frame:IsShown() then frame:Hide(); return true end
+    return self:show()
 end

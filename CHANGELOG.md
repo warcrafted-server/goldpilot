@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.8.3] - 2026-11-24
+
+### Cambiado
+- Parche de presentación: ventana nativa con retrato, pestañas bajo la ventana y métricas en tarjetas.
+
+### Corregido
+- Abrir la ventana desde el minimapa refresca la pestaña activa.
+
 ## [0.8.2] - 2026-11-24
 
 ### Cambiado

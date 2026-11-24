@@ -60,13 +60,6 @@ function addon.Minimap:setVisible(visible)
     return true
 end
 
--- En la copia de desarrollo (junction a la raíz del repo) el addon está en una subcarpeta.
-local function iconPath()
-    local folder = addon.name or "GoldPilot"
-    if folder == "GoldPilotDev" then return "Interface/AddOns/GoldPilotDev/GoldPilot/Media/Icon" end
-    return "Interface/AddOns/" .. folder .. "/Media/Icon"
-end
-
 addon.Modules:register("minimap", {
     onEnable = function()
         if inCombat() or not CreateFrame or not Minimap then return end
@@ -116,7 +109,7 @@ addon.Modules:register("minimap", {
 
         local icon = button:CreateTexture(nil, "ARTWORK")
         icon:SetAllPoints()
-        icon:SetTexture(iconPath())
+        icon:SetTexture(addon.Theme.iconPath())
         button.icon = icon
         position(button, settings.angle)
         if settings.hidden then button:Hide() end
@@ -124,7 +117,7 @@ addon.Modules:register("minimap", {
         if AddonCompartmentFrame and AddonCompartmentFrame.RegisterAddon then
             pcall(AddonCompartmentFrame.RegisterAddon, AddonCompartmentFrame, {
                 text = addon.L.MINIMAP_TITLE,
-                icon = iconPath(),
+                icon = addon.Theme.iconPath(),
                 notCheckable = true,
                 func = function(_, _, mouseButton)
                     if mouseButton == "RightButton" then addon.Diag:run() else showMainAction() end

@@ -134,7 +134,7 @@ end
 local function makeButton(parent, label, x, callback)
     local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     button:SetSize(120, 24)
-    button:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", x, 64)
+    button:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", x, 20)
     button:SetText(label)
     button:SetScript("OnClick", function() if not inCombat() then callback() end end)
     return button
@@ -165,7 +165,7 @@ function InventoryUI:refresh()
     self.page._inventoryRows = shown
     self.widgets.list:setRows(rows)
     self.widgets.metrics:setItems({
-        { label = addon.L.INVENTORY_BEST, value = addon.Theme.money(built.totals.valueBest) },
+        { label = addon.L.INVENTORY_BEST, value = addon.Theme.money(built.totals.valueBest), color = { 0.5, 0.88, 0.54 } },
         { label = addon.L.INVENTORY_VENDOR_TOTAL, value = addon.Theme.money(built.totals.valueVendor) },
         { label = addon.L.INVENTORY_WITHOUT_PRICE, value = tostring(built.totals.withoutPrice) },
         { label = addon.L.INVENTORY_STALE, value = tostring(built.totals.stale) },
@@ -201,16 +201,19 @@ function InventoryUI:build(page)
     page._inventoryRows = {}
     self.widgets = { list = addon.Widgets.list(page, nil, LIST_WIDTH), detail = addon.Widgets.detail(page), metrics = addon.Widgets.metrics(page, {}) }
     self.widgets.list:ClearAllPoints()
-    self.widgets.list:SetPoint("TOPLEFT", page, "TOPLEFT", 20, -52)
-    self.widgets.list:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 20, 58)
+    self.widgets.list:SetPoint("TOPLEFT", page, "TOPLEFT", 20, -108)
+    self.widgets.list:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 20, 20)
     self.widgets.list:SetWidth(LIST_WIDTH)
     self.widgets.detail:ClearAllPoints()
-    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", DETAIL_X, -48)
-    self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -16, 96)
+    self.widgets.detail:SetPoint("TOPLEFT", page, "TOPLEFT", DETAIL_X, -104)
+    self.widgets.detail:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -14, 52)
     self.widgets.detail.contentWidth = 330 - 24
+    self.widgets.metrics:ClearAllPoints()
+    self.widgets.metrics:SetPoint("TOPLEFT", page, "TOPLEFT", 76, -12)
+    self.widgets.metrics.contentWidth = 668
     local listBackground = addon.Widgets.frame("Frame", nil, page, "BackdropTemplate")
-    listBackground:SetPoint("TOPLEFT", page, "TOPLEFT", 14, -48)
-    listBackground:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", 20 + LIST_WIDTH + 26, 54)
+    listBackground:SetPoint("TOPLEFT", page, "TOPLEFT", 14, -104)
+    listBackground:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", 20 + LIST_WIDTH + 26, 16)
     if listBackground.SetFrameLevel and self.widgets.list.GetFrameLevel then
         listBackground:SetFrameLevel(math.max(0, self.widgets.list:GetFrameLevel() - 1))
     end
@@ -227,19 +230,19 @@ function InventoryUI:build(page)
     page.emptyText:Hide()
     self.scopeButton = CreateFrame("Button", nil, page, "UIPanelButtonTemplate")
     self.scopeButton:SetSize(150, 24)
-    self.scopeButton:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -12)
+    self.scopeButton:SetPoint("TOPLEFT", page, "TOPLEFT", 16, -72)
     self.scopeButton:SetScript("OnClick", function() if not inCombat() then self.account = not self.account; self:refresh() end end)
     self.hideCheckbox = addon.Widgets.checkbox(page, addon.L.INVENTORY_HIDE_RESERVED, self.hideReserved, function(value)
         if not inCombat() then self.hideReserved = value; self:refresh() end
     end)
-    self.hideCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 176, -10)
+    self.hideCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 176, -70)
     self.watchedCheckbox = addon.Widgets.checkbox(page, addon.L.INVENTORY_ONLY_WATCHED, self.onlyWatched, function(value)
         if not inCombat() then self.onlyWatched = value; self:refresh() end
     end)
-    self.watchedCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 356, -10)
+    self.watchedCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 356, -70)
     self.filterBox = CreateFrame("EditBox", nil, page, "InputBoxTemplate")
     self.filterBox:SetSize(190, 24)
-    self.filterBox:SetPoint("TOPRIGHT", page, "TOPRIGHT", -16, -12)
+    self.filterBox:SetPoint("TOPRIGHT", page, "TOPRIGHT", -16, -72)
     if self.filterBox.SetAutoFocus then self.filterBox:SetAutoFocus(false) end
     local hint = page:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     hint:SetPoint("LEFT", self.filterBox, "LEFT", 8, 0)

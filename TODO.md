@@ -43,5 +43,4 @@
 - Tiempos de reaparición de nodos: la observación propia no los predice con muchos jugadores por capa (D8).
 - Escaneo de resumen como el de Auctionator: el completo da también la mediana, en 30-40 s sin tirones.
 - Automatizar acciones de subasta: requiere clic del jugador y rozaría las normas.
-- Rutas de recolección dibujadas: ya las ofrecen Gatherer Reforged y GatherMate; GoldPilot recomienda la zona.
 - Base de precios empaquetada en el addon: datos viejos presentados como actuales.
