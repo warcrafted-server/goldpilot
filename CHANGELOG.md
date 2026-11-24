@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.8.4] - 2026-11-24
+
+### Corregido
+- Parche: las pestañas inferiores ya no se solapan.
+
 ## [0.8.3] - 2026-11-24
 
 ### Cambiado

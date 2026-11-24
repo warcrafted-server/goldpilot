@@ -96,9 +96,9 @@ function Widgets.tabButton(bar, name, label)
     button.native = button.Left ~= nil or button.LeftActive ~= nil
     if button.native then
         button:SetText(label)
-        if PanelTemplates_TabResize then pcall(PanelTemplates_TabResize, button, 0) end
+        if PanelTemplates_TabResize then pcall(PanelTemplates_TabResize, button, 24) end
         if button.GetWidth and (button:GetWidth() or 0) <= 0 then button:SetWidth(100) end
-        if previous then button:SetPoint("TOPLEFT", previous, "TOPRIGHT", -12, 0)
+        if previous then button:SetPoint("TOPLEFT", previous, "TOPRIGHT", 3, 0)
         else button:SetPoint("TOPLEFT", bar, "TOPLEFT", 0, 0) end
     else
         button:SetSize(120, 28)
