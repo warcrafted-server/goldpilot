@@ -21,7 +21,7 @@ Comandos disponibles: `/gp diag` genera un diagnóstico del cliente y de las ven
 
 ## Instalación
 
-- Instálalo desde CurseForge cuando esté disponible, o copia la carpeta `GoldPilot` en `World of Warcraft\_classic_era_\Interface\AddOns` (la ruta concreta puede variar según la instalación de Forever).
+- Instálalo desde CurseForge cuando esté disponible, o copia la carpeta `GoldPilot` en `World of Warcraft\_forever_\Interface\AddOns` y reinicia el juego.
 - Comprueba que el addon esté activado en la pantalla de selección de personaje.
 
 ## Uso

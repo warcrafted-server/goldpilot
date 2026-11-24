@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.2.1] - 2026-11-24
+
+### Añadido
+- Logo del proyecto (`docs/img/logo.png`, generado con `tools/generar_logo.py`), pruebas automáticas en GitHub y `tools/comprobar_release.py` para revisar la versión antes de etiquetar
+
+### Corregido
+- La ruta de instalación manual del README apuntaba a `_classic_era_`; la de Forever es `_forever_`
+
 ## [0.2.0] - 2026-11-24
 
 ### Añadido
