@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.2.2] - 2026-11-24
+
+### Cambiado
+- Logo rediseñado (moneda de oro con rosa de los vientos; `tools/generar_logo.py` ahora usa Pillow, solo para desarrollo)
+- `docs/CURSEFORGE.md` pasa a ser la ficha completa del proyecto: categorías, resúmenes y descripciones en inglés y castellano
+
 ## [0.2.1] - 2026-11-24
 
 ### Añadido
