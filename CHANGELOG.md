@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Cambiado
+- Capturas de Libro y del tooltip con el aspecto actual y sin nombres de personajes.
+
 ## [0.15.6] - 2026-11-25
 
 Parche: el paquete deja de incluir datos de terceros; la ruta funciona igual con los nodos propios.
