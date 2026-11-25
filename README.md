@@ -30,7 +30,7 @@ Comandos disponibles: `/gpilot` abre o cierra la ventana principal, `/gpilot win
 - Cambia entre el personaje actual y toda la cuenta con el botón de ámbito de Ahora.
 - Inventario muestra el valor neto de lo vendible, el valor si todo se vende al vendedor, los objetos sin precio y las observaciones viejas. Cambia entre el personaje actual y toda la cuenta, filtra por nombre, oculta reservados y selecciona un objeto para ver cantidades por personaje y ubicación, precios y recomendación. Reservar aparta toda la cantidad (Mayús reserva una unidad más); Seguir añade el objeto a las consultas de subasta. Ajustes permite configurar la interfaz.
 - Libro muestra ventas, compras y devoluciones agrupadas por objeto. Filtra por personaje o cuenta y por los últimos 7 días, 30 días o todo el historial.
-- Zonas reúne el oro por hora medido de cada zona y el historial de sesiones; crea una ruta de recolección de hierbas y minerales que se dibuja en el mapa del mundo. La ruta se crea con los nodos que has recogido tú: el paquete publicado no incluye semillas de posiciones, así que empieza con pocos puntos y crece con cada visita. La ruta sigue tu posición, resalta la siguiente parada, la marca en TomTom si quieres y ajusta el peso de los puntos con las visitas con y sin nodo.
+- Zonas reúne el oro por hora medido de cada zona y el historial de sesiones; crea una ruta de recolección de hierbas y minerales que se dibuja en el mapa del mundo. La ruta se crea con los nodos que has recogido tú: el paquete publicado no incluye semillas de nodos ni de posiciones, así que empieza con pocos puntos y crece con cada visita. La ruta sigue tu posición, resalta la siguiente parada, la marca en TomTom si quieres y ajusta el peso de los puntos con las visitas con y sin nodo.
 - Cualquier botín de nodos y criaturas (desuello incluido) abre un panel movible con el oro por hora de la sesión; pasa a pausa si dejas de recoger y resume la sesión en el chat al terminar. El panel se muestra u oculta con la casilla de Ajustes. Tras 20 minutos activos, Ahora añade el consejo de tu mejor zona.
 
 ## Desarrollo
@@ -53,4 +53,4 @@ Datos de juego de World of Warcraft (c) Blizzard Entertainment; proyecto no afil
 | Componente | Autor | Licencia | Enlace |
 | --- | --- | --- | --- |
 
-Este proyecto no contiene material de terceros.
+El paquete publicado no contiene material de terceros. Las semillas de nodos generadas desde wowdata (con datos de Questie) solo se usan en local, en `Data/Local/`, y no se publican.

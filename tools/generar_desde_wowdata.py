@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Genera semillas de nodos desde wowdata."""
+"""Genera Data/Local/NodeSeeds.lua desde wowdata: solo para pruebas locales, no se publica.
+
+Los datos vienen de Questie y de manual/nodes.json, con licencia de terceros sin resolver.
+"""
 import argparse
 import datetime
 import os
@@ -21,7 +24,7 @@ def cargar_nodos(db):
 
 
 def render_nodos(rows, fecha):
-    lines = ["-- Generado: " + fecha + " | Origen: wowdata | Nodos: " + str(len(rows)),
+    lines = ["-- Semilla local de wowdata: no redistribuir", "-- Generado: " + fecha + " | Origen: wowdata | Nodos: " + str(len(rows)),
              "local _, GP = ...", "GP.DataNodeSeeds = {"]
     lines.extend('    "%s;%d;%d;%d;%d;%s",' % row for row in rows)
     lines.append("}")
@@ -38,7 +41,7 @@ def generar(db_path, addon_dir, fecha):
 
 def generar_desde_conexion(db, addon_dir, fecha):
     nodos = cargar_nodos(db)
-    generated = os.path.join(addon_dir, "Data", "Generated")
+    generated = os.path.join(addon_dir, "Data", "Local")
     os.makedirs(generated, exist_ok=True)
     nodes_path = os.path.join(generated, "NodeSeeds.lua")
     with open(nodes_path, "w", encoding="utf-8", newline="\n") as f:

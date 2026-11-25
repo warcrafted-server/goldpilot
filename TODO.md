@@ -2,9 +2,8 @@
 
 ## Alta: antes de la primera publicación
 
-- [ ] Probar en juego la 0.15.3 y las casillas imprescindibles de [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md).
-- [ ] Revisar la licencia de los datos de wowdata de [NodeSeeds.lua](Data/Generated/NodeSeeds.lua), ya publicados en el repositorio.
-- [ ] Comprobar el secreto CF_API_KEY en GitHub, completar la ficha de CurseForge con capturas y, con aprobación expresa, crear el tag.
+- [ ] Probar en juego la 0.15.6 (con el paquete de `tools/empaquetar.py`) y las casillas imprescindibles de [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md).
+- [ ] Completar la ficha de CurseForge con capturas y, con aprobación expresa, crear el tag.
 
 ## Media
 

@@ -1,4 +1,4 @@
-# 0.15.5 (2026-11-25) — English
+# 0.15.6 (2026-11-25) — English
 
 ### First release
 
@@ -14,7 +14,7 @@
 - Movable gathering session panel with gold per hour.
 - Spanish and English. Prices are the ones you have observed yourself; the auction house cut is assumed to be 5%.
 
-# 0.15.5 (2026-11-25) — Español
+# 0.15.6 (2026-11-25) — Español
 
 ### Primera versión
 

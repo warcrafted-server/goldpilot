@@ -9,11 +9,13 @@ import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "GoldPilot.toc")
-LOCAL = os.path.join(ROOT, "Data", "Local", "NodeSpots.lua")
+# Datos de wowdata solo para pruebas locales (no se publican); se cargan antes que Store/.
+LOCAL = ("NodeSeeds.lua", "NodeSpots.lua")
 
 
 def main():
     out = []
+    inserted = False
     with open(SRC, encoding="utf-8") as f:
         for line in f.read().splitlines():
             if line.startswith("## Title:"):
@@ -24,9 +26,12 @@ def main():
                 line = line.replace("AddOns/GoldPilot/", "AddOns/GoldPilotDev/")
             elif line.strip() and not line.startswith("#"):
                 source = line.strip().replace("\\", "/")
+                if source.startswith("Store/") and not inserted:
+                    inserted = True
+                    for name in LOCAL:
+                        if os.path.exists(os.path.join(ROOT, "Data", "Local", name)):
+                            out.append("Data\\Local\\" + name)
                 out.append(source.replace("/", "\\"))
-                if source == "Data/Generated/NodeSeeds.lua" and os.path.exists(LOCAL):
-                    out.append("Data\\Local\\NodeSpots.lua")
                 continue
             out.append(line)
     with open(os.path.join(ROOT, "GoldPilotDev.toc"), "w", encoding="utf-8", newline="\n") as f:

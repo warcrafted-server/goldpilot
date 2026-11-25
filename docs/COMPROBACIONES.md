@@ -4,7 +4,7 @@
 
 Con `GoldPilotDev` activo:
 
-- [ ] Carga sin errores de Lua y `/gpilot version` muestra la 0.15.5.
+- [ ] Carga sin errores de Lua y `/gpilot version` muestra la 0.15.6.
 - [ ] Tooltip: precio de vendedor, precio de subasta con su antigüedad y, con Mayús, el detalle.
 - [ ] Subasta: el escaneo completo arranca y termina; al reabrir antes de 15 min no lo repite.
 - [ ] Ahora: aparecen las tarjetas, seis caben sin tocar el borde y el selector de ámbito responde.
@@ -16,7 +16,7 @@ Con `GoldPilotDev` activo:
 - [ ] En combate no se abre ni redibuja nada.
 - [ ] `/reload` conserva precios, libro y sesiones.
 
-Con el paquete publicable (`python tools/empaquetar.py`, descomprimir `dist/GoldPilot-0.15.5.zip` en `AddOns` y desactivar `GoldPilotDev`):
+Con el paquete publicable (`python tools/empaquetar.py`, descomprimir `dist/GoldPilot-0.15.6.zip` en `AddOns` y desactivar `GoldPilotDev`):
 
 - [ ] Carga sin errores y, sin nodos propios, crear una ruta avisa sin fallar.
 - [ ] Capturas para CurseForge: tooltip, Ahora, Inventario, Libro y Zonas con la ruta.
