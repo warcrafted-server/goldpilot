@@ -15,26 +15,26 @@ Diseño técnico inicial (2026-11-23). Producto y prioridades en [PROPUESTA.md](
 ## 2. Estructura del repositorio
 
 ```
-GoldPilot/                 Carpeta del addon (lo que se instala en Interface/AddOns)
-  GoldPilot.toc
-  Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations
-  Locales/                 Locale.lua, enUS.lua, esES.lua
-  Data/                    Semillas de nodos generadas desde wowdata (y la local opcional en Local/)
-  Store/                   Almacén de precios, historial, libro de operaciones y visitas de la ruta (lógica pura)
-  State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, RoutePlan, RouteFollow, Location
-  Engine/                  Valoración, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
-  Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan
-  UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión, mapa y rutas
-  API.lua                  API pública mínima para otros addons
-companion/                 Aplicación externa opcional (Python), fuera del paquete del addon
-tests/                     Pruebas fuera del juego (lupa + simulación de la API)
-tools/                     Empaquetar, generar datos desde wowdata, validar
+Raíz del repo = carpeta del addon (lo que se instala en Interface/AddOns/GoldPilot)
+GoldPilot.toc
+Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations
+Locales/                 Locale.lua, enUS.lua, esES.lua
+Data/                    Semillas de nodos generadas desde wowdata (y la local opcional en Local/)
+Store/                   Almacén de precios, historial, libro de operaciones y visitas de la ruta (lógica pura)
+State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, RoutePlan, RouteFollow, Location
+Engine/                  Valoración, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
+Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan
+UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión, mapa y rutas
+API.lua                  API pública mínima para otros addons
+companion/               Aplicación externa opcional (Python), fuera del paquete (ignorada en .pkgmeta)
+tests/                   Pruebas fuera del juego (lupa + simulación de la API)
+tools/                   Empaquetar, generar datos desde wowdata, validar
 docs/
 ```
 
-- El addon vive en una subcarpeta (como LoreWake) para que el repositorio pueda contener la aplicación. El empaquetado de CurseForge (BigWigs packager, como PocketBank) usa `.pkgmeta` con `move-folders` e `ignore` para publicar solo `GoldPilot/`.
+- El addon vive en la raíz del repositorio, como los demás addons. El empaquetado de CurseForge (BigWigs packager, como PocketBank) usa `.pkgmeta` con `ignore` para publicar solo los archivos del addon.
 - **Globales permitidos:** `GoldPilot` (espacio de nombres y API pública), `GoldPilotDB`, `GoldPilotCharDB`, los de los comandos (`SLASH_GOLDPILOT1/2`, `SlashCmdList.GOLDPILOT`), la función del compartimento de addons y los nombres de las ventanas que deban cerrarse con Escape. Una prueba lo comprueba.
-- **Semilla local:** `tools/generar_semilla_local.py` genera `GoldPilot/Data/Local/NodeSpots.lua` desde `wowdata` en modo lectura para probar en local; no se publica, no se versiona y el TOC de desarrollo la carga si existe.
+- **Semilla local:** `tools/generar_semilla_local.py` genera `Data/Local/NodeSpots.lua` desde `wowdata` en modo lectura para probar en local; no se publica, no se versiona y el TOC de desarrollo la carga si existe.
 - **TOC:** `## Interface: 16001`, `## SavedVariables: GoldPilotDB`, `## SavedVariablesPerCharacter: GoldPilotCharDB`, `## OptionalDeps: GoldPilot_Market, TomTom`, `## X-Curse-Project-ID` cuando exista el proyecto.
 
 ## 3. Núcleo (`Core/`)

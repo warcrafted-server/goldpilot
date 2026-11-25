@@ -20,7 +20,7 @@ def read(*parts):
 def main():
     errors = []
     version = read("VERSION").strip()
-    toc = re.search(r"^## Version:\s*(.+)$", read("GoldPilot", "GoldPilot.toc"), re.M).group(1).strip()
+    toc = re.search(r"^## Version:\s*(.+)$", read("GoldPilot.toc"), re.M).group(1).strip()
     if toc != version:
         errors.append(f"TOC ({toc}) distinto de VERSION ({version})")
     first = re.search(r"^## \[(\d+\.\d+\.\d+)\]", read("CHANGELOG.md"), re.M)
@@ -29,7 +29,7 @@ def main():
     notes = read("docs", "RELEASE_NOTES.md")
     if f"# {version} " not in notes:
         errors.append(f"docs/RELEASE_NOTES.md no tiene la sección de {version}")
-    if "X-Curse-Project-ID" not in read("GoldPilot", "GoldPilot.toc"):
+    if "X-Curse-Project-ID" not in read("GoldPilot.toc"):
         errors.append("falta ## X-Curse-Project-ID en el TOC (sin él CurseForge no recibe el paquete)")
     status = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     if status:

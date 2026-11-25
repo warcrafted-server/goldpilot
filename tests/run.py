@@ -6,8 +6,10 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ADDON = os.path.join(ROOT, "GoldPilot")
+ADDON = ROOT
 LOCAL = os.path.join(ADDON, "Data", "Local")
+# Solo estas carpetas forman el addon; tests/ y tools/ también tienen Lua o Python.
+ADDON_DIRS = ("Core", "Data", "Engine", "Locales", "Media", "State", "Store", "UI")
 ALLOWED = {"GoldPilot", "GoldPilotDB", "GoldPilotCharDB", "SLASH_GOLDPILOT1", "SLASH_GOLDPILOT2", "GoldPilotMainFrame"}
 
 
@@ -23,8 +25,8 @@ def toc_files():
 
 def lua_files():
     # La semilla local se genera aparte y solo la carga el TOC de desarrollo.
-    return sorted(p for p in glob.glob(os.path.join(ADDON, "**", "*.lua"), recursive=True)
-                  if not os.path.abspath(p).startswith(LOCAL + os.sep))
+    paths = [p for d in ADDON_DIRS for p in glob.glob(os.path.join(ADDON, d, "**", "*.lua"), recursive=True)]
+    return sorted(p for p in paths if not os.path.abspath(p).startswith(LOCAL + os.sep))
 
 
 def main():

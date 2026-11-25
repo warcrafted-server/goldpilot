@@ -24,10 +24,10 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Por qué:** ya está probada en el cliente de Forever, la conoces y reduce el riesgo.
 - **Descartado:** Ace3 (más código de terceros y licencias) y una arquitectura nueva sin justificación.
 
-## D5. Addon en subcarpeta y aplicación en el mismo repositorio — propuesta
+## D5. Addon en la raíz del repositorio — aceptada (2026-11-25)
 
-- **Decisión:** `GoldPilot/` (addon) y `companion/` (aplicación) en un solo repositorio; `.pkgmeta` publica solo el addon.
-- **Descartado:** dos repositorios (más coordinación de versiones del formato de intercambio para un solo autor).
+- **Decisión:** el addon vive en la raíz (`GoldPilot.toc`, `Core/`, `UI/`…), como FishForever, PocketBank y BestIcon; `.pkgmeta` excluye con `ignore` lo que no es del addon. Si llega la aplicación, irá en su propia carpeta ignorada por `.pkgmeta` o en otro repositorio.
+- **Sustituye a:** addon en la subcarpeta `GoldPilot/` con `move-folders`, distinto de los demás addons y sin probar en el empaquetador.
 
 ## D6. Canal con la aplicación: SavedVariables + addon de datos — propuesta
 

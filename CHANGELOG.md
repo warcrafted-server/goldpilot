@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.15.5] - 2026-11-25
+
+Parche: cambia la estructura del repositorio, no el addon instalado.
+
+### Cambiado
+- El addon pasa de la subcarpeta `GoldPilot/` a la raíz del repositorio, como los demás addons; `.pkgmeta` ya no usa `move-folders`.
+- `GoldPilotDev.toc` carga los archivos sin prefijo y su icono apunta a `AddOns/GoldPilotDev`.
+- `tools/empaquetar.py` genera el mismo contenido que el empaquetador de CurseForge (carpeta `GoldPilot/` con TOC, código, `LICENSE`, `README.md` y `CHANGELOG.md`).
+
 ## [0.15.4] - 2026-11-25
 
 Parche: solo documentación, sin cambios en el addon.

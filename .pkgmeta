@@ -4,10 +4,6 @@ manual-changelog:
   filename: docs/RELEASE_NOTES.md
   markup-type: markdown
 
-# El empaquetado real no se ha probado.
-move-folders:
-  GoldPilot/GoldPilot: GoldPilot
-
 ignore:
   - docs
   - tools
@@ -23,6 +19,7 @@ ignore:
   - .luacheckrc
   - .gitignore
   - GoldPilotDev.toc
-  - GoldPilot/Data/Local
+  - Data/Local
+  - dist
   - tests
   - .pkgmeta

@@ -8,10 +8,8 @@ addon.Theme = {
     },
 }
 
--- En la copia de desarrollo (junction a la raíz del repo) el addon está en una subcarpeta.
 function addon.Theme.iconPath()
     local folder = addon.name or "GoldPilot"
-    if folder == "GoldPilotDev" then return "Interface/AddOns/GoldPilotDev/GoldPilot/Media/Icon" end
     return "Interface/AddOns/" .. folder .. "/Media/Icon"
 end
 

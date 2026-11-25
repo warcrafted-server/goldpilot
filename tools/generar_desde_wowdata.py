@@ -52,7 +52,7 @@ def main(argv=None):
     parser.add_argument("--db", default=os.environ.get("WOWDATA_DB", DEFAULT_DB))
     parser.add_argument("--fecha", default=datetime.date.today().isoformat())
     args = parser.parse_args(argv)
-    generar(args.db, os.path.join(ROOT, "GoldPilot"), args.fecha)
+    generar(args.db, ROOT, args.fecha)
     return 0
 
 

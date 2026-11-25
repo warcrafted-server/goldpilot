@@ -103,7 +103,7 @@ def main(argv=None):
     parser.add_argument("--mapa", type=int, action="append", dest="mapas",
                         help="uiMapID a incluir (repetible); sin la opción, todos")
     args = parser.parse_args(argv)
-    generar(args.db, os.path.join(ROOT, "GoldPilot"), args.fecha, args.mapas)
+    generar(args.db, ROOT, args.fecha, args.mapas)
     return 0
 
 
