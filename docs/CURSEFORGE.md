@@ -16,7 +16,7 @@ Guía para rellenar el formulario de creación (no se pega entera: cada bloque v
 | Enlaces | Código fuente: `https://github.com/warcrafted-server/goldpilot` (solo si el repositorio es público); incidencias: `…/issues` (idem) |
 | Donaciones | Ninguna |
 | Dependencias | Ninguna obligatoria; TomTom es opcional (marca la siguiente parada de la ruta) |
-| Capturas | El tooltip de un objeto con precio de subasta; Ahora; Inventario; Libro; Zonas con la ruta en el mapa del mundo |
+| Capturas | En `docs/img/capturas/`, en este orden: `tooltip.png`, `ahora.png`, `inventario.png`, `libro.png`, `zonas.png`. Recortadas a la ventana y sin nombres de personajes. Falta una de la ruta en el mapa del mundo |
 
 ## Summary (English, máx. 250 caracteres)
 

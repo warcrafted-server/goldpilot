@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Cambiado
+- Capturas para la ficha de CurseForge en `docs/img/capturas/` (tooltip, Ahora, Inventario, Libro y Zonas), recortadas y sin nombres de personajes; sustituyen a `tooltip-objeto.png`.
+
 ## [0.15.6] - 2026-11-25
 
 Parche: el paquete deja de incluir datos de terceros; la ruta funciona igual con los nodos propios.
