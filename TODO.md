@@ -1,37 +1,28 @@
 # TODO
 
-## Bloqueante: decisiones del autor
+## Alta: antes de la primera publicación
+
+- [ ] Probar en juego la 0.15.3 y las casillas imprescindibles de [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md).
+- [ ] Revisar la licencia de los datos de wowdata de [NodeSeeds.lua](GoldPilot/Data/Generated/NodeSeeds.lua), ya publicados en el repositorio.
+- [ ] Comprobar el secreto CF_API_KEY en GitHub, completar la ficha de CurseForge con capturas y, con aprobación expresa, crear el tag.
+
+## Media
+
+- [ ] Asistente de venta en la subasta (requiere antes un diagnóstico de la ventana de subasta en juego).
+- [ ] Diagnóstico pendiente en juego: botín de mineral y correos de subastas canceladas a mano.
+- [ ] PocketBank: acordar una API pública mínima (existencias por personaje) para que GoldPilot no duplique datos, y que PocketBank pueda mostrar valores de GoldPilot (requiere permiso para tocarlo).
+- [ ] wowdata: importar los nodos observados por GoldPilot (`importar_obs.py`) para sustituir las semillas de Classic (requiere permiso para tocarlo).
+
+## Pendiente de decisión del autor
 
 - [ ] Pasar las decisiones «propuesta» de [docs/DECISIONES.md](docs/DECISIONES.md) a «aceptada» o cambiarlas.
 - [ ] D12: de dónde saca la aplicación los precios regionales (credencial propia de Battle.net, servidor propio o sin API).
 
-## Media: coordinación con otros proyectos (requiere permiso para tocarlos)
-
-- [ ] PocketBank: acordar una API pública mínima (existencias por personaje) para que GoldPilot no duplique datos, y que PocketBank pueda mostrar valores de GoldPilot.
-- [ ] wowdata: importar los nodos observados por GoldPilot (`importar_obs.py`) para sustituir las semillas de Classic.
-
-## Bloqueante antes de publicar la 0.3.0 (pruebas en juego, 2026-11-24)
-
-- [ ] Verificar en juego los arreglos de la 0.3.1: lista ancha con fondo opaco, ficha con botones siempre visibles, filtro con texto de ayuda, estrella y filtro «Solo seguidos», botón del minimapa pegado al borde con el icono nuevo.
-- [ ] Comprobar en juego fuera de ciudad: no se abre ni redibuja en combate.
-- [ ] Comprobado y correcto: tooltip, aviso al terminar la cola, precios tras `/reload`, valor de bolsas, métricas, reservar, `/gpilot diag` (21 presentes, 2 ausentes esperadas), SavedVariables 24 KB con 44 objetos.
-
-## Media: escenario con API de Blizzard (tras D12)
+## Baja: tras D12
 
 - [ ] Aplicación de escritorio que descargue los precios actuales con la API web y los deje en SavedVariables (el addon no puede hacer peticiones web); el tooltip pasaría a «Vendedor, precio actual (API) y mediana», con su propia clase de dato.
-- [ ] Afinado visual final del tooltip y de la ventana con Opus, cuando todo esté hecho.
-- [ ] Diagnóstico pendiente en juego: botín de mineral y correos de subastas canceladas a mano.
-
-## Alta: 0.1.0
-
-- [ ] Comprobar la versión 0.1.0 en juego (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
-
-## Media
-
-- [ ] 0.2.0: asistente de venta.
-- [ ] 0.3.0: verificar en juego la pestaña Inventario (ver [docs/COMPROBACIONES.md](docs/COMPROBACIONES.md)).
-- [ ] Precio externo opcional: no se usa Auctionator ni TSM; solo se revisará más adelante si hay demanda.
 - [ ] Probar la API web de Blizzard para Forever (rutas, frecuencia, términos de uso).
+- [ ] Precio externo opcional: no se usa Auctionator ni TSM; solo se revisará más adelante si hay demanda.
 
 ## Descartado
 

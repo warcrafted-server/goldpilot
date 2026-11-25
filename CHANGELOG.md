@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [0.15.4] - 2026-11-25
+
+Parche: solo documentación, sin cambios en el addon.
+
+### Cambiado
+- Puesta al día de `README.md`, `TODO.md`, la ficha de CurseForge (`docs/CURSEFORGE.md`) y las notas de publicación (`docs/RELEASE_NOTES.md`) para la primera versión publicada.
+- `docs/COMPROBACIONES.md`: lista corta de pruebas imprescindibles antes de publicar.
+
 ## [0.15.3] - 2026-11-25
 
 Parche: segunda pasada visual y correcciones de texto, sin función nueva.

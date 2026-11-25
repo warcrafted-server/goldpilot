@@ -1,5 +1,28 @@
 # Comprobaciones manuales en juego
 
+## Imprescindibles antes de la primera publicación
+
+Con `GoldPilotDev` activo:
+
+- [ ] Carga sin errores de Lua y `/gpilot version` muestra la 0.15.4.
+- [ ] Tooltip: precio de vendedor, precio de subasta con su antigüedad y, con Mayús, el detalle.
+- [ ] Subasta: el escaneo completo arranca y termina; al reabrir antes de 15 min no lo repite.
+- [ ] Ahora: aparecen las tarjetas, seis caben sin tocar el borde y el selector de ámbito responde.
+- [ ] Inventario: lista, selectores oscuros, barra de desplazamiento, Reservar y Seguir.
+- [ ] Libro: las operaciones aparecen tras abrir el buzón y reabrirlo no las duplica.
+- [ ] Sesión: al recoger sale el panel, suma una sola vez y pasa a pausa a los 3 min.
+- [ ] Zonas: crear y quitar una ruta; se ve en el mapa y sigue alineada con el zoom.
+- [ ] Ajustes: los textos caben en su columna y las casillas responden.
+- [ ] En combate no se abre ni redibuja nada.
+- [ ] `/reload` conserva precios, libro y sesiones.
+
+Con el paquete publicable (`python tools/empaquetar.py`, descomprimir `dist/GoldPilot-0.15.4.zip` en `AddOns` y desactivar `GoldPilotDev`):
+
+- [ ] Carga sin errores y, sin nodos propios, crear una ruta avisa sin fallar.
+- [ ] Capturas para CurseForge: tooltip, Ahora, Inventario, Libro y Zonas con la ruta.
+
+## Lista completa
+
 - [ ] GoldPilot carga sin errores.
 - [ ] `/gpilot version` muestra la versión del archivo `VERSION`.
 - [ ] Abrir Inventario con `/gpilot` y con clic izquierdo en el minimapa.
