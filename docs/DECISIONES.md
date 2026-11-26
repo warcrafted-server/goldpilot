@@ -43,7 +43,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Decisión:** Python, como `wowdata`, las herramientas de LoreWake y AskForever (empaquetado con PyInstaller ya resuelto allí).
 - **Descartado:** Node/Electron (más pesado) y una web pública (los datos del jugador son locales y privados).
 
-## D8. Sin temporizadores de reaparición de nodos — propuesta
+## D8. Sin temporizadores de reaparición de nodos — aceptada (2026-11-26)
 
 - **Decisión:** se sustituye por densidad observada por zona.
 - **Por qué:** con muchos jugadores por capa, la observación propia no predice la reaparición; sería una cifra falsa.
