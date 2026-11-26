@@ -20,11 +20,12 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Decisión:** solo `GetInboxInvoiceInfo` (o equivalente verificado) produce ventas `CONF`. Publicar es `REG`; desaparecer de la subasta no es vender.
 - **Riesgo:** si el jugador no abre el buzón, las ventas quedan pendientes; la interfaz lo indica («3 ventas sin recoger del buzón»).
 
-## D4. Arquitectura y convenciones de LoreWake — propuesta
+## D4. Arquitectura y convenciones de LoreWake — aceptada (2026-11-26)
 
 - **Decisión:** misma separación Core/State/Engine/UI, sin librerías, módulos con capacidades, traducciones por claves y pruebas con `lupa`.
 - **Por qué:** ya está probada en el cliente de Forever, la conoces y reduce el riesgo.
 - **Descartado:** Ace3 (más código de terceros y licencias) y una arquitectura nueva sin justificación.
+- **Aceptada (2026-11-26):** sin Ace3, pero adoptando sus buenas ideas con código propio escrito desde cero, sin copiar su código: temporizadores cancelables (`Core/Timer.lua`), mensajes internos `GOLDPILOT_` en `Core/Events.lua` y ajustes declarativos (pendiente).
 
 ## D5. Addon en la raíz del repositorio — aceptada (2026-11-25)
 

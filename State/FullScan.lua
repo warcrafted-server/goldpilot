@@ -10,7 +10,6 @@ local COOLDOWN, TIMEOUT, SLICE_MS, SLICE_ITEMS = 15 * 60, 120, 10, 200
 -- El cliente carga los objetos poco a poco: se insiste mientras sigan llegando enlaces.
 local MAX_ROUNDS, MAX_STALLED, ROUND_DELAY = 15, 3, 2
 local ticket = 0
-local scheduled = 0 -- invalida los inicios automáticos pendientes al cerrar la subasta o reprogramarlos
 local PET_CAGE = 82800 -- todas las mascotas comparten este identificador: un precio medio no significa nada
 
 local function now()
@@ -23,16 +22,7 @@ local function enabledByUser()
     return not (settings and settings.fullScan == false)
 end
 
--- Oyentes del progreso: se avisa al cambiar de fase y al acabar cada trozo, no por cada anuncio.
-local listeners = {}
-
-local function notify(progress)
-    for index = 1, #listeners do
-        local ok, err = pcall(listeners[index], progress)
-        if not ok then addon.Log:error("progreso del escaneo: " .. tostring(err)) end
-    end
-end
-
+-- El progreso viaja como mensaje interno; se avisa al cambiar de fase y al acabar cada trozo, no por cada anuncio.
 local function setPhase(phase, total)
     if not FullScan.inProgress then return end
     local previous = FullScan.progress
@@ -40,12 +30,13 @@ local function setPhase(phase, total)
     -- expected (la espera del escaneo anterior) solo sirve para estimar el porcentaje mientras se espera.
     FullScan.progress = { phase = phase, done = 0, total = total or 0, started = started,
         expected = previous and previous.expected or nil }
-    notify(FullScan.progress)
+    addon.Events:send("GOLDPILOT_SCAN_PROGRESS", FullScan.progress)
 end
 
+-- Se conserva por compatibilidad; los suscriptores nuevos usan el mensaje directamente.
 function FullScan:onProgress(fn)
     if type(fn) ~= "function" then return end
-    listeners[#listeners + 1] = fn
+    addon.Events:subscribe("fullscan-progress", "GOLDPILOT_SCAN_PROGRESS", fn)
     if self.progress then fn(self.progress) end
 end
 
@@ -85,21 +76,20 @@ local function clockTime(timestamp)
 end
 
 -- Deja la cuenta atrás en la barra y programa el inicio para cuando expire el límite del servidor.
--- Solo vale el último aviso: cerrar la subasta o reprogramar invalida el contador anterior.
+-- Solo vale el último aviso: cerrar la subasta o reprogramar cancela el temporizador anterior.
 local function waitCooldown(left, manual)
     local last = GoldPilotDB and GoldPilotDB.scan and tonumber(GoldPilotDB.scan.t) or (now() - COOLDOWN)
     local available = last + COOLDOWN
     FullScan.progress = { phase = "cooldown", ["until"] = available }
-    notify(FullScan.progress)
-    scheduled = scheduled + 1
-    local mine = scheduled
-    addon.Compat.call("C_Timer.After", left + 1, function()
-        if mine ~= scheduled or FullScan.inProgress or not addon.AuctionHouse:isOpen() then return end
+    addon.Events:send("GOLDPILOT_SCAN_PROGRESS", FullScan.progress)
+    addon.Timer.cancelAll("fullscan")
+    addon.Timer.after(left + 1, function()
+        if FullScan.inProgress or not addon.AuctionHouse:isOpen() then return end
         if not FullScan:start(manual) and FullScan.progress and FullScan.progress.phase == "cooldown" then
             FullScan.progress = nil
-            notify(nil)
+            addon.Events:send("GOLDPILOT_SCAN_PROGRESS", nil)
         end
-    end)
+    end, "fullscan")
     return available
 end
 
@@ -109,7 +99,7 @@ local function finish(ok, message)
     ticket = ticket + 1
     addon.AuctionHouse.scanning = false
     addon.Log:info(message)
-    notify(nil)
+    addon.Events:send("GOLDPILOT_SCAN_PROGRESS", nil)
     addon.AuctionHouse:_pump()
     return ok
 end
@@ -131,7 +121,7 @@ local function sliced(total, step, done, mine, track)
         end
         if track and FullScan.progress then
             FullScan.progress.done, FullScan.progress.total = math.min(index - 1, total), total
-            notify(FullScan.progress)
+            addon.Events:send("GOLDPILOT_SCAN_PROGRESS", FullScan.progress)
         end
         if index <= total then addon.Compat.call("C_Timer.After", 0, run) else done() end
     end
@@ -283,7 +273,7 @@ function FullScan:start(manual)
     local mine = ticket
     self.progress = { phase = "wait", done = 0, total = 0, started = GoldPilotDB.scan.t,
         expected = expected > 0 and expected or 30 }
-    notify(self.progress)
+    addon.Events:send("GOLDPILOT_SCAN_PROGRESS", self.progress)
     local ok = addon.Compat.call("C_AuctionHouse.ReplicateItems")
     if not ok then finish(false, addon.L.SCAN_EMPTY); return false, "error" end
     addon.Log:info(addon.L.SCAN_START)
@@ -327,8 +317,8 @@ addon.Modules:register("fullscan", {
             FullScan.inProgress, FullScan.receiving = false, false
             FullScan.progress = nil
             ticket = ticket + 1
-            scheduled = scheduled + 1
-            if hadProgress then notify(nil) end
+            addon.Timer.cancelAll("fullscan")
+            if hadProgress then addon.Events:send("GOLDPILOT_SCAN_PROGRESS", nil) end
             if FullScan.flush then FullScan.flush() end
         end)
     end,

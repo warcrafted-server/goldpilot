@@ -4,8 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.16.3] - 2026-11-26
+
 ### Añadido
 - docs/PUBLICACIONES.md: cola de versiones preparadas con su commit, para publicarlas en orden en CurseForge.
+
+### Cambiado
+- Temporizadores cancelables y mensajes internos entre módulos; el escaneo completo y su barra los usan.
 
 ## [0.16.2] - 2026-11-26
 

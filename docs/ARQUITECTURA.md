@@ -41,6 +41,10 @@ docs/
 
 Igual que LoreWake: un único frame de eventos con suscripción por módulo y agrupación de ráfagas (`BAG_UPDATE_DELAYED`, resultados de subasta); registro de módulos con `requires`; `Compat.has(cap)` y `Compat.call` con `pcall`; registro con niveles; `/gpilot diag` que guarda el informe en `GoldPilotDB.diag`.
 
+`Events.lua` entrega además mensajes internos entre módulos con `addon.Events:send("GOLDPILOT_...")`: se suscriben igual que los eventos, pero nunca se registran en el frame del juego.
+
+`Timer.lua`: temporizadores de un disparo y repetidos, con dueño, que se pueden cancelar (`addon.Timer.after/every/cancelAll`); si la función falla, se registra el error sin romper el resto.
+
 **Capacidades a diagnosticar desde el primer paso:** `C_AuctionHouse` (búsquedas, commodities, propias, `GetAuctionHouseCut`, `ReplicateItems`), eventos de subasta y de límite de consultas, `GetInboxInvoiceInfo` y lectura del buzón, `GetLootSourceInfo` y formato del GUID de objetos de mundo, `C_TradeSkillUI` con la ventana abierta, `C_Container` del banco, API pública de Auctionator (`Auctionator.API.v1`) y TSM (`TSM_API`).
 
 `Migrations.lua`: lista ordenada de funciones `[n] = function(db) ... end` que llevan `GoldPilotDB.schema` de `n-1` a `n`. Se ejecutan en `ADDON_LOADED` antes que cualquier módulo; si una falla, se guarda copia de la tabla original en `GoldPilotDB.backup` y el addon arranca en modo seguro (solo lectura y diagnóstico).

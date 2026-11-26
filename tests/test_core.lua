@@ -114,4 +114,52 @@ return {
         SlashCmdList.GOLDPILOT("watch 999")
         assert(GoldPilotDB.watch[999] == nil)
     end,
+    ["un temporizador cancelado no ejecuta su función"] = function(addon, mock)
+        local calls = 0
+        local handle = addon.Timer.after(1, function() calls = calls + 1 end, "prueba")
+        assert(handle:active())
+        handle:cancel()
+        assert(not handle:active())
+        mock.flushTimers()
+        assert(calls == 0)
+    end,
+    ["cancelAll cancela solo los temporizadores de su dueño"] = function(addon, mock)
+        local calls = { dueno = 0, otro = 0 }
+        addon.Timer.after(1, function() calls.dueno = calls.dueno + 1 end, "dueno")
+        addon.Timer.after(1, function() calls.otro = calls.otro + 1 end, "otro")
+        addon.Timer.cancelAll("dueno")
+        mock.flushTimers()
+        assert(calls.dueno == 0 and calls.otro == 1)
+    end,
+    ["every se repite hasta que la función devuelve false"] = function(addon, mock)
+        local calls = 0
+        addon.Timer.every(1, function()
+            calls = calls + 1
+            return calls < 3
+        end, "repite")
+        for _ = 1, 4 do mock.flushTimers() end
+        assert(calls == 3)
+    end,
+    ["un error en la función del temporizador se registra y no rompe"] = function(addon, mock)
+        local before = #mock.output
+        addon.Timer.after(1, function() error("fallo del temporizador") end)
+        mock.flushTimers()
+        local text = table.concat(mock.output, "\n", before + 1)
+        assert(text:find("fallo del temporizador", 1, true))
+    end,
+    ["send entrega argumentos y no registra el mensaje en el frame"] = function(addon, mock)
+        local received
+        addon.Events:subscribe("emisor", "GOLDPILOT_PRUEBA", function(a, b) received = a + b end)
+        assert(mock.events["GOLDPILOT_PRUEBA"] == nil)
+        addon.Events:send("GOLDPILOT_PRUEBA", 2, 3)
+        assert(received == 5)
+    end,
+    ["unsubscribe quita solo el suscriptor indicado"] = function(addon, mock)
+        local first, second = 0, 0
+        addon.Events:subscribe("uno", "GOLDPILOT_PRUEBA", function() first = first + 1 end)
+        addon.Events:subscribe("dos", "GOLDPILOT_PRUEBA", function() second = second + 1 end)
+        addon.Events:unsubscribe("uno", "GOLDPILOT_PRUEBA")
+        addon.Events:send("GOLDPILOT_PRUEBA")
+        assert(first == 0 and second == 1)
+    end,
 }

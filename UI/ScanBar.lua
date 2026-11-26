@@ -79,13 +79,11 @@ end
 
 -- El texto lleva los segundos transcurridos, así que se refresca una vez por segundo mientras dure el escaneo.
 function ScanBar:schedule()
-    if self.timer or inCombat() then return end
-    self.timer = true
-    addon.Compat.call("C_Timer.After", INTERVAL, function()
-        ScanBar.timer = false
+    if inCombat() or (self.timer and self.timer:active()) then return end
+    self.timer = addon.Timer.after(INTERVAL, function()
         local progress = addon.FullScan and addon.FullScan.progress
         if progress then ScanBar:update(progress) end
-    end)
+    end, "scan-bar")
 end
 
 function ScanBar:update(progress)
@@ -113,12 +111,13 @@ end
 
 addon.Modules:register("scan-bar", {
     onEnable = function()
-        if not addon.FullScan or not addon.FullScan.onProgress then return end
-        addon.FullScan:onProgress(function(progress) ScanBar:update(progress) end)
+        addon.Events:subscribe("scan-bar", "GOLDPILOT_SCAN_PROGRESS", function(progress)
+            ScanBar:update(progress)
+        end)
         addon.Events:subscribe("scan-bar", "PLAYER_REGEN_ENABLED", function()
             ScanBar:update(addon.FullScan.progress)
         end)
-        if addon.FullScan.progress then ScanBar:update(addon.FullScan.progress) end
+        if addon.FullScan and addon.FullScan.progress then ScanBar:update(addon.FullScan.progress) end
     end,
 })
 
