@@ -48,7 +48,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Decisión:** se sustituye por densidad observada por zona.
 - **Por qué:** con muchos jugadores por capa, la observación propia no predice la reaparición; sería una cifra falsa.
 
-## D9. Historial compacto con poda — propuesta
+## D9. Historial compacto con poda — aceptada (2026-11-26)
 
 - **Decisión:** diario 90 días, semanal hasta 52 semanas, cadenas empaquetadas; sin escaneos en bruto en SavedVariables. El historial largo es de la aplicación.
 - **Por qué:** tiempo de carga y tamaño de SavedVariables.
