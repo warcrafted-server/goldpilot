@@ -69,7 +69,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
   - Lo observado vuelve a `wowdata` (como ya hace con LoreWake y FishForever) y en la siguiente generación de datos sustituye a la semilla.
 - **Descartado:** fiarse de los datos de Classic, o no usar semilla (el asesor estaría vacío hasta recolectar mucho).
 
-## D12. Precios regionales para la aplicación: de dónde salen — pendiente
+## D12. Precios regionales para la aplicación: de dónde salen — aceptada (2026-11-26)
 
 - **Contexto:** la API web de Blizzard da todas las casas de Forever, pero hace falta una credencial de desarrollador de Battle.net (cliente gratuito: identificador y secreto).
 - **Opciones:**
@@ -77,6 +77,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
   - **B. Servidor propio (tu VPS) con una credencial:** el usuario no configura nada; implica mantener un servicio y revisar si los términos permiten redistribuir los datos.
   - **C. Sin API:** la aplicación solo analiza lo que el jugador observa (historial largo, libro, informes).
 - **Recomendación:** la aplicación funciona en modo C sin configurar nada y ofrece A como opción avanzada; B solo tras revisar los términos y si hay demanda.
+- **Aceptada (2026-11-26):** se empieza en modo C, con la aplicación preparada para la API (fuente de precios intercambiable). Un interruptor en la aplicación activa o desactiva la API para comparar cómo se ve con y sin ella durante el desarrollo; con la API desactivada todo funciona igual. El addon distingue los precios de la aplicación (clase EXT) y los ignora si el interruptor está apagado. Antes de activarla hay que comprobar que la API cubre Forever.
 
 ## D13. Archivos de agentes fuera del repositorio — aceptada (2026-11-23)
 
