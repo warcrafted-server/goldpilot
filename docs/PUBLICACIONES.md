@@ -14,9 +14,11 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.15.6 | dd1e53e | Primera versión | sí | 2026-11-25 |
 | 0.15.7 | 751f102 | Ahora: tarjeta de correo sin oro con recuento | no | no |
 | 0.16.0 | 9b20bcc | Barra de progreso del escaneo y aviso al interrumpirlo | no | no |
-| 0.16.1 | 830935e | Escaneo programado al acabar el límite de 15 min | no | no |
+| 0.16.1 | 830935e | Escaneo programado al acabar el límite de 15 min | barra sí; inicio automático no | 2026-11-26 (incluye 0.15.7 y 0.16.0) |
 | 0.16.2 | bbc3914 | Barra con porcentaje y segundos también en la espera | no | no |
 | 0.16.3 | 6f9d9e1 | Interno: temporizadores cancelables y mensajes entre módulos | no | no |
 | 0.16.4 | 7951ef1 | Barra del escaneo a la derecha y «(est.)» en lugar de ~ | no | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
+
+Las notas de cada commit solo describen esa versión. Si se publica una versión saltándose otras sin publicar, hay que añadir sus notas a mano en la ficha del archivo en CurseForge.
