@@ -53,7 +53,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Decisión:** diario 90 días, semanal hasta 52 semanas, cadenas empaquetadas; sin escaneos en bruto en SavedVariables. El historial largo es de la aplicación.
 - **Por qué:** tiempo de carga y tamaño de SavedVariables.
 
-## D10. Precio de referencia = mediana de las primeras unidades — propuesta
+## D10. Precio de referencia = mediana de las primeras unidades — aceptada (2026-11-26)
 
 - **Decisión:** `p50` de las unidades que cubren el 15 % de la oferta (ajustable), además del mínimo.
 - **Por qué:** el mínimo se manipula con un anuncio de una unidad; la mediana completa refleja anuncios que nadie compra.
