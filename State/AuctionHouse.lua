@@ -9,6 +9,29 @@ local MAX_LOADS, FRESH = 4, 15 * 60
 local loads = {}
 local sessionActive = false
 local isOpen = false
+local purchasing = false
+local purchaseHooked = false
+
+local function busy()
+    if purchasing then return true end
+    local frame = _G and _G.AuctionHouseFrame
+    if not frame then return false end
+    for _, name in ipairs({ "CommoditiesBuyFrame", "ItemBuyFrame", "CommoditiesSellFrame", "ItemSellFrame" }) do
+        local child = frame[name]
+        if child and type(child.IsShown) == "function" then
+            local ok, shown = pcall(child.IsShown, child)
+            if ok and shown then return true end
+        end
+    end
+    return false
+end
+
+local function clearPurchase()
+    if not purchasing then return end
+    purchasing = false
+    addon.Timer.cancelAll("ah-purchase")
+    AuctionHouse:_pump()
+end
 
 local function now()
     local ok, value = addon.Compat.call("time")
@@ -209,6 +232,13 @@ function AuctionHouse:_pump()
         end
         return
     end
+    if busy() then
+        if not retryScheduled then
+            retryScheduled = true
+            addon.Timer.after(1, function() retryScheduled = false; AuctionHouse:_pump() end, "ah-pump")
+        end
+        return
+    end
     local throttleOk, ready = addon.Compat.call("C_AuctionHouse.IsThrottledMessageSystemReady")
     if throttleOk and ready == false then
         if not retryScheduled then
@@ -372,13 +402,29 @@ local function closed()
     queue, current, done, finished = {}, nil, 0, 0
     sessionActive = false
     generation = generation + 1
+    addon.Timer.cancelAll("ah-pump")
+    addon.Timer.cancelAll("ah-purchase")
+    retryScheduled = false
+    purchasing = false
 end
 
 addon.Modules:register("auctionhouse", {
     requires = { "C_AuctionHouse.SendSearchQuery" },
     onEnable = function()
+        if not purchaseHooked and addon.Compat.has("hooksecurefunc")
+            and addon.Compat.has("C_AuctionHouse.StartCommoditiesPurchase") then
+            local ok = addon.Compat.call("hooksecurefunc", C_AuctionHouse, "StartCommoditiesPurchase", function()
+                if purchasing then return end
+                purchasing = true
+                addon.Timer.cancelAll("ah-purchase")
+                addon.Timer.after(60, clearPurchase, "ah-purchase")
+            end)
+            purchaseHooked = ok
+        end
         addon.Events:subscribe("auctionhouse", "AUCTION_HOUSE_SHOW", opened)
         addon.Events:subscribe("auctionhouse", "AUCTION_HOUSE_CLOSED", closed)
+        addon.Events:subscribe("auctionhouse", "COMMODITY_PURCHASE_SUCCEEDED", clearPurchase)
+        addon.Events:subscribe("auctionhouse", "COMMODITY_PURCHASE_FAILED", clearPurchase)
         addon.Events:subscribe("auctionhouse", "COMMODITY_SEARCH_RESULTS_UPDATED", onCommodityResults)
         addon.Events:subscribe("auctionhouse", "ITEM_SEARCH_RESULTS_UPDATED", onItemResults)
         addon.Events:subscribe("auctionhouse", "AUCTION_HOUSE_THROTTLED_SYSTEM_READY", function() AuctionHouse:_pump() end)

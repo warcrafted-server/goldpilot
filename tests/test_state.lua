@@ -49,6 +49,40 @@ return {
         local bags = addon.Bags:scan()
         assert(bags[25] == 7 and bags[35] == 2 and bags[36] == 5 and bags[999998] == 4)
     end,
+    ["la cola espera mientras se usa la subasta o se compra material"] = function(addon, mock)
+        setup()
+        addon.Bags.scan = function() return {} end
+        local sent = 0
+        C_AuctionHouse.SendSearchQuery = function() sent = sent + 1 end
+        local shown = true
+        AuctionHouseFrame = { CommoditiesBuyFrame = { IsShown = function() return shown end } }
+        GoldPilotDB = { watch = { [25] = true } }
+        addon.Modules:enableAll()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(sent == 0)
+        shown = false
+        mock.flushTimers()
+        assert(sent == 1)
+        mock.fire("AUCTION_HOUSE_CLOSED")
+
+        setup()
+        addon.Bags.scan = function() return {} end
+        hooksecurefunc = function(target, name, callback)
+            local original = target[name]
+            target[name] = function(...) original(...); callback(...) end
+        end
+        C_AuctionHouse.StartCommoditiesPurchase = function() end
+        C_AuctionHouse.SendSearchQuery = function() sent = sent + 1 end
+        GoldPilotDB = { watch = { [25] = true } }
+        addon.Modules:enableAll()
+        C_AuctionHouse.StartCommoditiesPurchase()
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(sent == 1)
+        mock.fire("COMMODITY_PURCHASE_SUCCEEDED")
+        assert(sent == 2)
+        mock.fire("AUCTION_HOUSE_CLOSED")
+
+    end,
     ["la cola prioriza watch, ordena bolsas y omite datos ausentes y repetidos"] = function(addon, mock)
         setup()
         NUM_TOTAL_EQUIPPED_BAG_SLOTS = 2

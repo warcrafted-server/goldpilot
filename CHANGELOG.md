@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.17.2] - 2026-11-27
+
+### Corregido
+- Las consultas de precios en segundo plano se pausan mientras compras o vendes en la subasta, para no provocar «Error interno de subasta».
+
+### Añadido
+- El diagnóstico `/gpilot diag ah` registra también los errores de la subasta.
+
 ## [0.17.1] - 2026-11-26
 
 ### Añadido

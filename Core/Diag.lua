@@ -60,7 +60,7 @@ local diagEvents = {
     "COMMODITY_PURCHASE_SUCCEEDED", "COMMODITY_PURCHASE_FAILED", "COMMODITY_PURCHASED",
     "ITEM_PURCHASED", "BIDS_UPDATED", "AUCTION_HOUSE_NEW_RESULTS_RECEIVED",
     "AUCTION_HOUSE_THROTTLED_MESSAGE_SENT", "AUCTION_HOUSE_THROTTLED_SYSTEM_READY",
-    "AUCTION_HOUSE_POST_WARNING", "AUCTION_HOUSE_POST_ERROR",
+    "AUCTION_HOUSE_POST_WARNING", "AUCTION_HOUSE_POST_ERROR", "AUCTION_HOUSE_SHOW_ERROR",
     "AUCTION_HOUSE_DISPLAY_MODE_CHANGED", "AUCTION_MULTISELL_START",
     "AUCTION_MULTISELL_UPDATE", "AUCTION_MULTISELL_FAILURE", "UI_ERROR_MESSAGE",
     "CHAT_MSG_SYSTEM",
@@ -274,7 +274,7 @@ function addon.Diag:toggleAuction()
                 local current = now()
                 entry.primero = entry.primero or current
                 entry.ultimo = current
-                if (eventName == "UI_ERROR_MESSAGE" or eventName == "CHAT_MSG_SYSTEM")
+                if (eventName == "UI_ERROR_MESSAGE" or eventName == "AUCTION_HOUSE_SHOW_ERROR" or eventName == "CHAT_MSG_SYSTEM")
                     and entry.n <= 10 then
                     entry.ejemplos = entry.ejemplos or {}
                     entry.ejemplos[#entry.ejemplos + 1] = textArguments(...)

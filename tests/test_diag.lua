@@ -153,12 +153,15 @@ return {
             clock = 1010
             mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 42)
             mock.fire("UI_ERROR_MESSAGE", "No puedes pujar", 1, "extra")
+            mock.fire("AUCTION_HOUSE_SHOW_ERROR", "Error interno", 7)
             assert(session.eventos["ITEM_SEARCH_RESULTS_UPDATED"].n == 1)
             assert(session.eventos["ITEM_SEARCH_RESULTS_UPDATED"].primero == 1010)
             assert(session.eventos["ITEM_SEARCH_RESULTS_UPDATED"].ultimo == 1010)
             assert(session.eventos["UI_ERROR_MESSAGE"].n == 1)
             assert(session.eventos["UI_ERROR_MESSAGE"].ejemplos[1][1] == "No puedes pujar")
             assert(session.eventos["UI_ERROR_MESSAGE"].ejemplos[1][2] == "extra")
+            assert(session.eventos["AUCTION_HOUSE_SHOW_ERROR"].n == 1)
+            assert(session.eventos["AUCTION_HOUSE_SHOW_ERROR"].ejemplos[1][1] == "Error interno")
 
             clock = 1200
             SlashCmdList.GOLDPILOT("diag ah")
