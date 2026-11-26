@@ -20,6 +20,7 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.16.4 | 7951ef1 | Barra del escaneo a la derecha y «(est.)» en lugar de ~ | no | no |
 | 0.16.5 | bff2de6 | Herramientas: notas de versión por archivo y generación en el CI | no hace falta | no |
 | 0.16.6 | eee07f2 | Barra del escaneo con ancho según el texto | no | no |
+| 0.17.0 | fcf0d4c | Ajustes declarativos, `/gpilot set` y ajuste de precios de la aplicación | no | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
 
