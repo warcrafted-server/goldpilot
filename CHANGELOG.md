@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.17.0] - 2026-11-26
+
+### Añadido
+- Ajustes definidos en un solo sitio: la pestaña Ajustes se genera sola y `/gpilot set` los lista y cambia.
+- Ajuste «Usar precios de la aplicación de escritorio», preparado para la futura aplicación.
+
 ## [0.16.6] - 2026-11-26
 
 ### Corregido

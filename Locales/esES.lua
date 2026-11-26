@@ -1,6 +1,13 @@
 local _, addon = ...
 addon.LocaleRegister("esES", {
-    HELP = "Comandos: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <enlace>, /gpilot ledger, /gpilot session [end], /gpilot hud",
+    HELP = "Comandos: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <enlace>, /gpilot ledger, /gpilot session [end], /gpilot hud, /gpilot set [<clave> on|off]",
+    SETTINGS_LIST_HEADER = "Ajustes:",
+    SETTINGS_LINE = "%s = %s (%s)",
+    SETTINGS_ON = "activado",
+    SETTINGS_OFF = "desactivado",
+    SETTINGS_UNKNOWN = "Ajuste desconocido: %s",
+    SETTINGS_INVALID = "Valor no válido para %s: usa on u off.",
+    SETTINGS_CHANGED = "Ajuste %s: ahora %s.",
     ROUTE_STATUS = "Ruta: disponible %s, marco %s, visible %s, nivel %s, mapa %s, mapa de la ruta %s, paradas %s, tamaño %sx%s, escala %s, combate %s, rect %s, error %s",
     LEDGER_ADDED = "Libro: %d registros nuevos.",
     LEDGER_SUMMARY = "Últimos 30 días: vendidos %d objetos, bruto %s, depósito %s, comisión %s, neto %s; comprados %d (%s gastados); devueltos %d; balance %s.",
@@ -201,6 +208,8 @@ addon.LocaleRegister("esES", {
     HUD_OFF = "Panel de sesión oculto. Vuelve con /gpilot hud.",
     SETTING_HUD = "Mostrar el panel de la sesión de recolección",
     SETTING_WAYPOINT = "Marcar la siguiente parada en TomTom",
+    SETTING_PRICES = "Precios",
+    SETTING_APP_PRICES = "Usar precios de la aplicación de escritorio",
     ROUTE_WAYPOINT = "GoldPilot: parada %d",
     SESSION_SUMMARY = "Sesión terminada: %d min activos, %s en total, %s por hora.",
     SESSION_CURRENT = "Sesión en curso: %d min activos, %s en total, %s por hora.",

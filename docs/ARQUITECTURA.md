@@ -17,7 +17,7 @@ Diseño técnico inicial (2026-11-23). Producto y prioridades en [PROPUESTA.md](
 ```
 Raíz del repo = carpeta del addon (lo que se instala en Interface/AddOns/GoldPilot)
 GoldPilot.toc
-Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations
+Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations, Settings
 Locales/                 Locale.lua, enUS.lua, esES.lua
 Data/Local/              Semillas de wowdata solo para pruebas locales (ignorada por git y por .pkgmeta)
 Store/                   Almacén de precios, historial, libro de operaciones y visitas de la ruta (lógica pura)
@@ -48,6 +48,8 @@ Igual que LoreWake: un único frame de eventos con suscripción por módulo y ag
 **Capacidades a diagnosticar desde el primer paso:** `C_AuctionHouse` (búsquedas, commodities, propias, `GetAuctionHouseCut`, `ReplicateItems`), eventos de subasta y de límite de consultas, `GetInboxInvoiceInfo` y lectura del buzón, `GetLootSourceInfo` y formato del GUID de objetos de mundo, `C_TradeSkillUI` con la ventana abierta, `C_Container` del banco, API pública de Auctionator (`Auctionator.API.v1`) y TSM (`TSM_API`).
 
 `Migrations.lua`: lista ordenada de funciones `[n] = function(db) ... end` que llevan `GoldPilotDB.schema` de `n-1` a `n`. Se ejecutan en `ADDON_LOADED` antes que cualquier módulo; si una falla, se guarda copia de la tabla original en `GoldPilotDB.backup` y el addon arranca en modo seguro (solo lectura y diagnóstico).
+
+`Settings.lua`: cada ajuste se define una sola vez (clave, tipo, valor por defecto, sección y etiqueta); de esa definición salen la pestaña Ajustes y `/gpilot set`.
 
 ## 4. Clases de dato
 

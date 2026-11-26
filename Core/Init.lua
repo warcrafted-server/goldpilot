@@ -21,6 +21,34 @@ local function command(input)
     elseif subcommand == "help" then
         addon.Log:info(addon.L.HELP)
         return
+    elseif subcommand == "set" then
+        local key, argument = string.match(input or "", "^%s*%S+%s*(%S*)%s*(%S*)")
+        if not key or key == "" then
+            addon.Log:info(addon.L.SETTINGS_LIST_HEADER)
+            for _, section in ipairs(addon.Settings.sections()) do
+                for _, definition in ipairs(addon.Settings.list(section)) do
+                    local current = addon.Settings.get(definition.key) == true
+                    addon.Log:info(string.format(addon.L.SETTINGS_LINE, definition.key,
+                        current and addon.L.SETTINGS_ON or addon.L.SETTINGS_OFF, addon.L[definition.label]))
+                end
+            end
+            return
+        end
+        if addon.Settings.get(key) == nil then
+            addon.Log:info(string.format(addon.L.SETTINGS_UNKNOWN, key))
+            return
+        end
+        local text = string.lower(argument or "")
+        local value
+        if text == "on" or text == "true" or text == "1" then value = true
+        elseif text == "off" or text == "false" or text == "0" then value = false end
+        if value == nil or not addon.Settings.set(key, value) then
+            addon.Log:info(string.format(addon.L.SETTINGS_INVALID, key))
+            return
+        end
+        addon.Log:info(string.format(addon.L.SETTINGS_CHANGED, key,
+            value and addon.L.SETTINGS_ON or addon.L.SETTINGS_OFF))
+        return
     elseif subcommand == "ledger" or subcommand == "libro" then
         local ok, now = addon.Compat.call("time")
         if not ok or not tonumber(now) then now = 0 end

@@ -62,9 +62,11 @@ function Valuation.reference(db, houseKey, itemKey, now, maxAge)
     if observed then
         candidates[#candidates + 1] = { class = "OBS", src = observed.src or "OBS", price = observed.p50, t = observed.t }
     end
-    for src, fn in pairs(sources) do
-        local ok, price, t = pcall(fn, itemKey)
-        if ok and price ~= nil then candidates[#candidates + 1] = { class = "EXT", src = src, price = price, t = t } end
+    if addon.Settings.get("appPrices") ~= false then
+        for src, fn in pairs(sources) do
+            local ok, price, t = pcall(fn, itemKey)
+            if ok and price ~= nil then candidates[#candidates + 1] = { class = "EXT", src = src, price = price, t = t } end
+        end
     end
     return Valuation.choose(candidates, now, maxAge)
 end

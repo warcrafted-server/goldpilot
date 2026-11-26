@@ -7,16 +7,10 @@ local function inCombat()
     return InCombatLockdown and InCombatLockdown()
 end
 
-local function settings()
-    GoldPilotDB = GoldPilotDB or {}
-    GoldPilotDB.settings = GoldPilotDB.settings or {}
-    if GoldPilotDB.settings.tooltip == nil then GoldPilotDB.settings.tooltip = true end
-    if GoldPilotDB.settings.routeWaypoint == nil then GoldPilotDB.settings.routeWaypoint = true end
-    GoldPilotDB.settings.minimap = GoldPilotDB.settings.minimap or { hidden = false }
-    if GoldPilotDB.settings.minimap.hidden == nil then GoldPilotDB.settings.minimap.hidden = false end
+local function window()
     GoldPilotCharDB = GoldPilotCharDB or {}
     GoldPilotCharDB.window = GoldPilotCharDB.window or {}
-    return GoldPilotDB.settings, GoldPilotCharDB.window
+    return GoldPilotCharDB.window
 end
 
 local function setPoint(frame, saved)
@@ -28,7 +22,7 @@ local function buildWindow()
     if Main.frame then return Main.frame end
     local frame = addon.Widgets.window("GoldPilotMainFrame", addon.L.WINDOW_TITLE, 760, 520)
     Main.frame = frame
-    local _, saved = settings()
+    local saved = window()
     setPoint(frame, saved)
     frame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
@@ -79,79 +73,48 @@ local function buildWindow()
     addPage("ledger", addon.L.TAB_LEDGER, Main.tabs.ledger or function() end)
     addPage("zones", addon.L.TAB_ZONES or "zones", Main.tabs.zones or function() end)
     addPage("settings", addon.L.TAB_SETTINGS, function(page)
-        local dbSettings = settings()
-        if not page.minimapCheckbox then
+        local function sync()
+            for key, box in pairs(page.checkboxes or {}) do
+                box:SetChecked(addon.Settings.get(key) == true)
+            end
+        end
+        if not page.checkboxes then
+            page.checkboxes = {}
             local function column(left, right)
                 local panel = addon.Widgets.panel(page, page.GetFrameLevel and page:GetFrameLevel())
                 panel:SetPoint("TOPLEFT", page, "TOPLEFT", left, -52)
                 panel:SetPoint("BOTTOMRIGHT", page, "BOTTOMLEFT", right, 16)
                 return panel
             end
-            local function heading(panel, y, label)
-                local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, y)
-                title:SetText(label)
-            end
-            local left, right = column(14, 376), column(384, 746)
-            heading(left, -16, addon.L.SETTING_GENERAL)
-            heading(left, -132, addon.L.SETTING_GATHERING)
-            heading(right, -16, addon.L.SETTING_FIELDS)
-            page.minimapCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_MINIMAP,
-                not dbSettings.minimap.hidden, function(checked)
-                    if inCombat() then return end
-                    dbSettings.minimap.hidden = not checked
-                    if addon.Minimap and addon.Minimap.setVisible then addon.Minimap:setVisible(checked) end
-                end)
-            page.minimapCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -92)
-            page.tooltipCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_TOOLTIP,
-                dbSettings.tooltip ~= false, function(checked)
-                    if inCombat() then return end
-                    dbSettings.tooltip = checked
-                end)
-            page.tooltipCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 394, -92)
-            page.fieldCheckboxes = {}
-            dbSettings.tooltipFields = dbSettings.tooltipFields or {}
-            for i, field in ipairs({ "vendor", "last", "median", "advice" }) do
-                local box = addon.Widgets.checkbox(page, addon.L["SETTING_FIELD_" .. string.upper(field)],
-                    dbSettings.tooltipFields[field] ~= false, function(checked)
-                        if inCombat() then return end
-                        dbSettings.tooltipFields[field] = checked
-                    end)
-                box:SetPoint("TOPLEFT", page, "TOPLEFT", 412, -128 - (i - 1) * 32)
-                page.fieldCheckboxes[field] = box
-            end
-            page.scanCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_FULLSCAN,
-                dbSettings.fullScan ~= false, function(checked)
-                    if inCombat() then return end
-                    dbSettings.fullScan = checked
-                end)
-            page.scanCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -128)
-            page.hudCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_HUD,
-                dbSettings.hud ~= false, function(checked)
-                    if inCombat() then return end
-                    if addon.SessionHUD then addon.SessionHUD:setEnabled(checked)
-                    else dbSettings.hud = checked end
-                end)
-            page.hudCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -208)
-            page.waypointCheckbox = addon.Widgets.checkbox(page, addon.L.SETTING_WAYPOINT,
-                dbSettings.routeWaypoint ~= false, function(checked)
-                    if inCombat() then return end
-                    dbSettings.routeWaypoint = checked
-                    if addon.RouteFollow and addon.RouteFollow.setWaypoint then
-                        addon.RouteFollow:setWaypoint(checked)
+            local function fill(panel, sections, x)
+                local y = -16
+                for _, section in ipairs(sections) do
+                    local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                    title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, y)
+                    title:SetText(addon.L["SETTING_" .. string.upper(section)])
+                    y = y - 24
+                    for _, definition in ipairs(addon.Settings.list(section)) do
+                        local box = addon.Widgets.checkbox(page, addon.L[definition.label],
+                            addon.Settings.get(definition.key) == true, function(checked)
+                                if inCombat() then return end
+                                addon.Settings.set(definition.key, checked)
+                            end)
+                        box:SetPoint("TOPLEFT", page, "TOPLEFT", x, y - 52)
+                        page.checkboxes[definition.key] = box
+                        y = y - 32
                     end
-                end)
-            page.waypointCheckbox:SetPoint("TOPLEFT", page, "TOPLEFT", 24, -244)
-        else
-            page.minimapCheckbox:SetChecked(not dbSettings.minimap.hidden)
-            page.tooltipCheckbox:SetChecked(dbSettings.tooltip ~= false)
-            for field, box in pairs(page.fieldCheckboxes) do
-                box:SetChecked((dbSettings.tooltipFields or {})[field] ~= false)
+                    y = y - 16
+                end
             end
-            page.scanCheckbox:SetChecked(dbSettings.fullScan ~= false)
-            page.hudCheckbox:SetChecked(dbSettings.hud ~= false)
-            page.waypointCheckbox:SetChecked(dbSettings.routeWaypoint ~= false)
+            local leftSections, rightSections = {}, {}
+            for _, section in ipairs(addon.Settings.sections()) do
+                if section == "fields" then rightSections[#rightSections + 1] = section
+                else leftSections[#leftSections + 1] = section end
+            end
+            fill(column(14, 376), leftSections, 24)
+            fill(column(384, 746), rightSections, 394)
         end
+        sync()
     end)
     for _, tab in ipairs(Main.registeredTabs) do
         if tab.name ~= "inventory" and tab.name ~= "now" and tab.name ~= "ledger" and tab.name ~= "zones" then

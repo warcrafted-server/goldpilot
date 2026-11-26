@@ -18,8 +18,7 @@ local function now()
 end
 
 local function enabledByUser()
-    local settings = GoldPilotDB and GoldPilotDB.settings
-    return not (settings and settings.fullScan == false)
+    return addon.Settings.get("fullScan") ~= false
 end
 
 -- El progreso viaja como mensaje interno; se avisa al cambiar de fase y al acabar cada trozo, no por cada anuncio.

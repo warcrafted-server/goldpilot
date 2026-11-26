@@ -1,6 +1,13 @@
 local _, addon = ...
 addon.LocaleRegister("enUS", {
-    HELP = "Commands: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <link>, /gpilot ledger, /gpilot session [end], /gpilot hud",
+    HELP = "Commands: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <link>, /gpilot ledger, /gpilot session [end], /gpilot hud, /gpilot set [<key> on|off]",
+    SETTINGS_LIST_HEADER = "Settings:",
+    SETTINGS_LINE = "%s = %s (%s)",
+    SETTINGS_ON = "on",
+    SETTINGS_OFF = "off",
+    SETTINGS_UNKNOWN = "Unknown setting: %s",
+    SETTINGS_INVALID = "Invalid value for %s: use on or off.",
+    SETTINGS_CHANGED = "Setting %s is now %s.",
     ROUTE_STATUS = "Route: available %s, frame %s, shown %s, level %s, map %s, plan map %s, stops %s, size %sx%s, scale %s, combat %s, rect %s, error %s",
     LEDGER_ADDED = "Ledger: %d new records.",
     LEDGER_SUMMARY = "Last 30 days: sold %d items, gross %s, deposit %s, cut %s, net %s; bought %d (%s spent); returned %d; balance %s.",
@@ -201,6 +208,8 @@ addon.LocaleRegister("enUS", {
     HUD_OFF = "Session panel hidden. Bring it back with /gpilot hud.",
     SETTING_HUD = "Show the gathering session panel",
     SETTING_WAYPOINT = "Mark the next stop in TomTom",
+    SETTING_PRICES = "Prices",
+    SETTING_APP_PRICES = "Use prices from the desktop app",
     ROUTE_WAYPOINT = "GoldPilot: stop %d",
     SESSION_SUMMARY = "Session finished: %d active min, %s in total, %s per hour.",
     SESSION_CURRENT = "Session in progress: %d active min, %s in total, %s per hour.",

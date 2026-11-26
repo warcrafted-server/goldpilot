@@ -61,15 +61,18 @@ return {
         addon.Main:show()
         addon.Main.tabsBar.buttons[5].scripts.OnClick(addon.Main.tabsBar.buttons[5])
         local page = addon.Main.pages.settings
-        local minimap, tooltipSetting = page.minimapCheckbox, page.tooltipCheckbox
+        local minimap, tooltipSetting = page.checkboxes.minimap, page.checkboxes.tooltip
         minimap:SetChecked(false)
         minimap.scripts.OnClick(minimap)
         assert(GoldPilotDB.settings.minimap.hidden)
         tooltipSetting:SetChecked(false)
         tooltipSetting.scripts.OnClick(tooltipSetting)
         assert(GoldPilotDB.settings.tooltip == false)
-        local waypoint = page.waypointCheckbox
-        assert(waypoint and waypoint.x == 24 and waypoint.y == -244)
+        local waypoint = page.checkboxes.routeWaypoint
+        assert(waypoint and waypoint.label.value == addon.L.SETTING_WAYPOINT)
+        assert(page.checkboxes["tooltipFields.vendor"].x == 394)
+        assert(page.checkboxes.appPrices and page.checkboxes.appPrices.label.value == addon.L.SETTING_APP_PRICES)
+        assert(page.checkboxes.appPrices:GetChecked() == true)
         assert(waypoint:GetChecked() == true)
         waypoint:SetChecked(false)
         waypoint.scripts.OnClick(waypoint)
@@ -79,7 +82,7 @@ return {
         assert(GoldPilotDB.settings.routeWaypoint == true and addon.RouteFollow.enabled == true)
         addon.Main.tabsBar:select("now")
         addon.Main.tabsBar:select("settings")
-        assert(page.waypointCheckbox:GetChecked() == true)
+        assert(page.checkboxes.routeWaypoint:GetChecked() == true)
         local frame = tooltip()
         addon.Tooltip:add(frame, { id = 25 })
         assert(#frame.lines == 0)
