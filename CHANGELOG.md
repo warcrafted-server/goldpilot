@@ -4,6 +4,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Añadido
+- docs/PUBLICACIONES.md: cola de versiones preparadas con su commit, para publicarlas en orden en CurseForge.
+
 ## [0.16.2] - 2026-11-26
 
 ### Cambiado
@@ -190,6 +193,9 @@ Parche: correcciones y retoques visuales, sin función nueva.
 - Los objetos ligados no reciben consejo de subasta ni se encolan para consulta.
 
 ## [Sin publicar]
+
+### Añadido
+- docs/PUBLICACIONES.md: cola de versiones preparadas con su commit, para publicarlas en orden en CurseForge.
 
 ## [0.6.2] - 2026-11-24
 
