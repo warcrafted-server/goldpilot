@@ -1,7 +1,7 @@
-# 0.16.1 (2026-11-26) — English
+# 0.16.2 (2026-11-26) — English
 
-- Opening the auction house during the 15-minute limit no longer leaves the full scan forgotten: it announces the time, shows a countdown and starts by itself if the auction house is still open.
+- The scan bar always shows the percentage and the seconds elapsed; while it waits for the server, the percentage is an estimate based on the previous scan.
 
-# 0.16.1 (2026-11-26) — Español
+# 0.16.2 (2026-11-26) — Español
 
-- Abrir la subasta durante el límite de 15 minutos ya no deja el escaneo completo olvidado: avisa de la hora, muestra la cuenta atrás y empieza solo si la subasta sigue abierta.
+- La barra del escaneo muestra siempre el porcentaje y los segundos que lleva; mientras espera al servidor, el porcentaje es una estimación según el escaneo anterior.

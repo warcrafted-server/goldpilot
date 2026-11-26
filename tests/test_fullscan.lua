@@ -29,7 +29,7 @@ return {
         end)
         mock.fire("AUCTION_HOUSE_SHOW")
         assert(addon.FullScan.inProgress and addon.FullScan:percent() == 0)
-        assert(addon.ScanBar.frame.text.value == string.format(addon.L.SCAN_BAR_WAIT, 0))
+        assert(addon.ScanBar.frame.text.value == string.format(addon.L.SCAN_BAR_WAIT, 0, 0))
         mock.fire("REPLICATE_ITEM_LIST_UPDATE")
         for _ = 1, 10 do mock.flushTimers() end
         assert(not addon.FullScan.inProgress and addon.FullScan.progress == nil)
@@ -42,6 +42,38 @@ return {
         end
         assert(peak == 100 and seen[#seen - 1] == 100 and sawBar)
         assert(addon.ScanBar.frame and addon.ScanBar.frame.hidden)
+    end,
+    ["la espera estima el porcentaje según el escaneo anterior"] = function(addon, mock)
+        setup(addon, 500, 200000 - 15 * 60)
+        GoldPilotDB.scan.wait = 20
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(addon.FullScan.inProgress and addon.FullScan.progress.phase == "wait")
+        assert(addon.FullScan:percent() == 0)
+        time = function() return 200000 + 10 end
+        assert(addon.FullScan:percent() == 25)
+        addon.ScanBar:update(addon.FullScan.progress)
+        assert(addon.ScanBar.frame.text.value == string.format(addon.L.SCAN_BAR_WAIT, 25, 10))
+        time = function() return 200000 + 60 * 60 end
+        assert(addon.FullScan:percent() == 49)
+    end,
+    ["la lectura empieza en 50 y el registro termina en 100"] = function(addon, mock)
+        setup(addon, 500)
+        local values = {}
+        addon.FullScan:onProgress(function(progress)
+            if progress then values[#values + 1] = { phase = progress.phase, value = addon.FullScan:percent() } end
+        end)
+        mock.fire("AUCTION_HOUSE_SHOW")
+        mock.fire("REPLICATE_ITEM_LIST_UPDATE")
+        for _ = 1, 10 do mock.flushTimers() end
+        local firstRead, lastRecord, maxWait = nil, nil, 0
+        for _, entry in ipairs(values) do
+            if entry.phase == "wait" then maxWait = math.max(maxWait, entry.value) end
+            if entry.phase == "read" and not firstRead then firstRead = entry.value end
+            if entry.phase == "record" then lastRecord = entry.value end
+        end
+        assert(maxWait <= 49)
+        assert(firstRead == 50)
+        assert(lastRecord == 100)
     end,
     ["cerrar la subasta a mitad avisa de la interrupción"] = function(addon, mock)
         setup(addon, 500)

@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.16.2] - 2026-11-26
+
+### Cambiado
+- La barra del escaneo muestra siempre el porcentaje y los segundos que lleva; mientras espera al servidor, el porcentaje es una estimación según el escaneo anterior.
+
 ## [0.16.1] - 2026-11-26
 
 ### Corregido

@@ -15,7 +15,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Por qué:** es tu requisito explícito y la principal diferencia frente a la competencia.
 - **Aceptada con cambio (2026-11-26):** por dentro se mantienen las seis clases; al jugador solo se le muestran tres etiquetas: «confirmado» (CONF), «observado» (OBS, GAME, REG, EXT) y «estimado» (EST).
 
-## D3. Venta confirmada = factura del correo — propuesta
+## D3. Venta confirmada = factura del correo — aceptada (2026-11-26)
 
 - **Decisión:** solo `GetInboxInvoiceInfo` (o equivalente verificado) produce ventas `CONF`. Publicar es `REG`; desaparecer de la subasta no es vender.
 - **Riesgo:** si el jugador no abre el buzón, las ventas quedan pendientes; la interfaz lo indica («3 ventas sin recoger del buzón»).

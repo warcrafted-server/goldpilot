@@ -35,8 +35,11 @@ end
 
 local function setPhase(phase, total)
     if not FullScan.inProgress then return end
-    local started = FullScan.progress and FullScan.progress.started or now()
-    FullScan.progress = { phase = phase, done = 0, total = total or 0, started = started }
+    local previous = FullScan.progress
+    local started = previous and previous.started or now()
+    -- expected (la espera del escaneo anterior) solo sirve para estimar el porcentaje mientras se espera.
+    FullScan.progress = { phase = phase, done = 0, total = total or 0, started = started,
+        expected = previous and previous.expected or nil }
     notify(FullScan.progress)
 end
 
@@ -48,12 +51,20 @@ end
 
 function FullScan:percent()
     local progress = self.progress
-    if not progress or progress.phase == "cooldown" or not progress.total or progress.total <= 0 then return 0 end
+    if not progress or progress.phase == "cooldown" then return 0 end
+    if progress.phase == "wait" then
+        local expected = tonumber(progress.expected) or 0
+        if expected <= 0 then expected = 30 end
+        local elapsed = math.max(0, now() - (tonumber(progress.started) or now()))
+        -- Se queda en el 49 % para no dar por hecha una espera que aún puede alargarse.
+        return math.min(49, math.floor(elapsed / expected * 50))
+    end
+    if not progress.total or progress.total <= 0 then return 0 end
     local done = math.min(progress.total, math.max(0, tonumber(progress.done) or 0))
     local ratio = done / progress.total
-    -- La lectura ocupa el 85 % y el registro de precios el resto.
-    if progress.phase == "record" then return math.floor(85 + ratio * 15) end
-    if progress.phase == "read" then return math.floor(ratio * 85) end
+    -- La lectura ocupa del 50 al 92 % y el registro de precios el resto.
+    if progress.phase == "record" then return math.floor(92 + ratio * 8) end
+    if progress.phase == "read" then return math.floor(50 + ratio * 42) end
     return 0
 end
 
@@ -263,12 +274,15 @@ function FullScan:start(manual)
     local left = self:secondsLeft()
     if left > 0 then return false, "cooldown", left end
     GoldPilotDB = GoldPilotDB or {}
+    -- Hay que leer la espera del escaneo anterior antes de que GoldPilotDB.scan se sobrescriba.
+    local expected = tonumber(GoldPilotDB.scan and GoldPilotDB.scan.wait) or 0
     GoldPilotDB.scan = { t = now() }
     self.inProgress, self.receiving = true, false
     addon.AuctionHouse.scanning = true
     ticket = ticket + 1
     local mine = ticket
-    self.progress = { phase = "wait", done = 0, total = 0, started = GoldPilotDB.scan.t }
+    self.progress = { phase = "wait", done = 0, total = 0, started = GoldPilotDB.scan.t,
+        expected = expected > 0 and expected or 30 }
     notify(self.progress)
     local ok = addon.Compat.call("C_AuctionHouse.ReplicateItems")
     if not ok then finish(false, addon.L.SCAN_EMPTY); return false, "error" end
