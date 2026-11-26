@@ -4,8 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.15.7] - 2026-11-26
+
 ### Cambiado
 - Capturas de Libro y del tooltip con el aspecto actual y sin nombres de personajes.
+
+### Corregido
+- Ahora: la tarjeta de correo sin oro muestra cuántos correos hay, mantiene la confianza en su sitio y, si no hay lista, pide abrir el buzón.
 
 ## [0.15.6] - 2026-11-25
 

@@ -44,8 +44,10 @@ local function mapName(mapID)
 end
 
 local function amount(card)
-    if card.id == "refresh" or ((card.id == "mail" or card.id == "mail_other") and (card.gain or 0) <= 0) then
-        return ""
+    if card.id == "refresh" then return "" end
+    if (card.id == "mail" or card.id == "mail_other") and (card.gain or 0) <= 0 then
+        local total = (card.mailCount or 0) > 0 and card.mailCount or (card.count or 0)
+        return string.format(total == 1 and addon.L.NOW_MAIL_COUNT_ONE or addon.L.NOW_MAIL_COUNT, total)
     end
     local value = addon.Theme.money(math.abs(card.gain or 0))
     if card.id == "zone" then return "+" .. value .. addon.L.NOW_PER_HOUR end
@@ -105,10 +107,7 @@ local function detail(card, current)
     local L, lines = addon.L, {}
     lines[#lines + 1] = { text = title(card), size = 14, color = { 1, 0.82, 0.2 } }
     if card.id ~= "refresh" then
-        local value = amount(card)
-        local trust = confidence(card.confidence or 0)
-        if value ~= "" then lines[#lines + 1] = { text = value, right = trust, size = 12, gap = 6 }
-        else lines[#lines + 1] = { text = trust, size = 12, gap = 6 } end
+        lines[#lines + 1] = { text = amount(card), right = confidence(card.confidence or 0), size = 12, gap = 6 }
     end
     lines[#lines + 1] = { text = L.NOW_WHY, size = 11, color = { 0.55, 0.5, 0.42 }, gap = 10 }
     local why
@@ -138,6 +137,9 @@ local function detail(card, current)
         why = L.NOW_WHY_REFRESH
     end
     lines[#lines + 1] = { text = why, size = 11 }
+    if (card.id == "mail" or card.id == "mail_other") and not (card.mails and #card.mails > 0) then
+        lines[#lines + 1] = { text = L.NOW_MAIL_OPEN, size = 11, gap = 10 }
+    end
     if card.id == "zone" and card.items and #card.items > 0 then
         lines[#lines + 1] = { text = L.NOW_ZONES_TOP, size = 11, color = { 0.55, 0.5, 0.42 }, gap = 10 }
         for _, item in ipairs(card.items) do

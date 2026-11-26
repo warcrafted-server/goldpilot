@@ -219,4 +219,35 @@ return {
         assert(addon.NowUI.lastAdviceContext.session == session)
         assert(addon.NowUI.lastAdviceContext.auctionable == addon.ItemData.auctionable)
     end,
+    ["Now cuenta los correos sin oro, deja la confianza a la derecha y pide abrir el buzón"] = function(addon)
+        addon.Main:show()
+        local originals = addon.L
+        for _, language in ipairs({ "enUS", "esES" }) do
+            addon.L = addon.LocaleStrings[language]
+            local mail = card("mail", { gain = 0, count = 2, seen = 199000 })
+            setCards(addon, { mail })
+            local expected = string.format(addon.L.NOW_MAIL_COUNT, 2)
+            assert(addon.NowUI.widgets.cards.items[1].amount.value == expected)
+            local detail = addon.NowUI.widgets.detail
+            assert(detail.labels[2].value == expected)
+            assert(detail.values[2].value == addon.L.NOW_HIGH)
+            assert(lines(detail):find(addon.L.NOW_MAIL_OPEN, 1, true))
+            local single = card("mail_other", { char = "Alt", gain = 0, count = 1 })
+            setCards(addon, { single })
+            assert(addon.NowUI.widgets.cards.items[1].amount.value == addon.L.NOW_MAIL_COUNT_ONE)
+            assert(lines(addon.NowUI.widgets.detail):find(addon.L.NOW_MAIL_OPEN, 1, true))
+            local withGold = card("mail", { gain = 50, count = 2, seen = 199000,
+                mails = { { name = "Venta", qty = 1, money = 50 } } })
+            setCards(addon, { withGold })
+            assert(addon.NowUI.widgets.cards.items[1].amount.value == "+" .. addon.Theme.money(50))
+            assert(addon.NowUI.widgets.detail.values[2].value == addon.L.NOW_HIGH)
+            assert(not lines(addon.NowUI.widgets.detail):find(addon.L.NOW_MAIL_OPEN, 1, true))
+            local listed = card("mail", { gain = 0, count = 2, mailCount = 3, seen = 199000,
+                mails = { { name = "Venta", qty = 1, money = 0 }, { name = "Devolución", qty = 2, money = 0 } } })
+            setCards(addon, { listed })
+            assert(addon.NowUI.widgets.cards.items[1].amount.value == string.format(addon.L.NOW_MAIL_COUNT, 3))
+            assert(not lines(addon.NowUI.widgets.detail):find(addon.L.NOW_MAIL_OPEN, 1, true))
+        end
+        addon.L = originals
+    end,
 }
