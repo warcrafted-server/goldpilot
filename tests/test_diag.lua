@@ -13,6 +13,13 @@ local function enable(addon, mock)
     mock.fire("PLAYER_LOGIN")
 end
 
+local function said(mock, text)
+    for _, line in ipairs(mock.output) do
+        if string.find(line, text, 1, true) then return true end
+    end
+    return false
+end
+
 return {
     ["diag guarda informe con capacidades presentes y ausentes"] = function(addon, mock)
         withGlobals({
@@ -59,11 +66,10 @@ return {
             mock.fire("MAIL_SHOW")
             mock.fire("LOOT_READY")
             mock.fire("TRADE_SKILL_SHOW")
-            SlashCmdList.GOLDPILOT("diag ah 42")
             mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 42)
             local diag = GoldPilotDB.diag
             assert(diag.auction.abierta and diag.auction.cut == 0.05)
-            assert(diag.auction.itemID == 42 and diag.auction.eventos[1].resultados == 7)
+            assert(diag.auction.eventos[1].resultados == 7)
             assert(diag.mail.abierto and diag.mail.n == 1 and diag.mail.facturas[1].tipo == 2)
             assert(diag.mail.facturas[1].campos[2].tipo == "string")
             assert(diag.mail.facturas[1].campos[2].valor == nil)
@@ -86,6 +92,120 @@ return {
             assert(GoldPilotDB.diag.profs.recetas == nil)
         end)
     end,
+    ["diag ah avisa si la subasta está cerrada"] = function(addon, mock)
+        withGlobals({
+            InCombatLockdown = function() return false end,
+            time = function() return 500 end,
+        }, function()
+            enable(addon, mock)
+            SlashCmdList.GOLDPILOT("diag ah")
+            assert(addon.Diag.ahSession == nil)
+            assert(said(mock, addon.L.DIAG_AH_CLOSED))
+            assert(GoldPilotDB == nil or GoldPilotDB.diag == nil or GoldPilotDB.diag.ah == nil)
+        end)
+    end,
+    ["diag ah recoge estructura y eventos y guarda al repetir"] = function(addon, mock)
+        local clock = 1000
+        withGlobals({
+            time = function() return clock end,
+            InCombatLockdown = function() return false end,
+            C_AuctionHouse = {
+                GetNumOwnedAuctions = function() return 1 end,
+                GetOwnedAuctionInfo = function() return "itemKey", 100, 2, "owner", 5000 end,
+            },
+            AuctionHouseFrame = {
+                GetObjectType = function() return "Frame" end,
+                GetWidth = function() return 500 end,
+                GetHeight = function() return 400 end,
+                IsShown = function() return true end,
+                GetDisplayMode = function() return "Commodities" end,
+                CommoditiesSellFrame = {
+                    GetObjectType = function() return "Frame" end,
+                    PriceInput = {
+                        GetObjectType = function() return "EditBox" end,
+                        SetAmount = function() end,
+                        GetAmount = function() end,
+                    },
+                },
+            },
+        }, function()
+            enable(addon, mock)
+            mock.fire("AUCTION_HOUSE_SHOW")
+            SlashCmdList.GOLDPILOT("diag ah")
+            local session = addon.Diag.ahSession
+            assert(session and session.inicio == 1000)
+            assert(said(mock, addon.L.DIAG_AH_START))
+
+            local structure = session.estructura
+            assert(structure.AuctionHouseFrame.existe)
+            assert(structure.AuctionHouseFrame.tipo == "Frame")
+            assert(structure.AuctionHouseFrame.ancho == 500 and structure.AuctionHouseFrame.alto == 400)
+            assert(structure.AuctionHouseFrame.visible == true)
+            assert(structure.AuctionHouseFrame.metodos[1] == "GetDisplayMode")
+            assert(structure.CommoditiesSellFrame.existe)
+            local price
+            for _, field in ipairs(structure.CommoditiesSellFrame.detalle) do
+                if field.nombre == "PriceInput" then price = field end
+            end
+            assert(price and price.tipo == "EditBox")
+            assert(price.metodos[1] == "SetAmount" and price.metodos[2] == "GetAmount")
+
+            clock = 1010
+            mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 42)
+            mock.fire("UI_ERROR_MESSAGE", "No puedes pujar", 1, "extra")
+            assert(session.eventos["ITEM_SEARCH_RESULTS_UPDATED"].n == 1)
+            assert(session.eventos["ITEM_SEARCH_RESULTS_UPDATED"].primero == 1010)
+            assert(session.eventos["ITEM_SEARCH_RESULTS_UPDATED"].ultimo == 1010)
+            assert(session.eventos["UI_ERROR_MESSAGE"].n == 1)
+            assert(session.eventos["UI_ERROR_MESSAGE"].ejemplos[1][1] == "No puedes pujar")
+            assert(session.eventos["UI_ERROR_MESSAGE"].ejemplos[1][2] == "extra")
+
+            clock = 1200
+            SlashCmdList.GOLDPILOT("diag ah")
+            local ah = GoldPilotDB.diag.ah
+            assert(addon.Diag.ahSession == nil)
+            assert(ah and ah.inicio == 1000 and ah.fin == 1200)
+            assert(ah.eventos["ITEM_SEARCH_RESULTS_UPDATED"].n == 1)
+            assert(ah.subastas[1][1] == "itemKey" and ah.subastas[1][5] == "5000")
+            assert(ah.modo == "Commodities")
+            assert(said(mock, addon.L.DIAG_AH_SAVED))
+
+            mock.fire("ITEM_SEARCH_RESULTS_UPDATED", 42)
+            assert(GoldPilotDB.diag.ah.eventos["ITEM_SEARCH_RESULTS_UPDATED"].n == 1)
+        end)
+    end,
+    ["diag ah guarda al cerrar la subasta"] = function(addon, mock)
+        withGlobals({
+            InCombatLockdown = function() return false end,
+            time = function() return 700 end,
+        }, function()
+            enable(addon, mock)
+            mock.fire("AUCTION_HOUSE_SHOW")
+            SlashCmdList.GOLDPILOT("diag ah")
+            mock.fire("AUCTION_HOUSE_CLOSED")
+            mock.flushTimers()
+            local ah = GoldPilotDB.diag.ah
+            assert(addon.Diag.ahSession == nil)
+            assert(ah.eventos["AUCTION_HOUSE_CLOSED"].n == 1)
+            assert(said(mock, addon.L.DIAG_AH_SAVED))
+        end)
+    end,
+    ["diag ah tolera un AuctionHouseFrame ausente"] = function(addon, mock)
+        withGlobals({
+            InCombatLockdown = function() return false end,
+            time = function() return 600 end,
+        }, function()
+            enable(addon, mock)
+            mock.fire("AUCTION_HOUSE_SHOW")
+            SlashCmdList.GOLDPILOT("diag ah")
+            SlashCmdList.GOLDPILOT("diag ah")
+            local ah = GoldPilotDB.diag.ah
+            assert(ah.estructura.AuctionHouseFrame.existe == false)
+            assert(ah.estructura.CommoditiesSellFrame.existe == false)
+            assert(ah.modo == nil)
+            assert(addon.Diag.ahSession == nil)
+        end)
+    end,
     ["comando diag guarda el informe y no actúa en combate"] = function(addon, mock)
         withGlobals({ time = function() return 789 end }, function()
             SlashCmdList.GOLDPILOT("diag")
@@ -96,6 +216,8 @@ return {
             local previous = GoldPilotDB.diag
             SlashCmdList.GOLDPILOT("diag")
             assert(GoldPilotDB.diag == previous)
+            SlashCmdList.GOLDPILOT("diag ah")
+            assert(addon.Diag.ahSession == nil)
             mock.fire("AUCTION_HOUSE_SHOW")
             assert(GoldPilotDB.diag.auction == nil)
         end)

@@ -61,9 +61,9 @@ local function command(input)
         return
     end
     if subcommand == "diag" then
-        local action, itemID = string.match(input or "", "^%s*%S+%s*(%S*)%s*(%S*)")
+        local action = string.match(input or "", "^%s*%S+%s*(%S*)")
         if string.lower(action or "") == "ah" then
-            addon.Diag:searchAuction(tonumber(itemID))
+            addon.Diag:toggleAuction()
         else
             addon.Diag:run()
         end

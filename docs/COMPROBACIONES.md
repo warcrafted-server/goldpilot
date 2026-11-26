@@ -178,3 +178,11 @@ Con el paquete publicable (`python tools/empaquetar.py`, descomprimir `dist/Gold
 - [ ] La barra de desplazamiento sale en Inventario con muchos objetos y se oculta en Zonas.
 - [ ] Ajustes: los textos caben en su columna y las casillas responden.
 - [ ] «Subasta del banco» con un objeto dice «visto hace…».
+
+## Diagnóstico de la subasta
+
+- [ ] Abre la casa de subastas y escribe `/gpilot diag ah`: el chat explica los pasos.
+- [ ] Publica un objeto barato, ve a Subastas y cancélalo.
+- [ ] Compra una unidad barata si puedes.
+- [ ] Escribe otra vez `/gpilot diag ah`: el chat confirma que se ha guardado.
+- [ ] Haz `/reload` para que se escriba el archivo y revisa `GoldPilotDB.diag.ah` en `SavedVariables/GoldPilot.lua`.

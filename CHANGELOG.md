@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.17.1] - 2026-11-26
+
+### Añadido
+- `/gpilot diag ah`: diagnóstico de la ventana de subasta (funciones, paneles y eventos) para preparar el asistente de venta.
+
 ## [0.17.0] - 2026-11-26
 
 ### Añadido

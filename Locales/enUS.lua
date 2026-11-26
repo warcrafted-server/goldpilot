@@ -1,6 +1,6 @@
 local _, addon = ...
 addon.LocaleRegister("enUS", {
-    HELP = "Commands: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <link>, /gpilot ledger, /gpilot session [end], /gpilot hud, /gpilot set [<key> on|off]",
+    HELP = "Commands: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag [ah], /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <link>, /gpilot ledger, /gpilot session [end], /gpilot hud, /gpilot set [<key> on|off]",
     SETTINGS_LIST_HEADER = "Settings:",
     SETTINGS_LINE = "%s = %s (%s)",
     SETTINGS_ON = "on",
@@ -21,6 +21,9 @@ addon.LocaleRegister("enUS", {
     DIAG_MAIL = "Diagnostic: mailbox opened.",
     DIAG_LOOT = "Diagnostic: loot observed.",
     DIAG_PROFS = "Diagnostic: profession window opened.",
+    DIAG_AH_CLOSED = "Open the auction house to run /gpilot diag ah.",
+    DIAG_AH_START = "Auction house diagnostic started for 10 min. Post a cheap item, go to Auctions and cancel it, and buy one cheap unit if you can; type /gpilot diag ah again when you are done.",
+    DIAG_AH_SAVED = "Auction house diagnostic saved in GoldPilotDB.diag.ah.",
     AH_PROGRESS = "Auction house: %d/%d items",
     WATCH_USAGE = "Usage: /gpilot watch <item link or ID>",
     WATCH_ON = "Watching %s.",

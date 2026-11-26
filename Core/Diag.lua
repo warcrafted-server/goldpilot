@@ -18,6 +18,54 @@ local auctionEvents = {
     "AUCTION_HOUSE_THROTTLED_MESSAGE_SENT", "ITEM_SEARCH_RESULTS_UPDATED",
 }
 
+-- Lista cerrada: el objetivo es averiguar qué ofrece este cliente, no suponerlo.
+local ahCapabilities = {
+    "C_AuctionHouse.PostItem", "C_AuctionHouse.PostCommodity",
+    "C_AuctionHouse.CalculateItemDeposit", "C_AuctionHouse.CalculateCommodityDeposit",
+    "C_AuctionHouse.GetAvailablePostCount", "C_AuctionHouse.IsSellItemValid",
+    "C_AuctionHouse.GetItemCommodityStatus", "C_AuctionHouse.QueryOwnedAuctions",
+    "C_AuctionHouse.GetNumOwnedAuctions", "C_AuctionHouse.GetOwnedAuctionInfo",
+    "C_AuctionHouse.GetOwnedAuctions", "C_AuctionHouse.CancelAuction",
+    "C_AuctionHouse.CanCancelAuction", "C_AuctionHouse.GetCancelCost",
+    "C_AuctionHouse.StartCommoditiesPurchase", "C_AuctionHouse.ConfirmCommoditiesPurchase",
+    "C_AuctionHouse.CancelCommoditiesPurchase", "C_AuctionHouse.PlaceBid",
+    "C_AuctionHouse.GetCommoditySearchResultInfo", "C_AuctionHouse.GetNumCommoditySearchResults",
+    "C_AuctionHouse.GetItemSearchResultInfo", "C_AuctionHouse.GetNumItemSearchResults",
+    "C_AuctionHouse.GetAuctionHouseCut", "C_AuctionHouse.GetTimeLeftBandInfo",
+    "C_AuctionHouse.SearchForItemKeys", "C_AuctionHouse.MakeItemKey",
+    "C_AuctionHouse.GetItemKeyInfo", "hooksecurefunc", "C_Item.GetItemInfoInstant",
+}
+
+local ahFrames = {
+    "AuctionHouseFrame", "CommoditiesSellFrame", "ItemSellFrame", "CommoditiesBuyFrame",
+    "ItemBuyFrame", "AuctionsFrame", "BrowseResultsFrame", "SearchBar",
+}
+
+local ahSellFrames = { CommoditiesSellFrame = true, ItemSellFrame = true }
+
+local ahFrameMethods = {
+    "SetDisplayMode", "GetDisplayMode", "SelectBrowseResult", "SetPostItem", "GetCategoriesList",
+}
+
+local ahFieldMethods = {
+    "SetAmount", "GetAmount", "SetPrice", "GetPrice", "SetQuantity", "GetQuantity",
+    "SetItem", "GetItem", "SetDuration", "GetDuration", "Click", "IsEnabled",
+}
+
+local diagEvents = {
+    "AUCTION_HOUSE_SHOW", "AUCTION_HOUSE_CLOSED", "AUCTION_HOUSE_AUCTION_CREATED",
+    "AUCTION_HOUSE_AUCTIONS_EXPIRED", "AUCTION_CANCELED", "OWNED_AUCTIONS_UPDATED",
+    "ITEM_SEARCH_RESULTS_UPDATED", "COMMODITY_SEARCH_RESULTS_UPDATED",
+    "COMMODITY_PRICE_UPDATED", "COMMODITY_PRICE_UNAVAILABLE",
+    "COMMODITY_PURCHASE_SUCCEEDED", "COMMODITY_PURCHASE_FAILED", "COMMODITY_PURCHASED",
+    "ITEM_PURCHASED", "BIDS_UPDATED", "AUCTION_HOUSE_NEW_RESULTS_RECEIVED",
+    "AUCTION_HOUSE_THROTTLED_MESSAGE_SENT", "AUCTION_HOUSE_THROTTLED_SYSTEM_READY",
+    "AUCTION_HOUSE_POST_WARNING", "AUCTION_HOUSE_POST_ERROR",
+    "AUCTION_HOUSE_DISPLAY_MODE_CHANGED", "AUCTION_MULTISELL_START",
+    "AUCTION_MULTISELL_UPDATE", "AUCTION_MULTISELL_FAILURE", "UI_ERROR_MESSAGE",
+    "CHAT_MSG_SYSTEM",
+}
+
 local function now()
     local ok, value = addon.Compat.call("time")
     if ok then return value end
@@ -39,6 +87,212 @@ local function saveSection(name, value, message)
     value.fecha = now()
     GoldPilotDB.diag[name] = value
     if message then addon.Log:info(message) end
+end
+
+local function get(object, key)
+    if object == nil then return nil end
+    local ok, value = pcall(function() return object[key] end)
+    if ok then return value end
+end
+
+local function invoke(object, name, ...)
+    local fn = get(object, name)
+    if type(fn) ~= "function" then return nil end
+    local ok, value = pcall(fn, object, ...)
+    if ok then return value end
+end
+
+local function existingMethods(object, candidates)
+    local names = {}
+    for _, name in ipairs(candidates) do
+        if type(get(object, name)) == "function" then names[#names + 1] = name end
+        if #names >= 60 then break end
+    end
+    return names
+end
+
+local function collectFields(frame)
+    local names = {}
+    pcall(function()
+        for key, value in pairs(frame) do
+            if type(key) == "string" and type(value) == "table"
+                and type(get(value, "GetObjectType")) == "function" then
+                names[#names + 1] = key
+            end
+        end
+    end)
+    table.sort(names)
+    local fields = {}
+    for i = 1, math.min(#names, 60) do
+        fields[i] = { nombre = names[i], tipo = invoke(get(frame, names[i]), "GetObjectType") }
+    end
+    return fields
+end
+
+local function collectDetails(frame)
+    local names = {}
+    pcall(function()
+        for key, value in pairs(frame) do
+            if type(key) == "string" and type(value) == "table" then names[#names + 1] = key end
+        end
+    end)
+    table.sort(names)
+    local details = {}
+    for i = 1, math.min(#names, 60) do
+        local field = get(frame, names[i])
+        details[i] = {
+            nombre = names[i],
+            tipo = invoke(field, "GetObjectType"),
+            metodos = existingMethods(field, ahFieldMethods),
+        }
+    end
+    return details
+end
+
+local function frameEntry(frame, deep)
+    local entry = { existe = frame ~= nil }
+    if frame == nil then return entry end
+    entry.tipo = invoke(frame, "GetObjectType")
+    entry.ancho = invoke(frame, "GetWidth")
+    entry.alto = invoke(frame, "GetHeight")
+    entry.visible = invoke(frame, "IsShown")
+    entry.campos = collectFields(frame)
+    if deep then entry.detalle = collectDetails(frame) end
+    return entry
+end
+
+local function collectStructure()
+    local frame = _G.AuctionHouseFrame
+    local structure = {}
+    for _, name in ipairs(ahFrames) do
+        local target = name == "AuctionHouseFrame" and frame or get(frame, name)
+        structure[name] = frameEntry(target, ahSellFrames[name] == true)
+    end
+    if frame ~= nil then
+        structure.AuctionHouseFrame.metodos = existingMethods(frame, ahFrameMethods)
+    end
+    return structure
+end
+
+local function collectCapabilities()
+    local caps = {}
+    for _, path in ipairs(ahCapabilities) do caps[path] = addon.Compat.has(path) end
+    return caps
+end
+
+local function auctionOpen()
+    if addon.Diag.auctionOpen then return true end
+    -- Tras /reload dentro de la subasta no llega AUCTION_HOUSE_SHOW: el marco visible lo resuelve.
+    return invoke(_G.AuctionHouseFrame, "IsShown") == true
+end
+
+local function shortValue(value)
+    local kind = type(value)
+    if kind == "string" then return string.sub(value, 1, 80) end
+    if kind == "number" or kind == "boolean" or kind == "nil" then return tostring(value) end
+    return "<" .. kind .. ">"
+end
+
+local function textArguments(...)
+    local texts = {}
+    for i = 1, select("#", ...) do
+        local value = select(i, ...)
+        if type(value) == "string" and value ~= "" then
+            texts[#texts + 1] = string.sub(value, 1, 120)
+        end
+        if #texts >= 5 then break end
+    end
+    return texts
+end
+
+local function finishAuctionSession()
+    local session = addon.Diag.ahSession
+    if not session then return end
+    if inCombat() then
+        -- saveSection no escribe en combate: se reintenta al salir en vez de perder la sesión.
+        addon.Timer.after(5, finishAuctionSession, "diag-ah")
+        return
+    end
+    addon.Diag.ahSession = nil
+    addon.Events:unsubscribeModule("diag-ah")
+    addon.Timer.cancelAll("diag-ah")
+
+    local auctions = {}
+    local countOK, count = addon.Compat.call("C_AuctionHouse.GetNumOwnedAuctions")
+    if countOK and tonumber(count) then
+        for i = 1, math.min(tonumber(count), 10) do
+            local values = pack(addon.Compat.call("C_AuctionHouse.GetOwnedAuctionInfo", i))
+            if values[1] == true then
+                local entry = {}
+                for value = 2, values.n do entry[#entry + 1] = shortValue(values[value]) end
+                auctions[i] = entry
+            end
+        end
+    end
+
+    saveSection("ah", {
+        inicio = session.inicio,
+        fin = now(),
+        capacidades = session.capacidades,
+        estructura = session.estructura,
+        eventos = session.eventos,
+        noRegistrados = session.noRegistrados,
+        subastas = auctions,
+        modo = invoke(_G.AuctionHouseFrame, "GetDisplayMode"),
+    }, addon.L.DIAG_AH_SAVED)
+end
+
+function addon.Diag:toggleAuction()
+    if inCombat() then return end
+    if self.ahSession then
+        finishAuctionSession()
+        return
+    end
+    if not auctionOpen() then
+        addon.Log:info(addon.L.DIAG_AH_CLOSED)
+        return
+    end
+    local session = {
+        inicio = now(),
+        eventos = {},
+        noRegistrados = {},
+        capacidades = collectCapabilities(),
+        estructura = collectStructure(),
+    }
+    self.ahSession = session
+    for _, event in ipairs(diagEvents) do
+        local eventName = event
+        local ok = pcall(function()
+            addon.Events:subscribe("diag-ah", eventName, function(...)
+                if addon.Diag.ahSession ~= session then return end
+                local entry = session.eventos[eventName]
+                if not entry then
+                    entry = { n = 0 }
+                    session.eventos[eventName] = entry
+                end
+                entry.n = entry.n + 1
+                local current = now()
+                entry.primero = entry.primero or current
+                entry.ultimo = current
+                if (eventName == "UI_ERROR_MESSAGE" or eventName == "CHAT_MSG_SYSTEM")
+                    and entry.n <= 10 then
+                    entry.ejemplos = entry.ejemplos or {}
+                    entry.ejemplos[#entry.ejemplos + 1] = textArguments(...)
+                end
+                -- Se termina fuera del reparto del evento: quitar suscriptores mientras se recorre la lista falla.
+                if eventName == "AUCTION_HOUSE_CLOSED" then
+                    addon.Timer.after(0, finishAuctionSession, "diag-ah")
+                end
+            end)
+        end)
+        if not ok then
+            -- Subscribe registra el evento en el cliente al final: si no existe, hay que deshacerlo.
+            pcall(function() addon.Events:unsubscribe("diag-ah", eventName) end)
+            session.noRegistrados[#session.noRegistrados + 1] = eventName
+        end
+    end
+    addon.Timer.after(600, finishAuctionSession, "diag-ah")
+    addon.Log:info(addon.L.DIAG_AH_START)
 end
 
 function addon.Diag:run()
@@ -68,20 +322,6 @@ function addon.Diag:run()
     GoldPilotDB.diag = report
     addon.Log:info(string.format(addon.L.DIAG_SUMMARY, present, #capabilities - present))
     if #absent > 0 then addon.Log:info(addon.L.DIAG_MISSING .. table.concat(absent, ", ")) end
-end
-
-function addon.Diag:searchAuction(itemID)
-    if inCombat() or not self.auctionOpen or not itemID then return end
-    local itemKey = itemID
-    local keyOK, key = addon.Compat.call("C_AuctionHouse.MakeItemKey", itemID)
-    if keyOK then itemKey = key end
-    local ok = addon.Compat.call("C_AuctionHouse.SendSearchQuery", itemKey, {}, false)
-    if ok then
-        GoldPilotDB = GoldPilotDB or {}
-        GoldPilotDB.diag = GoldPilotDB.diag or { caps = {} }
-        GoldPilotDB.diag.auction = GoldPilotDB.diag.auction or { abierta = true, eventos = {} }
-        GoldPilotDB.diag.auction.itemID = itemID
-    end
 end
 
 local function observeAuction()

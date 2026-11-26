@@ -1,6 +1,6 @@
 local _, addon = ...
 addon.LocaleRegister("esES", {
-    HELP = "Comandos: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag, /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <enlace>, /gpilot ledger, /gpilot session [end], /gpilot hud, /gpilot set [<clave> on|off]",
+    HELP = "Comandos: /gpilot [window], /gpilot help, /gpilot version, /gpilot diag [ah], /gpilot route, /gpilot minimap, /gpilot bags, /gpilot scan, /gpilot watch <enlace>, /gpilot ledger, /gpilot session [end], /gpilot hud, /gpilot set [<clave> on|off]",
     SETTINGS_LIST_HEADER = "Ajustes:",
     SETTINGS_LINE = "%s = %s (%s)",
     SETTINGS_ON = "activado",
@@ -21,6 +21,9 @@ addon.LocaleRegister("esES", {
     DIAG_MAIL = "Diagnóstico: buzón abierto.",
     DIAG_LOOT = "Diagnóstico: botín observado.",
     DIAG_PROFS = "Diagnóstico: ventana de profesión abierta.",
+    DIAG_AH_CLOSED = "Abre la casa de subastas para usar /gpilot diag ah.",
+    DIAG_AH_START = "Diagnóstico de la subasta iniciado durante 10 min. Publica un objeto barato, ve a Subastas y cancélalo, y compra una unidad barata si puedes; vuelve a escribir /gpilot diag ah al acabar.",
+    DIAG_AH_SAVED = "Diagnóstico de la subasta guardado en GoldPilotDB.diag.ah.",
     AH_PROGRESS = "Subasta: %d/%d objetos",
     WATCH_USAGE = "Uso: /gpilot watch <enlace del objeto o su número>",
     WATCH_ON = "Siguiendo %s.",
