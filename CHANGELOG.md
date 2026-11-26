@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.16.0] - 2026-11-26
+
+### Añadido
+- Barra con el porcentaje del escaneo completo junto a la subasta.
+
+### Corregido
+- Cerrar la subasta a mitad del escaneo avisa de la interrupción en lugar de perderlo en silencio; el aviso del límite de 15 minutos dice a qué hora se podrá volver a escanear.
+
 ## [0.15.7] - 2026-11-26
 
 ### Cambiado

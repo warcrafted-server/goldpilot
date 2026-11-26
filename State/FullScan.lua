@@ -22,6 +22,40 @@ local function enabledByUser()
     return not (settings and settings.fullScan == false)
 end
 
+-- Oyentes del progreso: se avisa al cambiar de fase y al acabar cada trozo, no por cada anuncio.
+local listeners = {}
+
+local function notify(progress)
+    for index = 1, #listeners do
+        local ok, err = pcall(listeners[index], progress)
+        if not ok then addon.Log:error("progreso del escaneo: " .. tostring(err)) end
+    end
+end
+
+local function setPhase(phase, total)
+    if not FullScan.inProgress then return end
+    local started = FullScan.progress and FullScan.progress.started or now()
+    FullScan.progress = { phase = phase, done = 0, total = total or 0, started = started }
+    notify(FullScan.progress)
+end
+
+function FullScan:onProgress(fn)
+    if type(fn) ~= "function" then return end
+    listeners[#listeners + 1] = fn
+    if self.progress then fn(self.progress) end
+end
+
+function FullScan:percent()
+    local progress = self.progress
+    if not progress or not progress.total or progress.total <= 0 then return 0 end
+    local done = math.min(progress.total, math.max(0, tonumber(progress.done) or 0))
+    local ratio = done / progress.total
+    -- La lectura ocupa el 85 % y el registro de precios el resto.
+    if progress.phase == "record" then return math.floor(85 + ratio * 15) end
+    if progress.phase == "read" then return math.floor(ratio * 85) end
+    return 0
+end
+
 -- Sin reloj de alta resolución (pruebas) se procesa un número fijo de elementos por trozo.
 local function clock()
     if debugprofilestop then return debugprofilestop() end
@@ -33,17 +67,25 @@ function FullScan:secondsLeft()
     return math.max(0, COOLDOWN - (now() - last))
 end
 
+local function clockTime(timestamp)
+    local ok, value = addon.Compat.call("date", "%H:%M", timestamp)
+    return ok and tostring(value) or "--:--"
+end
+
 local function finish(ok, message)
     FullScan.inProgress, FullScan.receiving = false, false
+    FullScan.progress = nil
     ticket = ticket + 1
     addon.AuctionHouse.scanning = false
     addon.Log:info(message)
+    notify(nil)
     addon.AuctionHouse:_pump()
     return ok
 end
 
 -- Ejecuta step(i) para i = 1..total repartido en fotogramas y llama a done() al terminar.
-local function sliced(total, step, done, mine)
+-- track actualiza el progreso al final de cada trozo; los reintentos en segundo plano no cuentan.
+local function sliced(total, step, done, mine, track)
     local index = 1
     local function run()
         if mine ~= ticket then return end
@@ -55,6 +97,10 @@ local function sliced(total, step, done, mine)
             if started then
                 if clock() - started > SLICE_MS then break end
             elseif index > limit then break end
+        end
+        if track and FullScan.progress then
+            FullScan.progress.done, FullScan.progress.total = math.min(index - 1, total), total
+            notify(FullScan.progress)
         end
         if index <= total then addon.Compat.call("C_Timer.After", 0, run) else done() end
     end
@@ -166,10 +212,12 @@ local function process(count)
         addon.Compat.call("C_Timer.After", ROUND_DELAY, function() retry(1, 0) end)
     end
 
+    setPhase("read", count)
     sliced(count, read, function()
         for _, ad in ipairs(pending) do held[ad.itemID], seen[ad.itemID] = true, true end
-        sliced(#order, record, publish, mine)
-    end, mine)
+        setPhase("record", #order)
+        sliced(#order, record, publish, mine, true)
+    end, mine, true)
 end
 
 local function onReplicate()
@@ -200,6 +248,8 @@ function FullScan:start(manual)
     addon.AuctionHouse.scanning = true
     ticket = ticket + 1
     local mine = ticket
+    self.progress = { phase = "wait", done = 0, total = 0, started = GoldPilotDB.scan.t }
+    notify(self.progress)
     local ok = addon.Compat.call("C_AuctionHouse.ReplicateItems")
     if not ok then finish(false, addon.L.SCAN_EMPTY); return false, "error" end
     addon.Log:info(addon.L.SCAN_START)
@@ -215,7 +265,9 @@ function FullScan:command()
     local started, reason, left = self:start(true)
     if started then return end
     if reason == "closed" then addon.Log:info(self.inProgress and addon.L.SCAN_START or addon.L.SCAN_CLOSED)
-    elseif reason == "cooldown" then addon.Log:info(string.format(addon.L.SCAN_COOLDOWN, math.ceil(left / 60)))
+    elseif reason == "cooldown" then
+        local last = GoldPilotDB and GoldPilotDB.scan and tonumber(GoldPilotDB.scan.t) or (now() - COOLDOWN)
+        addon.Log:info(string.format(addon.L.SCAN_COOLDOWN, clockTime(last + COOLDOWN), math.ceil(left / 60)))
     elseif reason == "unsupported" then addon.Log:info(addon.L.SCAN_UNSUPPORTED) end
 end
 
@@ -224,8 +276,16 @@ addon.Modules:register("fullscan", {
     onEnable = function()
         addon.Events:subscribe("fullscan", "REPLICATE_ITEM_LIST_UPDATE", onReplicate)
         addon.Events:subscribe("fullscan", "AUCTION_HOUSE_CLOSED", function()
+            local interrupted = FullScan.inProgress
+            if interrupted then
+                local started = GoldPilotDB and GoldPilotDB.scan and tonumber(GoldPilotDB.scan.t) or now()
+                addon.Log:info(string.format(addon.L.SCAN_INTERRUPTED, FullScan:percent(),
+                    clockTime(started + COOLDOWN)))
+            end
             FullScan.inProgress, FullScan.receiving = false, false
+            FullScan.progress = nil
             ticket = ticket + 1
+            if interrupted then notify(nil) end
             if FullScan.flush then FullScan.flush() end
         end)
     end,

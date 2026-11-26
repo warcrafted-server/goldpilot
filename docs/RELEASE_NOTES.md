@@ -1,7 +1,11 @@
-# 0.15.7 (2026-11-26) — English
+# 0.16.0 (2026-11-26) — English
 
-- Now: a mail card without gold shows how many mails there are, keeps confidence in place and, if there is no list, asks you to open the mailbox.
+- A thin bar beside the auction house shows the progress of the full scan.
+- Closing the auction house in the middle of the scan warns that it was interrupted instead of losing it silently.
+- The 15-minute limit message says what time the next full scan will be possible.
 
-# 0.15.7 (2026-11-26) — Español
+# 0.16.0 (2026-11-26) — Español
 
-- Ahora: una tarjeta de correo sin oro muestra cuántos correos hay, mantiene la confianza en su sitio y, si no hay lista, pide abrir el buzón.
+- Una barra fina junto a la subasta muestra el progreso del escaneo completo.
+- Cerrar la subasta a mitad del escaneo avisa de la interrupción en vez de perderlo en silencio.
+- El aviso del límite de 15 minutos dice a qué hora se podrá volver a escanear.

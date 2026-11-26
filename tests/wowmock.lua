@@ -104,6 +104,7 @@ function GetItemInfoInstant(itemID)
 end
 function InCombatLockdown() return mock.combat == true end
 function time() return 200000 end
+function date(format, value) return os.date(format, value) end
 function UnitName() return "Player" end
 Minimap = { GetShape = function() return "ROUND" end, GetCenter = function() return 0, 0 end }
 GameTooltip = { SetOwner = function() end, AddLine = function() end, Show = function() end, Hide = function() end }
