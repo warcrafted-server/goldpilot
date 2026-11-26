@@ -130,6 +130,13 @@ Settings.define{
 }
 
 Settings.define{
+    key = "sellAssist", type = "toggle", default = true, section = "general", label = "SETTING_SELL_ASSIST", order = 3,
+    apply = function(value)
+        if not value and addon.SellAssist then addon.SellAssist:hide() end
+    end,
+}
+
+Settings.define{
     key = "fullScan", type = "toggle", default = true, section = "gathering", label = "SETTING_FULLSCAN", order = 1,
 }
 

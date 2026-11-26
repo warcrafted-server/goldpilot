@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.18.0] - 2026-11-27
+
+### Añadido
+- Asistente de venta: al poner un objeto en la ventana de venta de la subasta, GoldPilot muestra la referencia, el mínimo de otros vendedores, el precio sugerido y lo que cobrarás, con un botón para usar ese precio.
+- Ajuste «Asistente de venta en la subasta».
+
 ## [0.17.2] - 2026-11-27
 
 ### Corregido

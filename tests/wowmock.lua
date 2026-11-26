@@ -28,6 +28,7 @@ function CreateFrame(kind, name, parent, template)
     function frame:GetWidth() return self.width or 1 end
     function frame:SetScrollChild(child) self.scrollChild = child end
     function frame:SetText(value) self.value = value end
+    function frame:SetEnabled(value) self.enabled = value end
     function frame:GetText() return self.value end
     function frame:SetChecked(value) self.checked = value == true end
     function frame:GetChecked() return self.checked end
@@ -43,6 +44,8 @@ function CreateFrame(kind, name, parent, template)
         function texture:SetAllPoints() end
         function texture:SetTexture(value) self.texture = value end
         function texture:SetSize(w, h) self.width, self.height = w, h end
+        function texture:SetWidth(value) self.width = value end
+        function texture:SetHeight(value) self.height = value end
         function texture:SetPoint(...) self.point = { ... } end
         function texture:SetAllPoints() end
         function texture:SetColorTexture(...) self.color = { ... } end
@@ -66,6 +69,8 @@ function CreateFrame(kind, name, parent, template)
         function font:SetTextColor(...) self.color = { ... } end
         function font:SetText(value) self.value = value end
         function font:SetWordWrap(value) self.wordWrap = value end
+        function font:SetWidth(value) self.width = value end
+        function font:SetJustifyH(value) self.justify = value end
         function font:GetText() return self.value end
         function font:SetPoint(...) self.point = { ... } end
         function font:Hide() self.hidden = true end

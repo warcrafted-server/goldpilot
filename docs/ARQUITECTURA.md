@@ -22,9 +22,9 @@ Locales/                 Locale.lua, enUS.lua, esES.lua
 Data/Local/              Semillas de wowdata solo para pruebas locales (ignorada por git y por .pkgmeta)
 Store/                   Almacén de precios, historial, libro de operaciones y visitas de la ruta (lógica pura)
 State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, RoutePlan, RouteFollow, Location
-Engine/                  Valoración, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
+Engine/                  Valoración, asistente de venta, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
 Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan
-UI/                      Tema, ventana principal, pestañas, tooltip, panel de subasta, HUD de sesión, mapa y rutas
+UI/                      Tema, ventana principal, pestañas, tooltip, asistente de venta, HUD de sesión, mapa y rutas
 API.lua                  API pública mínima para otros addons
 companion/               Aplicación externa opcional (Python), fuera del paquete (ignorada en .pkgmeta)
 tests/                   Pruebas fuera del juego (lupa + simulación de la API)
@@ -116,6 +116,8 @@ GoldPilotDB = {
 
 ## 7. Motor (`Engine/`)
 
+`Engine/Sell.lua` calcula el precio sugerido, el mínimo que supera al vendedor y el neto tras comisión y depósito sin acceder a la API del juego.
+
 Proveedores puros `proveedor(State, Store, Data, Settings) -> oportunidades`, como en LoreWake. Oportunidad:
 
 ```lua
@@ -129,6 +131,8 @@ Puntuación: `beneficio esperado × confianza × liquidez × peso del perfil`, c
 `Engine/Routes.lua` (puro) reúne los puntos propios y los de la semilla local, descarta los que no tienen precio o no puede recoger la habilidad, los agrupa en paradas y ordena y poda el recorrido; cada parada conserva sus puntos agrupados. `State/RoutePlan.lua` lo une al juego: lee el mapa actual, su nombre, el aspecto y el ancho en yardas, valora los puntos con las sesiones y con el factor de visitas, y guarda el plan activo (sin SavedVariables). `State/RouteFollow.lua` sigue el plan: consulta la posición cada 2 s, resalta y marca la siguiente parada, y registra las visitas con y sin nodo en `GoldPilotDB.routeVisits` para que `Store/Visits.lua` (puro) ajuste el peso de los puntos.
 
 ## 8. Interfaz (`UI/`)
+
+`UI/SellAssist.lua` lee las ofertas y el depósito en la subasta, muestra el consejo junto al formulario de venta y rellena el precio solo cuando el jugador pulsa el botón.
 
 - Tema derivado de `lorewake/Lorewake/UI/Theme.lua` (mismo autor; se copia y adapta, no se comparte en tiempo de ejecución).
 - Componentes reutilizables: ventana con pestañas, lista con secciones + ficha, franja de métricas, insignia de clase de dato, mini tendencia de texto (▲ ▼ ●) en lugar de gráficas.
