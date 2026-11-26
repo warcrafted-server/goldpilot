@@ -58,6 +58,41 @@ return {
         local expected = string.format(addon.L.SCAN_INTERRUPTED, percent, os.date("%H:%M", started + 15 * 60))
         assert(string.find(mock.output[#mock.output], expected, 1, true), mock.output[#mock.output])
     end,
+    ["abrir la subasta durante el límite avisa y programa el escaneo"] = function(addon, mock)
+        setup(addon, 200, 200000 - 6 * 60)
+        local replicated = 0
+        C_AuctionHouse.ReplicateItems = function() replicated = replicated + 1 end
+        mock.fire("AUCTION_HOUSE_SHOW")
+        local available = 200000 - 6 * 60 + 15 * 60
+        local expected = string.format(addon.L.SCAN_SCHEDULED, os.date("%H:%M", available))
+        local announced = false
+        for _, line in ipairs(mock.output) do
+            if string.find(line, expected, 1, true) then announced = true end
+        end
+        assert(announced)
+        assert(addon.FullScan.progress and addon.FullScan.progress.phase == "cooldown")
+        assert(addon.FullScan.progress["until"] == available and addon.FullScan:percent() == 0)
+        assert(not addon.FullScan.inProgress)
+        assert(addon.ScanBar.frame.text.value == string.format(addon.L.SCAN_BAR_COOLDOWN, 9, 0))
+        time = function() return available + 1 end
+        mock.flushTimers()
+        assert(replicated == 1 and addon.FullScan.inProgress)
+    end,
+    ["cerrar la subasta cancela el escaneo programado"] = function(addon, mock)
+        setup(addon, 200, 200000 - 6 * 60)
+        local replicated = 0
+        C_AuctionHouse.ReplicateItems = function() replicated = replicated + 1 end
+        mock.fire("AUCTION_HOUSE_SHOW")
+        assert(addon.FullScan.progress and addon.FullScan.progress.phase == "cooldown")
+        local cleared = false
+        addon.FullScan:onProgress(function(progress) if progress == nil then cleared = true end end)
+        cleared = false
+        mock.fire("AUCTION_HOUSE_CLOSED")
+        assert(addon.FullScan.progress == nil and cleared)
+        time = function() return 200000 + 15 * 60 + 1 end
+        mock.flushTimers()
+        assert(replicated == 0 and not addon.FullScan.inProgress)
+    end,
     ["el comando con el límite activo dice la hora y los minutos"] = function(addon, mock)
         setup(addon, 0, 200000 - 60)
         mock.fire("AUCTION_HOUSE_SHOW")

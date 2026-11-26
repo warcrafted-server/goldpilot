@@ -1,11 +1,7 @@
-# 0.16.0 (2026-11-26) — English
+# 0.16.1 (2026-11-26) — English
 
-- A thin bar beside the auction house shows the progress of the full scan.
-- Closing the auction house in the middle of the scan warns that it was interrupted instead of losing it silently.
-- The 15-minute limit message says what time the next full scan will be possible.
+- Opening the auction house during the 15-minute limit no longer leaves the full scan forgotten: it announces the time, shows a countdown and starts by itself if the auction house is still open.
 
-# 0.16.0 (2026-11-26) — Español
+# 0.16.1 (2026-11-26) — Español
 
-- Una barra fina junto a la subasta muestra el progreso del escaneo completo.
-- Cerrar la subasta a mitad del escaneo avisa de la interrupción en vez de perderlo en silencio.
-- El aviso del límite de 15 minutos dice a qué hora se podrá volver a escanear.
+- Abrir la subasta durante el límite de 15 minutos ya no deja el escaneo completo olvidado: avisa de la hora, muestra la cuenta atrás y empieza solo si la subasta sigue abierta.

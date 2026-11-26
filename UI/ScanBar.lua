@@ -77,14 +77,14 @@ function ScanBar:hide()
     return false
 end
 
--- En espera el texto cuenta los segundos, así que se refresca una vez por segundo.
+-- En espera y en cuenta atrás el texto cuenta los segundos, así que se refresca una vez por segundo.
 function ScanBar:schedule()
     if self.timer or inCombat() then return end
     self.timer = true
     addon.Compat.call("C_Timer.After", INTERVAL, function()
         ScanBar.timer = false
         local progress = addon.FullScan and addon.FullScan.progress
-        if progress and progress.phase == "wait" then ScanBar:update(progress) end
+        if progress and (progress.phase == "wait" or progress.phase == "cooldown") then ScanBar:update(progress) end
     end)
 end
 
@@ -97,6 +97,10 @@ function ScanBar:update(progress)
     if progress.phase == "wait" then
         local elapsed = math.max(0, now() - (tonumber(progress.started) or now()))
         frame.text:SetText(string.format(addon.L.SCAN_BAR_WAIT, elapsed))
+        self:schedule()
+    elseif progress.phase == "cooldown" then
+        local left = math.max(0, math.floor((tonumber(progress["until"]) or now()) - now()))
+        frame.text:SetText(string.format(addon.L.SCAN_BAR_COOLDOWN, math.floor(left / 60), left % 60))
         self:schedule()
     else
         frame.text:SetText(string.format(addon.L.SCAN_BAR_READ, percent))

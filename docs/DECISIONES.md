@@ -2,16 +2,18 @@
 
 Registro breve de las decisiones importantes: contexto, decisión, alternativas descartadas. Estado: **propuesta** (pendiente de tu revisión), **aceptada** o **sustituida**.
 
-## D1. Ser una capa de decisión, no otro escáner de precios — propuesta
+## D1. Ser una capa de decisión, no otro escáner de precios — aceptada (2026-11-26)
 
 - **Contexto:** TSM (con app de escritorio), Auctionator y una decena de contadores de oro/hora ya funcionan en Forever.
 - **Decisión:** GoldPilot se centra en recomendar, explicar y medir el beneficio real; obtiene precios de sus propias observaciones y de su aplicación opcional.
 - **Actualización (2026-11-24):** a petición del autor se hace escaneo completo al abrir la subasta (30-40 s, límite de 15 min), como fuente de datos propia; la diferencia sigue siendo la recomendación.
+- **Aceptada (2026-11-26):** la función principal es decir qué es lo mejor en cada momento para ganar el máximo oro. El escaneo es el medio. Las herramientas de subasta (vender, mis subastas, comprar) entran para poder prescindir de Auctionator, siempre al servicio del consejo.
 
-## D2. Clase de dato obligatoria en cada cifra — propuesta
+## D2. Clase de dato obligatoria en cada cifra — aceptada (2026-11-26)
 
 - **Decisión:** `GAME`, `OBS`, `REG`, `CONF`, `EXT`, `EST` (ARQUITECTURA §4). La interfaz siempre la muestra.
 - **Por qué:** es tu requisito explícito y la principal diferencia frente a la competencia.
+- **Aceptada con cambio (2026-11-26):** por dentro se mantienen las seis clases; al jugador solo se le muestran tres etiquetas: «confirmado» (CONF), «observado» (OBS, GAME, REG, EXT) y «estimado» (EST).
 
 ## D3. Venta confirmada = factura del correo — propuesta
 

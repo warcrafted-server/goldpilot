@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.16.1] - 2026-11-26
+
+### Corregido
+- Abrir la subasta durante el límite de 15 minutos ya no deja el escaneo completo olvidado: avisa de la hora, muestra la cuenta atrás y empieza solo si la subasta sigue abierta.
+
 ## [0.16.0] - 2026-11-26
 
 ### Añadido

@@ -10,6 +10,7 @@ local COOLDOWN, TIMEOUT, SLICE_MS, SLICE_ITEMS = 15 * 60, 120, 10, 200
 -- El cliente carga los objetos poco a poco: se insiste mientras sigan llegando enlaces.
 local MAX_ROUNDS, MAX_STALLED, ROUND_DELAY = 15, 3, 2
 local ticket = 0
+local scheduled = 0 -- invalida los inicios automáticos pendientes al cerrar la subasta o reprogramarlos
 local PET_CAGE = 82800 -- todas las mascotas comparten este identificador: un precio medio no significa nada
 
 local function now()
@@ -47,7 +48,7 @@ end
 
 function FullScan:percent()
     local progress = self.progress
-    if not progress or not progress.total or progress.total <= 0 then return 0 end
+    if not progress or progress.phase == "cooldown" or not progress.total or progress.total <= 0 then return 0 end
     local done = math.min(progress.total, math.max(0, tonumber(progress.done) or 0))
     local ratio = done / progress.total
     -- La lectura ocupa el 85 % y el registro de precios el resto.
@@ -70,6 +71,25 @@ end
 local function clockTime(timestamp)
     local ok, value = addon.Compat.call("date", "%H:%M", timestamp)
     return ok and tostring(value) or "--:--"
+end
+
+-- Deja la cuenta atrás en la barra y programa el inicio para cuando expire el límite del servidor.
+-- Solo vale el último aviso: cerrar la subasta o reprogramar invalida el contador anterior.
+local function waitCooldown(left, manual)
+    local last = GoldPilotDB and GoldPilotDB.scan and tonumber(GoldPilotDB.scan.t) or (now() - COOLDOWN)
+    local available = last + COOLDOWN
+    FullScan.progress = { phase = "cooldown", ["until"] = available }
+    notify(FullScan.progress)
+    scheduled = scheduled + 1
+    local mine = scheduled
+    addon.Compat.call("C_Timer.After", left + 1, function()
+        if mine ~= scheduled or FullScan.inProgress or not addon.AuctionHouse:isOpen() then return end
+        if not FullScan:start(manual) and FullScan.progress and FullScan.progress.phase == "cooldown" then
+            FullScan.progress = nil
+            notify(nil)
+        end
+    end)
+    return available
 end
 
 local function finish(ok, message)
@@ -259,15 +279,22 @@ function FullScan:start(manual)
     return true
 end
 
-function FullScan:maybeStart() return self:start(false) end
+function FullScan:maybeStart()
+    local started, reason, left = self:start(false)
+    if not started and reason == "cooldown" and enabledByUser() then
+        local available = waitCooldown(left, false)
+        addon.Log:info(string.format(addon.L.SCAN_SCHEDULED, clockTime(available)))
+    end
+    return started
+end
 
 function FullScan:command()
     local started, reason, left = self:start(true)
     if started then return end
     if reason == "closed" then addon.Log:info(self.inProgress and addon.L.SCAN_START or addon.L.SCAN_CLOSED)
     elseif reason == "cooldown" then
-        local last = GoldPilotDB and GoldPilotDB.scan and tonumber(GoldPilotDB.scan.t) or (now() - COOLDOWN)
-        addon.Log:info(string.format(addon.L.SCAN_COOLDOWN, clockTime(last + COOLDOWN), math.ceil(left / 60)))
+        local available = waitCooldown(left, true)
+        addon.Log:info(string.format(addon.L.SCAN_COOLDOWN, clockTime(available), math.ceil(left / 60)))
     elseif reason == "unsupported" then addon.Log:info(addon.L.SCAN_UNSUPPORTED) end
 end
 
@@ -282,10 +309,12 @@ addon.Modules:register("fullscan", {
                 addon.Log:info(string.format(addon.L.SCAN_INTERRUPTED, FullScan:percent(),
                     clockTime(started + COOLDOWN)))
             end
+            local hadProgress = FullScan.progress ~= nil
             FullScan.inProgress, FullScan.receiving = false, false
             FullScan.progress = nil
             ticket = ticket + 1
-            if interrupted then notify(nil) end
+            scheduled = scheduled + 1
+            if hadProgress then notify(nil) end
             if FullScan.flush then FullScan.flush() end
         end)
     end,
