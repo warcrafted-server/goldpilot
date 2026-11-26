@@ -38,7 +38,7 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Descartado:** canal de píxeles en tiempo real (AskForever): innecesario para datos económicos y con más superficie de seguridad.
 - **Aceptada (2026-11-26):** el precio del momento sale en vivo del juego (escaneo y consultas). La aplicación aporta el historial, la mediana regional y las tendencias, que se cargan al entrar. GoldPilot tendrá un botón «Actualizar precios» que recarga la interfaz (lo añadiremos cuando exista la aplicación). El canal de píxeles solo sirve del juego a la aplicación y se reserva para cuando haga falta tiempo real en ese sentido.
 
-## D7. Aplicación en Python — propuesta
+## D7. Aplicación en Python — aceptada (2026-11-26)
 
 - **Decisión:** Python, como `wowdata`, las herramientas de LoreWake y AskForever (empaquetado con PyInstaller ya resuelto allí).
 - **Descartado:** Node/Electron (más pesado) y una web pública (los datos del jugador son locales y privados).
