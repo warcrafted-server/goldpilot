@@ -32,10 +32,11 @@ Registro breve de las decisiones importantes: contexto, decisión, alternativas 
 - **Decisión:** el addon vive en la raíz (`GoldPilot.toc`, `Core/`, `UI/`…), como FishForever, PocketBank y BestIcon; `.pkgmeta` excluye con `ignore` lo que no es del addon. Si llega la aplicación, irá en su propia carpeta ignorada por `.pkgmeta` o en otro repositorio.
 - **Sustituye a:** addon en la subcarpeta `GoldPilot/` con `move-folders`, distinto de los demás addons y sin probar en el empaquetador.
 
-## D6. Canal con la aplicación: SavedVariables + addon de datos — propuesta
+## D6. Canal con la aplicación: SavedVariables + addon de datos — aceptada (2026-11-26)
 
 - **Decisión:** juego → app leyendo SavedVariables; app → juego escribiendo `GoldPilot_Market`. Asíncrono, sin captura de pantalla.
 - **Descartado:** canal de píxeles en tiempo real (AskForever): innecesario para datos económicos y con más superficie de seguridad.
+- **Aceptada (2026-11-26):** el precio del momento sale en vivo del juego (escaneo y consultas). La aplicación aporta el historial, la mediana regional y las tendencias, que se cargan al entrar. GoldPilot tendrá un botón «Actualizar precios» que recarga la interfaz (lo añadiremos cuando exista la aplicación). El canal de píxeles solo sirve del juego a la aplicación y se reserva para cuando haga falta tiempo real en ese sentido.
 
 ## D7. Aplicación en Python — propuesta
 

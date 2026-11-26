@@ -4,6 +4,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+### Cambiado
+- Decisión D6 aceptada: precio en vivo desde el juego, historial desde la aplicación y botón para recargar.
+
 ## [0.16.4] - 2026-11-26
 
 ### Corregido
@@ -203,6 +206,9 @@ Parche: correcciones y retoques visuales, sin función nueva.
 - Los objetos ligados no reciben consejo de subasta ni se encolan para consulta.
 
 ## [Sin publicar]
+
+### Cambiado
+- Decisión D6 aceptada: precio en vivo desde el juego, historial desde la aplicación y botón para recargar.
 
 ## [0.16.4] - 2026-11-26
 
