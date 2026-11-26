@@ -18,7 +18,7 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.16.2 | bbc3914 | Barra con porcentaje y segundos también en la espera | no | no |
 | 0.16.3 | 6f9d9e1 | Interno: temporizadores cancelables y mensajes entre módulos | no | no |
 | 0.16.4 | 7951ef1 | Barra del escaneo a la derecha y «(est.)» en lugar de ~ | no | no |
-| 0.16.5 | (ver git log) | Herramientas: notas de versión por archivo y generación en el CI | no hace falta | no |
+| 0.16.5 | bff2de6 | Herramientas: notas de versión por archivo y generación en el CI | no hace falta | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
 

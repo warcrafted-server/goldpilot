@@ -74,6 +74,7 @@ end
 
 function ScanBar:hide()
     local frame = self.frame
+    if frame then frame.barWidth = nil end
     if frame and frame.IsShown and frame:IsShown() then frame:Hide() end
     return false
 end
@@ -105,7 +106,11 @@ function ScanBar:update(progress)
         frame.text:SetText(string.format(addon.L.SCAN_BAR_READ, percent, elapsed))
         self:schedule()
     end
-    if frame.fill.SetWidth then frame.fill:SetWidth(math.max(2, (WIDTH - 2) * percent / 100)) end
+    -- El texto varía con el idioma y los segundos: la barra solo crece durante el escaneo para no temblar.
+    local used = frame.text.GetStringWidth and frame.text:GetStringWidth() or 0
+    frame.barWidth = math.max(frame.barWidth or WIDTH, math.ceil(used) + 20)
+    frame:SetSize(frame.barWidth, HEIGHT)
+    if frame.fill.SetWidth then frame.fill:SetWidth(math.max(2, (frame.barWidth - 2) * percent / 100)) end
     frame:Show()
     return true
 end

@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.16.6] - 2026-11-26
+
+### Corregido
+- Barra del escaneo: se ensancha con el texto para que no se salga del recuadro.
+
 ## [0.16.5] - 2026-11-26
 
 ### Cambiado
@@ -209,6 +214,11 @@ Parche: correcciones y retoques visuales, sin función nueva.
 - Los objetos ligados no reciben consejo de subasta ni se encolan para consulta.
 
 ## [Sin publicar]
+
+## [0.16.6] - 2026-11-26
+
+### Corregido
+- Barra del escaneo: se ensancha con el texto para que no se salga del recuadro.
 
 ### Cambiado
 - Decisión D6 aceptada: precio en vivo desde el juego, historial desde la aplicación y botón para recargar.
