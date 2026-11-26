@@ -1,7 +1,7 @@
-# 0.16.3 (2026-11-26) — English
+# 0.16.4 (2026-11-26) — English
 
-- Internal improvements to timers and module messages; no visible changes.
+- Scan bar: moved to the right below the auction house so it no longer covers the tabs, and the estimated percentage is shown as "(est.)".
 
-# 0.16.3 (2026-11-26) — Español
+# 0.16.4 (2026-11-26) — Español
 
-- Mejoras internas en temporizadores y mensajes entre módulos; sin cambios visibles.
+- Barra del escaneo: a la derecha bajo la subasta para no tapar las pestañas; el porcentaje estimado se indica con «(est.)».

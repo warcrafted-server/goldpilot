@@ -31,7 +31,7 @@ addon.LocaleRegister("esES", {
     SCAN_UNSUPPORTED = "Este cliente no permite el escaneo completo.",
     SCAN_INTERRUPTED = "Escaneo completo interrumpido al %d %% al cerrar la subasta. El siguiente será posible a las %s.",
     SCAN_BAR_READ = "GoldPilot · escaneando %d %% · %d s",
-    SCAN_BAR_WAIT = "GoldPilot · esperando al servidor ~%d %% · %d s",
+    SCAN_BAR_WAIT = "GoldPilot · esperando al servidor %d %% (est.) · %d s",
     SCAN_BAR_COOLDOWN = "GoldPilot · próximo escaneo en %d:%02d",
     AH_DONE = "Subasta: %d objetos leídos",
     AGE_MINUTES = "hace %d min",

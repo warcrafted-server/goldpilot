@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.16.4] - 2026-11-26
+
+### Corregido
+- Barra del escaneo: a la derecha bajo la subasta, sin tapar las pestañas, y sin el símbolo `~` que la fuente del juego no tiene.
+
 ## [0.16.3] - 2026-11-26
 
 ### Añadido
@@ -198,6 +203,11 @@ Parche: correcciones y retoques visuales, sin función nueva.
 - Los objetos ligados no reciben consejo de subasta ni se encolan para consulta.
 
 ## [Sin publicar]
+
+## [0.16.4] - 2026-11-26
+
+### Corregido
+- Barra del escaneo: a la derecha bajo la subasta, sin tapar las pestañas, y sin el símbolo `~` que la fuente del juego no tiene.
 
 ### Añadido
 - docs/PUBLICACIONES.md: cola de versiones preparadas con su commit, para publicarlas en orden en CurseForge.

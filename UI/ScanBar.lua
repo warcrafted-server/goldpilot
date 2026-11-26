@@ -52,7 +52,8 @@ local function build()
     frame:SetFrameStrata("MEDIUM")
     local anchor = _G.AuctionHouseFrame
     if anchor then
-        frame:SetPoint("TOP", anchor, "BOTTOM", 0, -4)
+        -- A la derecha: las pestañas de la subasta cuelgan por debajo del borde izquierdo.
+        frame:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", -4, -4)
     else
         frame:SetPoint("TOP", UIParent, "TOP", 0, -120)
     end
