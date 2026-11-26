@@ -27,3 +27,4 @@ dist/
 GoldPilotDev.toc
 Data/Local/
 __pycache__/
+docs/RELEASE_NOTES.md

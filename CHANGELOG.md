@@ -4,8 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.16.5] - 2026-11-26
+
 ### Cambiado
 - Decisión D6 aceptada: precio en vivo desde el juego, historial desde la aplicación y botón para recargar.
+- Notas de versión en docs/notas/X.Y.Z.md; el CI genera las de CurseForge con todas las versiones desde el último tag publicado.
 
 ## [0.16.4] - 2026-11-26
 

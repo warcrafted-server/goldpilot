@@ -17,6 +17,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Release notes
+        run: python3 tools/notas_release.py "${GITHUB_REF_NAME#v}"
+
       - name: Package and release
         uses: BigWigsMods/packager@v2
         with:

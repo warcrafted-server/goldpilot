@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -26,9 +27,21 @@ def main():
     first = re.search(r"^## \[(\d+\.\d+\.\d+)\]", read("CHANGELOG.md"), re.M)
     if not first or first.group(1) != version:
         errors.append(f"la primera entrada del CHANGELOG ({first.group(1) if first else 'ninguna'}) no es {version}")
-    notes = read("docs", "RELEASE_NOTES.md")
-    if f"# {version} " not in notes:
-        errors.append(f"docs/RELEASE_NOTES.md no tiene la sección de {version}")
+    nota = os.path.join(ROOT, "docs", "notas", version + ".md")
+    if not os.path.isfile(nota):
+        errors.append(f"falta docs/notas/{version}.md")
+    else:
+        texto = read("docs", "notas", version + ".md")
+        for idioma in ("## English", "## Español"):
+            if idioma not in texto:
+                errors.append(f"docs/notas/{version}.md no tiene la sección {idioma}")
+    with tempfile.TemporaryDirectory() as tmp:
+        generadas = subprocess.run(
+            [sys.executable, os.path.join(ROOT, "tools", "notas_release.py"), version,
+             "--salida", os.path.join(tmp, "RELEASE_NOTES.md")],
+            cwd=ROOT, capture_output=True, text=True)
+        if generadas.returncode != 0:
+            errors.append("falla la generación de las notas de versión: " + generadas.stderr.strip())
     if "X-Curse-Project-ID" not in read("GoldPilot.toc"):
         errors.append("falta ## X-Curse-Project-ID en el TOC (sin él CurseForge no recibe el paquete)")
     status = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
