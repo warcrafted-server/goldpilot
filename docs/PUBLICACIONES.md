@@ -16,5 +16,6 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.16.0 | 9b20bcc | Barra de progreso del escaneo y aviso al interrumpirlo | no | no |
 | 0.16.1 | 830935e | Escaneo programado al acabar el límite de 15 min | no | no |
 | 0.16.2 | bbc3914 | Barra con porcentaje y segundos también en la espera | no | no |
+| 0.16.3 | 6f9d9e1 | Interno: temporizadores cancelables y mensajes entre módulos | no | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
