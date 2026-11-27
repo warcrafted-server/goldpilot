@@ -16,7 +16,7 @@ Guía para rellenar el formulario de creación (no se pega entera: cada bloque v
 | Enlaces | Código fuente: `https://github.com/warcrafted-server/goldpilot` (solo si el repositorio es público); incidencias: `…/issues` (idem) |
 | Donaciones | Ninguna |
 | Dependencias | Ninguna obligatoria; TomTom es opcional (marca la siguiente parada de la ruta) |
-| Capturas | En `docs/img/capturas/`, en este orden: `tooltip.png`, `ahora.png`, `inventario.png`, `libro.png`, `zonas.png`, `ruta-mapa.png`. Recortadas a la ventana y sin nombres de personajes. `zonas.png` y `ruta-mapa.png` se hicieron con las semillas locales de desarrollo, así que muestran más puntos de los que tendrá una instalación nueva |
+| Capturas | En `docs/img/capturas/`, en este orden: `venta.png`, `gangas.png`, `mis-subastas.png`, `mi-lista.png`, `tooltip.png`, `ahora.png`, `zonas.png`, `ruta-mapa.png`, `inventario.png`, `libro.png`. Recortadas a la ventana y sin nombres de personajes. `zonas.png` y `ruta-mapa.png` se hicieron con las semillas locales de desarrollo, así que muestran más puntos de los que tendrá una instalación nueva. Falta una de la pestaña Comercio |
 
 ## Summary (English, máx. 250 caracteres)
 
@@ -40,7 +40,8 @@ Gana más oro en WoW Forever: asistente de venta, avisos de rebajas, gangas, lis
 - **Bargains:** items to resell or to sell to a vendor, with the maximum price worth paying and a live check when you open the item. Optional filters: include small profits, only what you can afford.
 - **Shopping list:** save items with your maximum price; they turn green when available and you get a chat message after a scan.
 
-### What it does- **Item tooltips:** vendor price, last price seen, median and a one-word recommendation (Auction or Vendor). Hold Shift to also see the units on sale and the price trend.
+### What it does
+- **Item tooltips:** vendor price, last price seen, median and a one-word recommendation (Auction or Vendor). Hold Shift to also see the units on sale and the price trend.
 - **Full auction scan:** when you open the auction house, GoldPilot downloads the whole listing in 30–40 seconds. It is on by default and can be turned off in Settings; `/gpilot scan` runs it by hand. The server limits it to once every 15 minutes.
 - **Item-by-item queries:** whatever the full scan does not cover — watched items, equipped gear, and the bags and banks of all your characters — is queried one item at a time, respecting the game's limits.
 - **Prices per variant:** equipment variants keep their own prices.
@@ -84,7 +85,8 @@ Problems or ideas? Leave a comment, and if you report a bug, include the output 
 - **Gangas:** objetos para revender o para vender al vendedor, con el precio máximo que compensa pagar y una comprobación en vivo al abrirlos. Filtros: incluir ganancias pequeñas y solo lo que puedes pagar.
 - **Mi lista:** apunta objetos con tu precio máximo; salen en verde cuando están disponibles y te avisa en el chat tras un escaneo.
 
-### Qué hace- **Tooltips de objeto:** precio de vendedor, último precio visto, mediana y una recomendación de una palabra (Subasta o Vendedor). Con Mayús ves además las unidades en venta y la tendencia del precio.
+### Qué hace
+- **Tooltips de objeto:** precio de vendedor, último precio visto, mediana y una recomendación de una palabra (Subasta o Vendedor). Con Mayús ves además las unidades en venta y la tendencia del precio.
 - **Escaneo completo de la subasta:** al abrirla, GoldPilot descarga el listado entero en 30-40 s. Está activado por defecto y se puede desactivar en Ajustes; `/gpilot scan` lo lanza a mano. El servidor limita a uno cada 15 minutos.
 - **Consultas objeto a objeto:** lo que no cubre el escaneo completo —objetos seguidos, equipo equipado y bolsas y bancos de todos tus personajes— se consulta de uno en uno, respetando los límites del juego.
 - **Precios por variante:** las variantes de equipo mantienen su propio precio.
