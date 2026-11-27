@@ -20,7 +20,7 @@ GoldPilot.toc
 Core/                    Init, Events, Modules, Compat, Log, Diag, Migrations, Settings
 Locales/                 Locale.lua, enUS.lua, esES.lua
 Data/Local/              Semillas de wowdata solo para pruebas locales (ignorada por git y por .pkgmeta)
-Store/                   Almacén de precios, historial, libro de operaciones y visitas de la ruta (lógica pura)
+Store/                   Almacén de precios, historial, libro de operaciones (subasta y vendedor) y visitas de la ruta (lógica pura)
 State/                   Colectores: Bags, Bank, Money, AuctionHouse, Mail, Loot, Professions, RoutePlan, RouteFollow, Location
 Engine/                  Valoración, asistente de venta, asesor, proveedores de recomendaciones y rutas de recolección (lógica pura)
 Sources/                 Fuentes de precio propias y datos externos de la aplicación, si se habilitan

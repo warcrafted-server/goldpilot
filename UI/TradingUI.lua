@@ -61,6 +61,7 @@ local function detailLines(item)
     if item.sold > 0 then
         block(L.TRADING_SOLD, item.sold, addon.Theme.money(item.income), nil, L.TRADING_AVERAGE, addon.Theme.money(item.avgSell))
     end
+    if item.vendorSold > 0 then add(string.format(L.TRADING_VENDOR, item.vendorSold), addon.Theme.money(item.vendorIncome), nil, 10) end
     if item.resold > 0 then
         local profit, color = signed(item.resaleProfit)
         local unit = signed(math.floor(item.resaleProfit / item.resold + 0.5))

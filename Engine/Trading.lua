@@ -15,7 +15,7 @@ function Trading.analyze(entries, personal)
             local item = groups[entry.name]
             if not item then
                 item = { name = entry.name, events = {}, itemID = nil, last = nil,
-                    bought = 0, spent = 0, sold = 0, income = 0, resold = 0,
+                    bought = 0, spent = 0, sold = 0, income = 0, resold = 0, vendorSold = 0, vendorIncome = 0,
                     resaleProfit = 0, other = 0, otherIncome = 0, stock = 0, stockCost = 0 }
                 groups[entry.name] = item
             end
@@ -47,6 +47,7 @@ function Trading.analyze(entries, personal)
                 local income = gross - (tonumber(entry.cut) or 0)
                 local unitIncome = income / qty
                 item.sold, item.income = item.sold + qty, item.income + income
+                if entry.venue == "vendor" then item.vendorSold, item.vendorIncome = item.vendorSold + qty, item.vendorIncome + income end
                 local left = qty
                 while left > 0 and lots[lotHead] do
                     local lot = lots[lotHead]

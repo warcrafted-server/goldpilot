@@ -95,6 +95,48 @@ function Ledger.sync(db, char, mails, now)
     return added
 end
 
+function Ledger.vendorSale(db, char, now, itemID, name, qty, unitPrice)
+    db.ledger = db.ledger or {}
+    itemID, qty, unitPrice = tonumber(itemID), tonumber(qty), tonumber(unitPrice)
+    if not itemID or type(name) ~= "string" or name == "" or not qty or qty <= 0 or not unitPrice or unitPrice <= 0 then return false end
+    local matchedName
+    for _, year in pairs(db.ledger) do
+        for _, entry in ipairs(year) do
+            if entry.kind == "buy" and ((tonumber(entry.itemID) and tonumber(entry.itemID) == itemID) or entry.name == name) then
+                matchedName = tonumber(entry.itemID) == itemID and entry.name or matchedName or name
+            end
+        end
+    end
+    if not matchedName then return false end
+    local gross = unitPrice * qty
+    local year = yearOf(now)
+    db.ledger[year] = db.ledger[year] or {}
+    db.ledger[year][#db.ledger[year] + 1] = { t = now, char = char, kind = "sell", venue = "vendor",
+        name = matchedName, itemID = itemID, qty = qty, gross = gross, deposit = 0, cut = 0, net = gross, src = "OBS" }
+    return true
+end
+
+function Ledger.vendorUndo(db, char, name, qty)
+    qty = tonumber(qty)
+    if type(name) ~= "string" or not qty or qty <= 0 then return false end
+    local nowOk, now = addon.Compat.call("time")
+    now = nowOk and tonumber(now) or 0
+    local latest, latestYear, latestIndex
+    for year, entries in pairs(db and db.ledger or {}) do
+        for index, entry in ipairs(entries) do
+            local timestamp = tonumber(entry.t) or 0
+            if entry.kind == "sell" and entry.venue == "vendor" and entry.char == char and entry.name == name and
+                tonumber(entry.qty) == qty and timestamp <= now and now - timestamp < 43200 and
+                (not latest or timestamp > latest or timestamp == latest and year == latestYear and index > latestIndex) then
+                latest, latestYear, latestIndex = timestamp, year, index
+            end
+        end
+    end
+    if not latestIndex then return false end
+    table.remove(db.ledger[latestYear], latestIndex)
+    return true
+end
+
 local function includes(entry, since, char)
     return (tonumber(entry.t) or 0) >= (tonumber(since) or 0) and
         (char == nil or entry.char == char)

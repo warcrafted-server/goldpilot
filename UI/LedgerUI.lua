@@ -81,7 +81,7 @@ local function detailLines(item, entries, account)
     local kinds = { sell = L.LEDGER_SALE, buy = L.LEDGER_PURCHASE, return_ = L.LEDGER_RETURN }
     for i = 1, math.min(6, #entries) do
         local entry = entries[i]
-        local kind = entry.kind == "return" and kinds.return_ or kinds[entry.kind]
+        local kind = entry.kind == "return" and kinds.return_ or entry.kind == "sell" and entry.venue == "vendor" and L.LEDGER_VENDOR_SALE or kinds[entry.kind]
         local text = string.format(kind, tonumber(entry.qty) or 0)
         text = text .. " |cff8a8a8a" .. addon.Theme.age(math.max(0, currentTime() - (tonumber(entry.t) or 0))) .. "|r"
         local net, netColor = signed(entry.net)

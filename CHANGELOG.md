@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.24.0] - 2026-11-27
+
+### Añadido
+- Cuentas y Comercio cuentan las ventas a un vendedor de objetos comprados en la subasta, incluida la recompra.
+
 ## [0.23.0] - 2026-11-27
 
 ### Añadido
