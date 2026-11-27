@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.18.2] - 2026-11-27
+
+### Corregido
+- El asistente de venta muestra el depósito también con equipo y otros objetos que no son materiales.
+
 ## [0.18.1] - 2026-11-27
 
 ### Cambiado
@@ -49,6 +54,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ### Corregido
 - Barra del escaneo: a la derecha bajo la subasta, sin tapar las pestañas, y sin el símbolo `~` que la fuente del juego no tiene.
+
+### Añadido
+- docs/PUBLICACIONES.md: cola de versiones preparadas con su commit, para publicarlas en orden en CurseForge.
 
 ## [0.16.3] - 2026-11-26
 
@@ -242,24 +250,6 @@ Parche: correcciones y retoques visuales, sin función nueva.
 
 ### Corregido
 - Los objetos ligados no reciben consejo de subasta ni se encolan para consulta.
-
-## [Sin publicar]
-
-## [0.16.6] - 2026-11-26
-
-### Corregido
-- Barra del escaneo: se ensancha con el texto para que no se salga del recuadro.
-
-### Cambiado
-- Decisión D6 aceptada: precio en vivo desde el juego, historial desde la aplicación y botón para recargar.
-
-## [0.16.4] - 2026-11-26
-
-### Corregido
-- Barra del escaneo: a la derecha bajo la subasta, sin tapar las pestañas, y sin el símbolo `~` que la fuente del juego no tiene.
-
-### Añadido
-- docs/PUBLICACIONES.md: cola de versiones preparadas con su commit, para publicarlas en orden en CurseForge.
 
 ## [0.6.2] - 2026-11-24
 

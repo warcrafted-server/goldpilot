@@ -229,7 +229,8 @@ local function update()
     local quantity = tonumber(call(sellFrame.QuantityInput, "GetQuantity")) or 1
     quantity = math.max(1, quantity)
     local duration = call(sellFrame.Duration, "GetDuration")
-    local depositValue = deposit(item, id, commodity, duration, quantity)
+    -- Con equipo, CalculateItemDeposit falla en Forever; el panel de Blizzard ya tiene el importe.
+    local depositValue = deposit(item, id, commodity, duration, quantity) or tonumber(call(sellFrame.Deposit, "GetAmount"))
     local db = GoldPilotDB or {}
     local value = addon.Valuation.value(db, addon.AuctionHouse:houseKey(), key, time())
     local minPrice = readOtherMin(id, key, commodity)
