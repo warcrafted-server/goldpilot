@@ -24,6 +24,15 @@ local function label(parent, width, justify)
     return text
 end
 
+-- Las columnas no admiten oro, plata y cobre a la vez: se quita la fracción que no cambia la decisión.
+-- El precio se redondea hacia arriba y el resto hacia abajo, para no prometer de más.
+local function money(copper, up)
+    local value = tonumber(copper) or 0
+    local step = value >= 1000000 and 10000 or value >= 10000 and 100 or 1
+    value = (up and math.ceil(value / step) or math.floor(value / step)) * step
+    return addon.Theme.money(value)
+end
+
 local function createPanel(parent)
     if DealsUI.frame or not parent or inCombat() then return DealsUI.frame end
     local panel = addon.Widgets.sidePanel(parent, addon.L.DEALS_TITLE, WIDTH)
@@ -215,9 +224,9 @@ local function render()
                         local name = itemName(deal.itemID)
                         local rowY = -y
                         setPoint(widgets.name, 8, rowY); widgets.name:SetText(addon.Widgets.truncate(name or "...", 22)); widgets.name:SetTextColor(unpack(PALE)); widgets.name:Show()
-                        setPoint(widgets.price, 160, rowY); widgets.price:SetText(addon.Theme.money(deal.min)); widgets.price:SetTextColor(unpack(PALE)); widgets.price:Show()
-                        setPoint(widgets.max, 238, rowY); widgets.max:SetText(addon.Theme.money(deal.maxPay)); widgets.max:SetTextColor(unpack(PALE)); widgets.max:Show()
-                        setPoint(widgets.profit, 316, rowY); widgets.profit:SetText(addon.Theme.money(deal.profit)); widgets.profit:SetTextColor(unpack(kind == "resale" and GREEN or GOLD)); widgets.profit:Show()
+                        setPoint(widgets.price, 160, rowY); widgets.price:SetText(money(deal.min, true)); widgets.price:SetTextColor(unpack(PALE)); widgets.price:Show()
+                        setPoint(widgets.max, 238, rowY); widgets.max:SetText(money(deal.maxPay)); widgets.max:SetTextColor(unpack(PALE)); widgets.max:Show()
+                        setPoint(widgets.profit, 316, rowY); widgets.profit:SetText(money(deal.profit)); widgets.profit:SetTextColor(unpack(kind == "resale" and GREEN or GOLD)); widgets.profit:Show()
                         widgets.button:ClearAllPoints(); widgets.button:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, rowY + 2); widgets.button:SetSize(WIDTH - 8, ROW_HEIGHT)
                         widgets.button:SetScript("OnClick", function() addon.Timer.cancelAll(OPEN_OWNER); DealsUI.opened, DealsUI.live = nil, nil; openItem(deal, 0) end); widgets.button:Show()
                         y = y + ROW_HEIGHT
@@ -255,7 +264,7 @@ local function liveResults(itemID, isCommodity, itemKey)
             if type(info) == "table" then listings[#listings + 1] = { price = info.buyoutAmount, qty = info.quantity, own = info.containsOwnerItem } end
         end
     end
-    return addon.Sell.otherMin(listings)
+    return addon.Deals.market(listings, isCommodity)
 end
 
 local function updateLive(eventID, eventKey, isCommodity)
@@ -264,13 +273,19 @@ local function updateLive(eventID, eventKey, isCommodity)
     local eventItemID = type(eventID) == "table" and eventID.itemID or eventID
     if eventItemID == nil and type(eventKey) == "table" then eventItemID = eventKey.itemID end
     if tonumber(eventItemID) ~= tonumber(opened.itemID) then return end
-    local current = liveResults(opened.itemID, isCommodity, opened.key)
+    local current, nextPrice = liveResults(opened.itemID, isCommodity, opened.key)
     local name = itemName(opened.itemID) or "..."
     if current then
-        local result = addon.Deals.check(opened.deal, current)
-        local key = result.good and "DEALS_LIVE_GOOD" or "DEALS_LIVE_BAD"
-        DealsUI.live = { text = string.format(addon.L[key], name, addon.Theme.money(current), addon.Theme.money(result.gain)),
-            color = result.good and GREEN or RED, height = 32 }
+        local result = addon.Deals.check(opened.deal, current, nextPrice)
+        local text
+        if result.good then
+            text = string.format(addon.L.DEALS_LIVE_GOOD, name, money(current, true), money(result.gain))
+        elseif result.rival then
+            text = string.format(addon.L.DEALS_LIVE_RIVAL, name, money(result.rival, true))
+        else
+            text = string.format(addon.L.DEALS_LIVE_BAD, name, money(current, true))
+        end
+        DealsUI.live = { text = text, color = result.good and GREEN or RED, height = 32 }
     else
         DealsUI.live = { text = string.format(addon.L.DEALS_LIVE_GONE, name), color = RED, height = 32 }
     end

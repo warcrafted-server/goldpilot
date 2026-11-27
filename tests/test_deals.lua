@@ -67,7 +67,7 @@ return {
         assert(auction.selected and auction.selected.itemKey.itemID == 42 and bought == 0)
         assert(searched == 42, "al abrir el objeto se piden sus precios")
         mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 42)
-        assert(panel.live:GetText():find("no longer a bargain", 1, true))
+        assert(panel.live:GetText():find("not a bargain", 1, true))
         livePrice = 40
         mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 42)
         assert(panel.live:GetText():find("now", 1, true) and bought == 0)
@@ -76,6 +76,25 @@ return {
         browse:Show(); addon.Settings.set("deals", false); mock.flushTimers(); assert(not panel:IsShown())
         _G.AuctionHouseFrame, C_AuctionHouse, GoldPilotDB = oldAuction, oldApi, oldDB
         addon.Valuation.vendor = oldVendor
+    end,
+    ["resale uses today's market and the next competitor"] = function(addon)
+        local day, now = 100, 100 * 86400 + 100
+        local item = { itemID = 7, min = 1950000, p50 = 1950000, qty = 8, t = now,
+            history = { { day - 2, 3499998, 3499998, 5 }, { day - 1, 2000000, 3500000, 1 } } }
+        assert(not addon.Deals.evaluate(item, { now = now }), "el mercado ya está en el precio bajo")
+        item.p50 = 3400000
+        local deal = addon.Deals.evaluate(item, { now = now })
+        assert(deal and deal.ref == 3400000)
+        local current, nextPrice = addon.Deals.market({ { price = 1960000, qty = 1, own = false },
+            { price = 1950000, qty = 1, own = false }, { price = 100, qty = 1, own = true } }, false)
+        assert(current == 1950000 and nextPrice == 1960000)
+        local result = addon.Deals.check(deal, current, nextPrice)
+        assert(not result.good and result.rival == 1960000 and result.gain < 0)
+        assert(addon.Deals.check(deal, current, 3000000).good)
+        local first, same = addon.Deals.market({ { price = 50, qty = 2, own = false } }, false)
+        assert(first == 50 and same == 50)
+        local low, higher = addon.Deals.market({ { price = 50, qty = 5, own = 0 }, { price = 90, qty = 1, own = 0 } }, true)
+        assert(low == 50 and higher == 90)
     end,
     ["deals UI tolerates absent auction frame"] = function(addon, mock)
         local old = _G.AuctionHouseFrame; _G.AuctionHouseFrame = nil

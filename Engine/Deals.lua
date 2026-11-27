@@ -38,12 +38,15 @@ function Deals.evaluate(item, opts)
     end
     if #medians < config.minDays or (tonumber(item.qty) or 0) < config.minQty then return nil end
     local ref = lowerMedian(medians)
+    -- Si el mercado ya ha bajado, revender al precio de otros días es imposible: manda el precio de hoy.
+    local current = tonumber(item.p50)
+    if current and current < ref then ref = current end
     if min > ref * config.discount then return nil end
     local afterCut = math.floor(ref * (1 - addon.Sell.CUT))
     local profit = afterCut - min
     if profit < config.minProfit then return nil end
     return { itemID = item.itemID, kind = "resale", min = min, ref = ref, profit = profit,
-        maxPay = math.min(math.floor(ref * config.discount), afterCut - config.minProfit),
+        maxPay = math.min(math.floor(ref * config.discount), afterCut - config.minProfit), minProfit = config.minProfit,
         percent = math.floor((1 - min / ref) * 100 + 0.5), t = stamp }
 end
 
@@ -65,12 +68,38 @@ function Deals.find(items, opts)
     return rows
 end
 
-function Deals.check(deal, current)
-    current = tonumber(current)
-    if type(deal) ~= "table" or not current then return nil end
-    local gain = deal.kind == "vendor" and (tonumber(deal.ref) or 0) - current
-        or math.floor((tonumber(deal.ref) or 0) * (1 - addon.Sell.CUT)) - current
-    return { price = current, gain = gain, good = current <= (tonumber(deal.maxPay) or 0) }
+-- Precio ajeno más barato y el del siguiente competidor, que es el que limitará la reventa. Los materiales
+-- baratos se compran juntos; en el resto, otra unidad al mismo precio ya compite contigo.
+function Deals.market(listings, commodity)
+    local others = {}
+    for _, listing in ipairs(listings or {}) do
+        if addon.Sell.otherMin({ listing }) then others[#others + 1] = listing end
+    end
+    table.sort(others, function(a, b) return a.price < b.price end)
+    local first = others[1]
+    if not first then return nil end
+    if not commodity then
+        if (tonumber(first.qty) or 1) > 1 then return first.price, first.price end
+        return first.price, others[2] and others[2].price
+    end
+    for _, listing in ipairs(others) do
+        if listing.price > first.price then return first.price, listing.price end
+    end
+    return first.price
 end
 
+function Deals.check(deal, current, nextPrice)
+    current = tonumber(current)
+    if type(deal) ~= "table" or not current then return nil end
+    local sell = tonumber(deal.ref) or 0
+    local gain, minimum = sell - current, 1
+    if deal.kind ~= "vendor" then
+        nextPrice = tonumber(nextPrice)
+        if nextPrice then sell = math.min(sell, nextPrice - 1) end
+        gain = math.floor(sell * (1 - addon.Sell.CUT)) - current
+        minimum = tonumber(deal.minProfit) or 1
+    end
+    local cheap = current <= (tonumber(deal.maxPay) or 0)
+    return { price = current, gain = gain, good = cheap and gain >= minimum, rival = cheap and gain < minimum and nextPrice or nil }
+end
 return Deals

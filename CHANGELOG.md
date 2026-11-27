@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.21.1] - 2026-11-27
+
+### Corregido
+- Gangas: la reventa ya no promete ganancias con precios de días anteriores si el mercado ha bajado, y al abrir un objeto avisa cuando otro vendedor a un precio parecido impide ganar.
+- Gangas: las cantidades grandes ya no salen cortadas.
+
 ## [0.21.0] - 2026-11-27
 
 ### Añadido
