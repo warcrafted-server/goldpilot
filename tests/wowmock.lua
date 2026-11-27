@@ -11,7 +11,7 @@ function CreateFrame(kind, name, parent, template)
     function frame:UnregisterEvent(event) mock.events[event] = nil end
     function frame:SetScript(script, fn) self.handler = fn; self.scripts = self.scripts or {}; self.scripts[script] = fn end
     function frame:SetSize(w, h) self.width, self.height = w, h end
-    function frame:SetPoint(_, _, _, x, y) self.x, self.y = x, y end
+    function frame:SetPoint(...) self.point = { ... }; local point = self.point; self.x, self.y = point[4], point[5] end
     function frame:ClearAllPoints() end
     function frame:SetAllPoints() end
     function frame:SetFrameStrata() end
@@ -73,6 +73,8 @@ function CreateFrame(kind, name, parent, template)
         function font:SetJustifyH(value) self.justify = value end
         function font:GetText() return self.value end
         function font:SetPoint(...) self.point = { ... } end
+        function font:ClearAllPoints() self.point = nil end
+        function font:SetTextColor(...) self.color = { ... } end
         function font:Hide() self.hidden = true end
         function font:Show() self.hidden = false end
         return font

@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.18.1] - 2026-11-27
+
+### Cambiado
+- El recuadro del asistente de venta va fuera de la ventana de la subasta para no tapar la lista de precios, se ajusta a su contenido, alinea las cantidades y muestra la confianza en palabras.
+
 ## [0.18.0] - 2026-11-27
 
 ### Añadido

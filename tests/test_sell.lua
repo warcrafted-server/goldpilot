@@ -23,7 +23,8 @@ return {
     end,
     ["sell assistant displays suggestions, fills price, closes and respects setting"] = function(addon, mock)
         local oldAuction, oldHook, oldAuctionAPI = _G.AuctionHouseFrame, hooksecurefunc, C_AuctionHouse
-        local oldGetItemID = C_Item.GetItemID
+        local oldGetItemID, oldValue = C_Item.GetItemID, addon.Valuation.value
+        local depositAmount = 5
         local auction = CreateFrame("Frame")
         local function input(method, value)
             local object = CreateFrame("Frame")
@@ -58,13 +59,21 @@ return {
                 return index == 1 and { unitPrice = 50, quantity = 2, numOwnerItems = 2 }
                     or { unitPrice = 80, quantity = 3, numOwnerItems = 0 }
             end,
-            CalculateCommodityDeposit = function() return 5 end,
+            CalculateCommodityDeposit = function() return depositAmount end,
         }
+        addon.Valuation.value = function() return { ref = { price = 100, class = "OBS" } } end
         addon.Modules:enableAll()
         mock.fire("AUCTION_HOUSE_SHOW")
         display:SetItem({ itemID = 123 })
         mock.flushTimers()
         assert(addon.SellAssist.frame and addon.SellAssist.frame:IsShown())
+        local panel = addon.SellAssist.frame
+        assert(panel.point[2] == auction and panel.point[3] == "TOPRIGHT" and panel.x == 4 and panel.y == -30)
+        assert(panel.rows[1].value:GetText():find(addon.L.SELL_CONF_OBS, 1, true))
+        local withDepositHeight = panel:GetHeight()
+        depositAmount = nil
+        mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 123)
+        assert(panel:GetHeight() < withDepositHeight)
         mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 123)
         assert(addon.SellAssist.suggestion.price == 79)
         addon.SellAssist.frame.useButton.scripts.OnClick()
@@ -79,7 +88,8 @@ return {
         addon.Settings.set("sellAssist", true)
         _G.AuctionHouseFrame = nil
         mock.fire("AUCTION_HOUSE_SHOW")
+        assert(not addon.SellAssist.frame:IsShown())
         _G.AuctionHouseFrame, hooksecurefunc, C_AuctionHouse = oldAuction, oldHook, oldAuctionAPI
-        C_Item.GetItemID = oldGetItemID
+        C_Item.GetItemID, addon.Valuation.value = oldGetItemID, oldValue
     end,
 }

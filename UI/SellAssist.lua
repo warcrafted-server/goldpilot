@@ -3,8 +3,9 @@ local _, addon = ...
 local SellAssist = { hooked = false, owner = "sell-assist" }
 addon.SellAssist = SellAssist
 
-local WIDTH = 220
+local WIDTH = 230
 local GOLD = { 0.72, 0.55, 0.2, 0.9 }
+local ROW_HEIGHT = 18
 
 local function inCombat()
     return InCombatLockdown and InCombatLockdown()
@@ -44,7 +45,7 @@ end
 local function createPanel(parent)
     if SellAssist.frame or inCombat() or not parent then return SellAssist.frame end
     local frame = addon.Widgets.frame("Frame", nil, parent, "BackdropTemplate")
-    frame:SetSize(WIDTH, 174)
+    frame:SetSize(WIDTH, 100)
     frame:SetFrameStrata("DIALOG")
     local background = frame:CreateTexture(nil, "BACKGROUND")
     background:SetAllPoints()
@@ -60,18 +61,33 @@ local function createPanel(parent)
     edge("BOTTOMLEFT", "BOTTOMRIGHT", true)
     edge("TOPLEFT", "BOTTOMLEFT", false)
     edge("TOPRIGHT", "BOTTOMRIGHT", false)
-    frame.lines = {}
-    for index = 1, 7 do
-        local line = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        line:SetFont("Fonts/FRIZQT__.TTF", index == 1 and 12 or 11, "")
-        line:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -7 - (index - 1) * 17)
-        line:SetWidth(WIDTH - 16)
-        line:SetJustifyH("LEFT")
-        frame.lines[index] = line
+    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.title:SetFont("Fonts/FRIZQT__.TTF", 12, "")
+    frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -7)
+    frame.rows = {}
+    for index = 1, 5 do
+        local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        label:SetFont("Fonts/FRIZQT__.TTF", 11, "")
+        label:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -26 - (index - 1) * ROW_HEIGHT)
+        label:SetWidth(112)
+        label:SetJustifyH("LEFT")
+        label:SetTextColor(0.92, 0.86, 0.72)
+        local value = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        value:SetFont("Fonts/FRIZQT__.TTF", index == 3 and 13 or 11, "")
+        value:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -8, -26 - (index - 1) * ROW_HEIGHT)
+        -- Ancho completo: con oro, plata, cobre y la confianza no cabría en media columna.
+        value:SetWidth(WIDTH - 16)
+        value:SetJustifyH("RIGHT")
+        frame.rows[index] = { label = label, value = value }
     end
+    frame.warning = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.warning:SetFont("Fonts/FRIZQT__.TTF", 11, "")
+    frame.warning:SetWidth(WIDTH - 16)
+    frame.warning:SetWordWrap(true)
+    frame.warning:SetTextColor(1, 0.35, 0.2)
     frame.useButton = addon.Widgets.frame("Button", nil, frame, "UIPanelButtonTemplate")
     frame.useButton:SetSize(WIDTH - 16, 24)
-    frame.useButton:SetPoint("BOTTOM", frame, "BOTTOM", 0, 7)
+    frame.useButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -80)
     frame.useButton:SetText(addon.L.SELL_USE)
     frame.useButton:SetScript("OnClick", function()
         if inCombat() or not SellAssist.suggestion or not SellAssist.sellFrame then return end
@@ -137,20 +153,53 @@ end
 
 local function render(frame, value, minPrice, suggestion, depositValue)
     local function money(amount) return addon.Theme.money(amount) end
-    frame.lines[1]:SetText(addon.L.SELL_TITLE)
-    frame.lines[2]:SetText(value.ref
-        and string.format(addon.L.SELL_REF, money(value.ref.price), addon.Theme.badge(value.ref.class))
-        or addon.L.SELL_NO_REF)
-    frame.lines[3]:SetText(minPrice and string.format(addon.L.SELL_MIN, money(minPrice)) or addon.L.SELL_NO_MIN)
-    frame.lines[4]:SetText(suggestion and string.format(addon.L.SELL_SUGGESTED, money(suggestion.price)) or addon.L.SELL_NO_DATA)
-    frame.lines[5]:SetText(suggestion and string.format(addon.L.SELL_NET, money(suggestion.net)) or "")
-    frame.lines[6]:SetText(depositValue and string.format(addon.L.SELL_DEPOSIT, money(depositValue)) or "")
-    local warning = suggestion and suggestion.warning
-    frame.lines[7]:SetText(warning == "vendor" and addon.L.SELL_WARN_VENDOR or warning == "crashed" and addon.L.SELL_WARN_CRASHED or "")
-    if frame.lines[4].SetTextColor then frame.lines[4]:SetTextColor(1, 0.82, 0.2) end
-    if frame.lines[7].SetTextColor then
-        if warning then frame.lines[7]:SetTextColor(1, 0.35, 0.2) else frame.lines[7]:SetTextColor(0.92, 0.86, 0.72) end
+    frame.title:SetText(addon.L.SELL_TITLE)
+    local refClass = value.ref and tostring(value.ref.class or ""):upper()
+    local confidence = refClass == "GAME" and addon.L.SELL_CONF_GAME
+        or refClass == "OBS" and addon.L.SELL_CONF_OBS
+        or refClass == "EST" and addon.L.SELL_CONF_EST
+        or refClass == "EXT" and addon.L.SELL_CONF_EXT
+    local rows = {
+        { addon.L.SELL_REF, value.ref and (money(value.ref.price) .. " |cff999999(" .. tostring(confidence or refClass) .. ")|r") or addon.L.SELL_NONE },
+        { addon.L.SELL_MIN, minPrice and money(minPrice) or addon.L.SELL_NONE },
+        { addon.L.SELL_SUGGESTED, suggestion and money(suggestion.price) or addon.L.SELL_NONE },
+        { addon.L.SELL_NET, suggestion and money(suggestion.net) or addon.L.SELL_NONE },
+    }
+    if depositValue then rows[#rows + 1] = { addon.L.SELL_DEPOSIT, money(depositValue) } end
+    local y = 26
+    for index, row in ipairs(frame.rows) do
+        local data = rows[index]
+        if data then
+            row.label:SetText(data[1])
+            row.value:SetText(data[2])
+            row.label:ClearAllPoints()
+            row.label:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -y)
+            row.value:ClearAllPoints()
+            row.value:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -8, -y)
+            row.label:Show(); row.value:Show()
+            if data[1] == addon.L.SELL_SUGGESTED then row.value:SetTextColor(1, 0.82, 0.2)
+            elseif data[1] == addon.L.SELL_NET then row.value:SetTextColor(0.4, 0.9, 0.4)
+            else row.value:SetTextColor(0.92, 0.86, 0.72) end
+            y = y + ROW_HEIGHT
+        else
+            row.label:Hide(); row.value:Hide()
+        end
     end
+    local warning = suggestion and suggestion.warning
+    local warningText = warning == "vendor" and addon.L.SELL_WARN_VENDOR or warning == "crashed" and addon.L.SELL_WARN_CRASHED or ""
+    frame.warning:SetText(warningText)
+    if warningText ~= "" then
+        frame.warning:ClearAllPoints()
+        frame.warning:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -y)
+        y = y + 30
+        frame.warning:Show()
+    else
+        frame.warning:Hide()
+    end
+    local buttonTop = y + 6
+    frame.useButton:ClearAllPoints()
+    frame.useButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -buttonTop)
+    frame:SetHeight(buttonTop + 24 + 8)
     frame.useButton:SetEnabled(suggestion ~= nil)
 end
 
@@ -176,7 +225,7 @@ local function update()
     local frame = createPanel(parent)
     if not frame then return false end
     frame:ClearAllPoints()
-    frame:SetPoint("TOPLEFT", sellFrame, "TOPRIGHT", 4, 0)
+    frame:SetPoint("TOPLEFT", auction, "TOPRIGHT", 4, -30)
     local quantity = tonumber(call(sellFrame.QuantityInput, "GetQuantity")) or 1
     quantity = math.max(1, quantity)
     local duration = call(sellFrame.Duration, "GetDuration")
