@@ -40,6 +40,14 @@ return {
         addon.AuctionHouse.enqueue = function() enqueued = enqueued + 1 end
         addon.Modules:enableAll()
         local converted = addon.MyAuctions.convertOwned()
+        local loaded = C_AuctionHouse.GetItemKeyInfo
+        C_AuctionHouse.GetItemKeyInfo = function() return nil end
+        local during = addon.MyAuctions.convertOwned()
+        C_AuctionHouse.GetItemKeyInfo = loaded
+        for index, row in ipairs(during) do
+            assert(row.name == converted[index].name and row.unitPrice == converted[index].unitPrice, "sin datos del objeto no cambian ni el nombre ni el precio")
+            assert(not string.find(row.name, "|H", 1, true))
+        end
         assert(#converted == 3 and converted[3].itemID == 102 and converted[3].unitPrice == 100)
         mock.fire("AUCTION_HOUSE_SHOW"); mock.flushTimers()
         assert(queried == 1 and addon.MyAuctions.frame:IsShown())

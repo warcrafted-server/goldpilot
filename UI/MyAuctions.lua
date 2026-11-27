@@ -3,7 +3,7 @@ local _, addon = ...
 local MyAuctions = { owner = "my-auctions", queried = false, active = false }
 addon.MyAuctions = MyAuctions
 
-local WIDTH, ROW_HEIGHT = 360, 20
+local WIDTH, ROW_HEIGHT = 420, 20
 local GOLD = { 0.9, 0.72, 0.29 }
 local RED, GREEN, PALE, GRAY = { 1, 0.3, 0.25 }, { 0.4, 0.9, 0.4 }, { 0.92, 0.82, 0.55 }, { 0.65, 0.65, 0.65 }
 
@@ -30,10 +30,10 @@ local function createPanel(parent)
     frame.rows = {}
     for i = 1, 8 do
         local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        label:SetFont("Fonts/FRIZQT__.TTF", 10, ""); label:SetWidth(150); label:SetJustifyH("LEFT")
+        label:SetFont("Fonts/FRIZQT__.TTF", 10, ""); label:SetWidth(140); label:SetJustifyH("LEFT")
         label:SetWordWrap(false)
         local value = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        value:SetFont("Fonts/FRIZQT__.TTF", 10, ""); value:SetWidth(60); value:SetJustifyH("RIGHT")
+        value:SetFont("Fonts/FRIZQT__.TTF", 10, ""); value:SetWidth(76); value:SetJustifyH("RIGHT")
         value:SetWordWrap(false)
         local button = addon.Widgets.frame("Button", nil, frame, "UIPanelButtonTemplate")
         button:SetSize(66, 18)
@@ -57,10 +57,24 @@ local function itemKey(info, commodity)
     return (info.itemLink and addon.ItemKey.fromLink(info.itemLink, true)) or id
 end
 
-local function itemName(info)
-    local keyInfo = api("C_AuctionHouse.GetItemKeyInfo", info.itemKey)
-    if type(keyInfo) == "table" and type(keyInfo.itemName) == "string" then return keyInfo.itemName end
-    return info.name or info.itemLink or tostring(info.itemKey and info.itemKey.itemID or "?")
+-- Durante un escaneo el cliente deja de dar a ratos los datos del objeto: se recuerdan los ya vistos,
+-- o la fila alternaría entre el nombre y el enlace, y entre material y objeto.
+local names, commodities = {}, {}
+
+local function itemName(info, keyInfo)
+    local auctionID = info.auctionID or info.itemLink
+    local name = type(keyInfo) == "table" and keyInfo.itemName
+    if type(name) ~= "string" or name == "" then
+        name = type(info.itemLink) == "string" and string.match(info.itemLink, "%[([^%]]+)%]") or info.name
+    end
+    if type(name) == "string" and name ~= "" then
+        if auctionID then names[auctionID] = name end
+        return name
+    end
+    if auctionID and names[auctionID] then return names[auctionID] end
+    local id = info.itemKey and info.itemKey.itemID
+    if id then addon.Compat.call("C_Item.RequestLoadItemDataByID", id) end
+    return "..."
 end
 
 local function ownedAuctions()
@@ -79,12 +93,13 @@ local function converted()
     local result, enqueued = {}, {}
     for _, info in ipairs(ownedAuctions()) do
         local id, buyout = tonumber(info.itemKey and info.itemKey.itemID), tonumber(info.buyoutAmount)
-        local isCommodity = api("C_AuctionHouse.GetItemKeyInfo", info.itemKey)
-        isCommodity = type(isCommodity) == "table" and isCommodity.isCommodity == true
+        local keyInfo = api("C_AuctionHouse.GetItemKeyInfo", info.itemKey)
+        if id and type(keyInfo) == "table" then commodities[id] = keyInfo.isCommodity == true end
+        local isCommodity = id and commodities[id] == true
         if id and buyout and buyout > 0 then
             local quantity = math.max(1, tonumber(info.quantity) or 1)
             local key = itemKey(info, isCommodity)
-            local name = itemName(info)
+            local name = itemName(info, keyInfo)
             result[#result + 1] = { auctionID = info.auctionID, itemID = id, key = key, name = name,
                 quantity = quantity, unitPrice = isCommodity and buyout or math.floor(buyout / quantity),
                 status = info.status, timeLeft = info.timeLeftSeconds }
@@ -121,16 +136,16 @@ local function render()
         if row then
             local y = -(panel.contentTop + 20) - (index - 1) * ROW_HEIGHT
             widgets.label:ClearAllPoints(); widgets.label:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, y)
-            widgets.label:SetWidth(150)
-            widgets.label:SetText(addon.Widgets.truncate(row.auction.name, 23)); widgets.label:SetTextColor(unpack(PALE)); widgets.label:Show()
-            widgets.value:ClearAllPoints(); widgets.value:SetPoint("TOPLEFT", panel, "TOPLEFT", 160, y)
+            widgets.label:SetWidth(140)
+            widgets.label:SetText(addon.Widgets.truncate(row.auction.name, 21)); widgets.label:SetTextColor(unpack(PALE)); widgets.label:Show()
+            widgets.value:ClearAllPoints(); widgets.value:SetPoint("TOPLEFT", panel, "TOPLEFT", 156, y)
             local state, color, text
             if row.state == "undercut" then state, color, text = addon.L.MYAUCTIONS_UNDERCUT, RED,
-                string.format(addon.L.MYAUCTIONS_UNDERCUT, addon.Theme.money(row.min))
+                string.format(addon.L.MYAUCTIONS_UNDERCUT, addon.Theme.shortMoney(row.min))
             elseif row.state == "ok" then state, color, text = addon.L.MYAUCTIONS_OK, GREEN, ""
             elseif row.state == "sold" then state, color, text = addon.L.MYAUCTIONS_SOLD, GOLD, addon.L.MYAUCTIONS_SOLD
             else state, color, text = addon.L.MYAUCTIONS_UNKNOWN, GRAY, addon.L.MYAUCTIONS_UNKNOWN end
-            widgets.value:SetText(addon.Theme.money(row.auction.unitPrice))
+            widgets.value:SetText(addon.Theme.shortMoney(row.auction.unitPrice))
             widgets.value:SetTextColor(unpack(PALE)); widgets.value:Show()
             widgets.state = widgets.state or panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             if widgets.state.SetFont then widgets.state:SetFont("Fonts/FRIZQT__.TTF", 10, "") end
@@ -138,7 +153,7 @@ local function render()
             if widgets.state.SetWordWrap then widgets.state:SetWordWrap(false) end
             widgets.state:ClearAllPoints()
             widgets.state:SetPoint("TOPRIGHT", panel, "TOPRIGHT", row.state == "undercut" and -76 or -8, y)
-            if widgets.state.SetWidth then widgets.state:SetWidth(row.state == "undercut" and 70 or 80) end
+            if widgets.state.SetWidth then widgets.state:SetWidth(row.state == "undercut" and 104 or 80) end
             widgets.state:SetText(text ~= "" and text or state)
             widgets.stateKind = row.state
             if widgets.state.SetTextColor then widgets.state:SetTextColor(unpack(color)) end

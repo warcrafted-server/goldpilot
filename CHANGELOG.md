@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.25.3] - 2026-11-27
+
+### Corregido
+- Mis subastas: durante el escaneo ya no alterna entre los nombres y el código interno de los objetos.
+- Mis subastas: el precio mínimo ya no sale cortado.
+
 ## [0.25.2] - 2026-11-27
 
 ### Corregido

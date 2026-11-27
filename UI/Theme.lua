@@ -29,6 +29,13 @@ function addon.Theme.money(copper)
     return string.format("%dg %ds %dc", gold, silver, copper % 100)
 end
 
+-- Para columnas estrechas: a partir de 1 oro sin cobre y desde 100 oros sin plata.
+function addon.Theme.shortMoney(copper)
+    local value = tonumber(copper) or 0
+    local step = value >= 1000000 and 10000 or value >= 10000 and 100 or 1
+    return addon.Theme.money(math.floor(value / step) * step)
+end
+
 function addon.Theme.age(seconds)
     seconds = math.max(0, tonumber(seconds) or 0)
     if seconds < 3600 then
