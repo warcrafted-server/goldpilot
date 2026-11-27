@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.20.0] - 2026-11-27
+
+### Añadido
+- Gangas: en la pestaña Comprar, GoldPilot señala los objetos más baratos de lo que valen (vendedor o reventa) y los abre con un clic.
+- Ajuste «Gangas en la subasta».
+
 ## [0.19.2] - 2026-11-27
 
 ### Cambiado

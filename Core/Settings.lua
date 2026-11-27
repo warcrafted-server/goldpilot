@@ -145,6 +145,14 @@ Settings.define{
 }
 
 Settings.define{
+    key = "deals", type = "toggle", default = true, section = "general", label = "SETTING_DEALS", order = 5,
+    apply = function(value)
+        if not value and addon.DealsUI then addon.DealsUI:hide() end
+        if value and addon.DealsUI then addon.DealsUI:start() end
+    end,
+}
+
+Settings.define{
     key = "fullScan", type = "toggle", default = true, section = "gathering", label = "SETTING_FULLSCAN", order = 1,
 }
 
