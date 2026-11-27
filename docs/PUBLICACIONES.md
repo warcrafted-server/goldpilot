@@ -27,6 +27,7 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.18.1 | 919453a | Aspecto del asistente de venta (fuera de la ventana, ajustado, confianza en palabras) | no | no |
 | 0.18.2 | edb6bf0 | Depósito del asistente de venta también con equipo | no | no |
 | 0.19.0 | 6068ce4 | Mis subastas: rebajadas, bien y vendidas, con cancelar | no | no |
+| 0.19.1 | 0e81777 | Estilo de GoldPilot en los recuadros de subasta y acentos corregidos | no | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
 
