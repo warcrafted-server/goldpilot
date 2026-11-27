@@ -29,6 +29,7 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.19.0 | 6068ce4 | Mis subastas: rebajadas, bien y vendidas, con cancelar | no | no |
 | 0.19.1 | 0e81777 | Estilo de GoldPilot en los recuadros de subasta y acentos corregidos | no | no |
 | 0.19.2 | 59645be | Precio del vendedor en el aviso y nombres más anchos | no | no |
+| 0.20.0 | 6f44be7 | Gangas en la pestaña Comprar | no | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
 
