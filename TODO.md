@@ -2,7 +2,8 @@
 
 ## Alta
 
-- [ ] Rotación en Gangas, calculada dentro del addon: tus ventas y devoluciones por objeto, unidades en venta y salidas estimadas entre escaneos.
+- [ ] Programa local de escritorio (D6, D7): consulta la API de Blizzard desde el PC del jugador, con sus credenciales, y deja precios y rotación estimada en un archivo que lee el addon. Primer paso: comprobar con dos consultas separadas una hora que se detectan las compras.
+- [ ] Rotación en Gangas: tus ventas y devoluciones y unidades en venta dentro del addon; salidas estimadas desde el programa local.
 - [ ] Probar en juego: Comercio, ventas a vendedor, «Cancelar» en Mis subastas y quitar objetos de Mi lista.
 - [ ] Mi lista: los nombres salen centrados; alinearlos a la izquierda.
 
