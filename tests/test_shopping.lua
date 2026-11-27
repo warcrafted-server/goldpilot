@@ -39,6 +39,7 @@ return {
         panel.editor.boxes[3].scripts.OnTextChanged(panel.editor.boxes[3])
         mock.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 77)
         assert(panel.editor.boxes[3]:GetText() == "9", "el redibujado conserva lo escrito")
+        assert(panel.editor.action.template == "UIPanelButtonTemplate", "sin plantilla el botón no se ve en el juego")
         panel.editor.action.scripts.OnClick()
         assert(GoldPilotDB.shopping[77].max == 12309)
         assert(#panel.shopping.rows > 0 and panel.shopping.rows[1].now.color[2] > 0.8)

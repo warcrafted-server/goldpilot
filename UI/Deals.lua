@@ -287,7 +287,9 @@ render = function()
             y = y + 4
         end
         panel.hint:ClearAllPoints(); panel.hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
-        panel.hint:SetText(addon.L.DEALS_HINT); panel.hint:Show(); y = y + 32
+        -- Con un objeto abierto el recuadro ya es alto: la nota deja sitio al formulario de la lista.
+        if DealsUI.activeItem then panel.hint:Hide()
+        else panel.hint:SetText(addon.L.DEALS_HINT); panel.hint:Show(); y = y + 32 end
     end
     local active = DealsUI.activeItem
     if active then
@@ -298,7 +300,7 @@ render = function()
             or (DealsUI.activePriceItem == active and DealsUI.currentPrice) or 0
         local editor = panel.editor or { boxes = {} }; panel.editor = editor
         if editor.itemID ~= active then editor.itemID = active; editor.dirty = false end
-        local title = editor.title or label(panel, WIDTH - 16); editor.title = title
+        local title = editor.title or label(panel, WIDTH - 16, "LEFT"); editor.title = title
         title:ClearAllPoints(); title:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y); title:SetText(name or ("#" .. active)); title:Show(); y = y + 18
         local fields = { { key = "gold", divisor = 10000, cap = 999999, label = addon.L.SHOP_G },
             { key = "silver", divisor = 100, cap = 99, label = addon.L.SHOP_S }, { key = "copper", divisor = 1, cap = 99, label = addon.L.SHOP_C } }
@@ -315,8 +317,8 @@ render = function()
             end
             local caption = editor.labels and editor.labels[i]
             if not caption then editor.labels = editor.labels or {}; caption = label(panel, 12); editor.labels[i] = caption end
-            caption:ClearAllPoints(); caption:SetPoint("TOPLEFT", panel, "TOPLEFT", 8 + (i - 1) * 70, -y); caption:SetText(field.label); caption:Show()
-            box:ClearAllPoints(); box:SetPoint("TOPLEFT", panel, "TOPLEFT", 22 + (i - 1) * 70, -y)
+            caption:ClearAllPoints(); caption:SetPoint("TOPLEFT", panel, "TOPLEFT", 10 + (i - 1) * 80, -y - 5); caption:SetText(field.label); caption:Show()
+            box:ClearAllPoints(); box:SetPoint("TOPLEFT", panel, "TOPLEFT", 30 + (i - 1) * 80, -y)
             if not editor.dirty then
                 local amount = math.floor(initial or 0)
                 local value = i == 1 and math.floor(amount / 10000) or i == 2 and math.floor(amount / 100) % 100 or amount % 100
@@ -326,12 +328,12 @@ render = function()
         end
         editor.filling = false
         y = y + 24
-        local action = editor.action or addon.Widgets.frame("Button", nil, panel); editor.action = action
-        action:SetSize(entry and 112 or 128, 22); action:ClearAllPoints(); action:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
+        local action = editor.action or addon.Widgets.frame("Button", nil, panel, "UIPanelButtonTemplate"); editor.action = action
+        action:SetSize(150, 22); action:ClearAllPoints(); action:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
         action:SetText(entry and addon.L.SHOP_UPDATE or addon.L.SHOP_ADD)
         action:SetScript("OnClick", function() DealsUI:saveEditor() end); action:Show()
         if entry then
-            local remove = editor.remove or addon.Widgets.frame("Button", nil, panel); editor.remove = remove
+            local remove = editor.remove or addon.Widgets.frame("Button", nil, panel, "UIPanelButtonTemplate"); editor.remove = remove
             remove:SetSize(90, 22); remove:ClearAllPoints(); remove:SetPoint("LEFT", action, "RIGHT", 6, 0)
             remove:SetText(addon.L.SHOP_REMOVE); remove:SetScript("OnClick", function()
                 addon.Shopping.remove(GoldPilotDB, active); editor.dirty = false; DealsUI:refresh()
