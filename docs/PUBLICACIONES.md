@@ -34,6 +34,7 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.21.0 | 3a973d2 | Gangas útiles: dos secciones, «Paga hasta», comprobación en vivo y filtro | no | no |
 | 0.21.1 | 97a18f4 | Gangas: reventa realista según el mercado actual | no | no |
 | 0.22.0 | 742fe40 | Gangas: casilla «Solo lo que puedo pagar» | no | no |
+| 0.23.0 | 369d172 | Pestaña Comercio: compras, ventas, ganancia de reventa y sin vender | no | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
 
