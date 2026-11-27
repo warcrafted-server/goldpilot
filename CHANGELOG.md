@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.19.0] - 2026-11-27
+
+### Añadido
+- Mis subastas: en la pestaña Subastas, GoldPilot señala las subastas que te han rebajado con el precio que conviene ahora, las que van bien y las vendidas, y permite cancelar las rebajadas con confirmación.
+- Ajuste «Asistente de Mis subastas».
+
 ## [0.18.2] - 2026-11-27
 
 ### Corregido

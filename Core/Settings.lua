@@ -137,6 +137,14 @@ Settings.define{
 }
 
 Settings.define{
+    key = "myAuctions", type = "toggle", default = true, section = "general", label = "SETTING_MY_AUCTIONS", order = 4,
+    apply = function(value)
+        if not value and addon.MyAuctions then addon.MyAuctions:hide() end
+        if value and addon.MyAuctions then addon.MyAuctions:start() end
+    end,
+}
+
+Settings.define{
     key = "fullScan", type = "toggle", default = true, section = "gathering", label = "SETTING_FULLSCAN", order = 1,
 }
 
