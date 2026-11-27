@@ -82,6 +82,8 @@ addon.LocaleRegister("esES", {
     SETTING_MY_AUCTIONS = "Asistente de Mis subastas",
     SETTING_DEALS = "Gangas en la subasta",
     SETTING_DEALS_SMALL = "Gangas: incluir ganancias pequeñas",
+    DEALS_AFFORDABLE = "Solo lo que puedo pagar",
+    SETTING_DEALS_AFFORDABLE = "Gangas: solo lo que puedo pagar",
     DEALS_TITLE = "Gangas",
     DEALS_AGE = "Precios de %s",
     DEALS_SMALL = "Incluir ganancias pequeñas",

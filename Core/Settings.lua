@@ -160,6 +160,13 @@ Settings.define{
 }
 
 Settings.define{
+    key = "dealsAffordable", type = "toggle", default = true, section = "general", label = "SETTING_DEALS_AFFORDABLE", order = 7,
+    apply = function()
+        if addon.DealsUI and addon.DealsUI.refresh then addon.DealsUI:refresh() end
+    end,
+}
+
+Settings.define{
     key = "fullScan", type = "toggle", default = true, section = "gathering", label = "SETTING_FULLSCAN", order = 1,
 }
 

@@ -42,6 +42,9 @@ local function createPanel(parent)
     panel.checkbox = addon.Widgets.smallCheckbox(panel, addon.L.DEALS_SMALL, addon.Settings.get("dealsSmall"), function(value)
         addon.Settings.set("dealsSmall", value)
     end)
+    panel.affordableCheckbox = addon.Widgets.smallCheckbox(panel, addon.L.DEALS_AFFORDABLE, addon.Settings.get("dealsAffordable"), function(value)
+        addon.Settings.set("dealsAffordable", value)
+    end)
     panel.live = label(panel, WIDTH - 16)
     panel.live:SetWordWrap(true)
     panel.sections = {}
@@ -104,6 +107,14 @@ local function compute(now)
                     t = price.t, history = history.daily, vendor = vendorPrice(key, budget) }
             end
         end
+    end
+    local moneyOK, money = addon.Compat.call("GetMoney")
+    if addon.Settings.get("dealsAffordable") and moneyOK and tonumber(money) then
+        local affordable = {}
+        for _, item in ipairs(items) do
+            if item.min <= tonumber(money) then affordable[#affordable + 1] = item end
+        end
+        items = affordable
     end
     return addon.Deals.find(items, { now = now, small = addon.Settings.get("dealsSmall") }), latest, fresh
 end
@@ -186,6 +197,10 @@ local function render()
     panel.checkbox:ClearAllPoints(); panel.checkbox:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -y)
     if panel.checkbox.SetChecked then panel.checkbox:SetChecked(addon.Settings.get("dealsSmall")) end
     panel.checkbox:Show(); panel.checkbox.label:Show()
+    y = y + 22
+    panel.affordableCheckbox:ClearAllPoints(); panel.affordableCheckbox:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -y)
+    if panel.affordableCheckbox.SetChecked then panel.affordableCheckbox:SetChecked(addon.Settings.get("dealsAffordable")) end
+    panel.affordableCheckbox:Show(); panel.affordableCheckbox.label:Show()
     y = y + 28
     if DealsUI.live then
         panel.live:ClearAllPoints(); panel.live:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
@@ -329,6 +344,10 @@ addon.Modules:register("deals", { onEnable = function()
     addon.Events:subscribe("deals", "AUCTION_HOUSE_SHOW", function() DealsUI:start() end)
     addon.Events:subscribe("deals", "AUCTION_HOUSE_CLOSED", function() DealsUI:hide() end)
     addon.Events:subscribe("deals", "PLAYER_REGEN_ENABLED", poll)
+    addon.Events:subscribe("deals", "PLAYER_MONEY", function()
+        if not addon.Settings.get("dealsAffordable") then return end
+        if shown(DealsUI.frame) then recalculate() else DealsUI.cacheTime = 0 end
+    end)
     addon.Events:subscribe("deals", "GOLDPILOT_SCAN_PROGRESS", function(progress)
         if progress ~= nil then return end
         DealsUI.cacheTime = 0
@@ -341,8 +360,9 @@ addon.Modules:register("deals", { onEnable = function()
     addon.Events:subscribe("deals", "ITEM_SEARCH_RESULTS_UPDATED", function(itemKey) updateLive(itemKey, itemKey, false) end)
     addon.Events:subscribe("deals", "GOLDPILOT_SETTING_CHANGED", function(key, value)
         if key == "deals" then if value then DealsUI:start() else DealsUI:hide() end
-        elseif key == "dealsSmall" and DealsUI.frame then
-            if DealsUI.frame.checkbox.SetChecked then DealsUI.frame.checkbox:SetChecked(value == true) end
+        elseif (key == "dealsSmall" or key == "dealsAffordable") and DealsUI.frame then
+            local checkbox = key == "dealsSmall" and DealsUI.frame.checkbox or DealsUI.frame.affordableCheckbox
+            if checkbox.SetChecked then checkbox:SetChecked(value == true) end
             if DealsUI.active then render() end
         end
     end)

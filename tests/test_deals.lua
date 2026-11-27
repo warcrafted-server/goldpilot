@@ -33,11 +33,12 @@ return {
         assert(addon.Widgets.truncate("corto", 23) == "corto")
     end,
     ["deals UI shows sections, toggles small profits, and checks live prices without buying"] = function(addon, mock)
-        local oldAuction, oldApi, oldDB = _G.AuctionHouseFrame, C_AuctionHouse, GoldPilotDB
+        local oldAuction, oldApi, oldDB, oldMoney = _G.AuctionHouseFrame, C_AuctionHouse, GoldPilotDB, _G.GetMoney
         local oldVendor = addon.Valuation.vendor
         local auction, browse = CreateFrame("Frame"), CreateFrame("Frame")
         browse:Show(); auction.BrowseResultsFrame = browse; auction.SelectBrowseResult = function(self, value) self.selected = value end
         _G.AuctionHouseFrame = auction
+        _G.GetMoney = function() return 80 end
         local bought, searched, livePrice = 0, nil, 100
         C_AuctionHouse = {
             MakeItemKey = function(id) return { itemID = id } end,
@@ -60,8 +61,15 @@ return {
         local panel = addon.DealsUI.frame
         assert(panel:IsShown() and panel.sections.resale and panel.sections.vendor)
         assert(panel.sections.vendor.title:GetText() == addon.L.DEALS_SECTION_VENDOR)
+        assert(addon.Settings.get("dealsAffordable") and #addon.DealsUI.results.vendor == 1)
         panel.checkbox:SetChecked(true); panel.checkbox.scripts.OnClick(panel.checkbox)
-        assert(addon.Settings.get("dealsSmall") and #addon.DealsUI.results.vendor == 2)
+        assert(addon.Settings.get("dealsSmall") and #addon.DealsUI.results.vendor == 1)
+        panel.affordableCheckbox:SetChecked(false); panel.affordableCheckbox.scripts.OnClick(panel.affordableCheckbox)
+        assert(#addon.DealsUI.results.vendor == 2)
+        panel.affordableCheckbox:SetChecked(true); panel.affordableCheckbox.scripts.OnClick(panel.affordableCheckbox)
+        _G.GetMoney = function() return 100 end
+        mock.fire("PLAYER_MONEY")
+        assert(#addon.DealsUI.results.vendor == 2)
         local button = panel.sections.vendor.rows[1].button
         button.scripts.OnClick()
         assert(auction.selected and auction.selected.itemKey.itemID == 42 and bought == 0)
@@ -74,7 +82,7 @@ return {
         browse:Hide(); auction.CommoditiesSellFrame = CreateFrame("Frame"); auction.CommoditiesSellFrame:Show()
         mock.flushTimers(); assert(not panel:IsShown())
         browse:Show(); addon.Settings.set("deals", false); mock.flushTimers(); assert(not panel:IsShown())
-        _G.AuctionHouseFrame, C_AuctionHouse, GoldPilotDB = oldAuction, oldApi, oldDB
+        _G.AuctionHouseFrame, C_AuctionHouse, GoldPilotDB, _G.GetMoney = oldAuction, oldApi, oldDB, oldMoney
         addon.Valuation.vendor = oldVendor
     end,
     ["resale uses today's market and the next competitor"] = function(addon)

@@ -82,6 +82,8 @@ addon.LocaleRegister("enUS", {
     SETTING_MY_AUCTIONS = "My auctions assistant",
     SETTING_DEALS = "Bargains at the auction house",
     SETTING_DEALS_SMALL = "Bargains: include small profits",
+    DEALS_AFFORDABLE = "Only what I can afford",
+    SETTING_DEALS_AFFORDABLE = "Bargains: only what I can afford",
     DEALS_TITLE = "Bargains",
     DEALS_AGE = "Prices from %s",
     DEALS_SMALL = "Include small profits",

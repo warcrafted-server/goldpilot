@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.22.0] - 2026-11-27
+
+### Añadido
+- Gangas: casilla «Solo lo que puedo pagar», activada de serie.
+
 ## [0.21.1] - 2026-11-27
 
 ### Corregido
