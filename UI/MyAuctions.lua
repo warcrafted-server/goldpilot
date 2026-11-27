@@ -3,7 +3,7 @@ local _, addon = ...
 local MyAuctions = { owner = "my-auctions", queried = false, active = false }
 addon.MyAuctions = MyAuctions
 
-local WIDTH, ROW_HEIGHT = 340, 20
+local WIDTH, ROW_HEIGHT = 360, 20
 local GOLD = { 0.9, 0.72, 0.29 }
 local RED, GREEN, PALE, GRAY = { 1, 0.3, 0.25 }, { 0.4, 0.9, 0.4 }, { 0.92, 0.82, 0.55 }, { 0.65, 0.65, 0.65 }
 
@@ -30,7 +30,7 @@ local function createPanel(parent)
     frame.rows = {}
     for i = 1, 8 do
         local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        label:SetFont("Fonts/FRIZQT__.TTF", 10, ""); label:SetWidth(120); label:SetJustifyH("LEFT")
+        label:SetFont("Fonts/FRIZQT__.TTF", 10, ""); label:SetWidth(150); label:SetJustifyH("LEFT")
         label:SetWordWrap(false)
         local value = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         value:SetFont("Fonts/FRIZQT__.TTF", 10, ""); value:SetWidth(60); value:SetJustifyH("RIGHT")
@@ -105,8 +105,8 @@ local function truncate(text)
         local byte = string.byte(text, index)
         if byte < 128 or byte >= 192 then
             chars = chars + 1
-            if chars == 17 then cut = index end
-            if chars == 19 then return string.sub(text, 1, cut) .. "…" end
+            if chars == 22 then cut = index end
+            if chars == 24 then return string.sub(text, 1, cut) .. "…" end
         end
     end
     return text
@@ -135,9 +135,9 @@ local function render()
         if row then
             local y = -(panel.contentTop + 20) - (index - 1) * ROW_HEIGHT
             widgets.label:ClearAllPoints(); widgets.label:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, y)
-            widgets.label:SetWidth(120)
+            widgets.label:SetWidth(150)
             widgets.label:SetText(truncate(row.auction.name)); widgets.label:SetTextColor(unpack(PALE)); widgets.label:Show()
-            widgets.value:ClearAllPoints(); widgets.value:SetPoint("TOPLEFT", panel, "TOPLEFT", 130, y)
+            widgets.value:ClearAllPoints(); widgets.value:SetPoint("TOPLEFT", panel, "TOPLEFT", 160, y)
             local state, color, text
             if row.state == "undercut" then state, color, text = addon.L.MYAUCTIONS_UNDERCUT, RED,
                 string.format(addon.L.MYAUCTIONS_UNDERCUT, addon.Theme.money(row.min))

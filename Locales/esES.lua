@@ -98,6 +98,7 @@ addon.LocaleRegister("esES", {
     SELL_SUGGESTED = "Sugerido",
     SELL_NET = "Neto",
     SELL_DEPOSIT = "Depósito",
+    SELL_VENDOR = "Paga el vendedor",
     SELL_NONE = "sin datos",
     SELL_CONF_GAME = "confirmado",
     SELL_CONF_OBS = "observado",

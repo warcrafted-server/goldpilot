@@ -46,7 +46,7 @@ local function createPanel(parent)
     local frame = addon.Widgets.sidePanel(parent, addon.L.SELL_TITLE, WIDTH)
     if not frame then return nil end
     frame.rows = {}
-    for index = 1, 5 do
+    for index = 1, 6 do
         local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         label:SetFont("Fonts/FRIZQT__.TTF", 11, "")
         label:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -26 - (index - 1) * ROW_HEIGHT)
@@ -148,6 +148,8 @@ local function render(frame, value, minPrice, suggestion, depositValue)
         { addon.L.SELL_NET, suggestion and money(suggestion.net) or addon.L.SELL_NONE },
     }
     if depositValue then rows[#rows + 1] = { addon.L.SELL_DEPOSIT, money(depositValue) } end
+    -- Sin la cifra del vendedor el aviso no se puede comprobar.
+    if suggestion and suggestion.warning == "vendor" and value.vendor then rows[#rows + 1] = { addon.L.SELL_VENDOR, money(value.vendor.price) } end
     local y = frame.contentTop
     for index, row in ipairs(frame.rows) do
         local data = rows[index]

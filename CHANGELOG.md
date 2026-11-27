@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.19.2] - 2026-11-27
+
+### Cambiado
+- El asistente de venta muestra cuánto paga el vendedor cuando aconseja venderle a él.
+- Mis subastas deja más sitio a los nombres de los objetos.
+
 ## [0.19.1] - 2026-11-27
 
 ### Cambiado
