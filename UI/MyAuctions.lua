@@ -98,20 +98,6 @@ local function converted()
 end
 MyAuctions.convertOwned = converted
 
-local function truncate(text)
-    text = tostring(text or "?")
-    local chars, cut = 0, 0
-    for index = 1, #text do
-        local byte = string.byte(text, index)
-        if byte < 128 or byte >= 192 then
-            chars = chars + 1
-            if chars == 22 then cut = index end
-            if chars == 24 then return string.sub(text, 1, cut) .. "…" end
-        end
-    end
-    return text
-end
-
 local function render()
     if inCombat() then return end
     local auction = _G and _G.AuctionHouseFrame
@@ -136,7 +122,7 @@ local function render()
             local y = -(panel.contentTop + 20) - (index - 1) * ROW_HEIGHT
             widgets.label:ClearAllPoints(); widgets.label:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, y)
             widgets.label:SetWidth(150)
-            widgets.label:SetText(truncate(row.auction.name)); widgets.label:SetTextColor(unpack(PALE)); widgets.label:Show()
+            widgets.label:SetText(addon.Widgets.truncate(row.auction.name, 23)); widgets.label:SetTextColor(unpack(PALE)); widgets.label:Show()
             widgets.value:ClearAllPoints(); widgets.value:SetPoint("TOPLEFT", panel, "TOPLEFT", 160, y)
             local state, color, text
             if row.state == "undercut" then state, color, text = addon.L.MYAUCTIONS_UNDERCUT, RED,

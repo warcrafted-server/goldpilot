@@ -25,6 +25,24 @@ end
 
 Widgets.frame = frame
 
+function Widgets.truncate(value, maxCharacters)
+    local valueString = tostring(value or "?")
+    maxCharacters = math.max(1, tonumber(maxCharacters) or 1)
+    local starts, index = {}, 1
+    while index <= #valueString do
+        starts[#starts + 1] = index
+        local byte = string.byte(valueString, index)
+        if byte < 0x80 then index = index + 1
+        elseif byte < 0xE0 then index = index + 2
+        elseif byte < 0xF0 then index = index + 3
+        else index = index + 4 end
+    end
+    if #starts <= maxCharacters then return valueString end
+    local prefixCount = math.max(0, maxCharacters - 1)
+    local finish = prefixCount > 0 and starts[prefixCount + 1] - 1 or 0
+    return string.sub(valueString, 1, finish) .. "…"
+end
+
 -- Recorta el borde gris que traen los iconos del juego.
 local function cropIcon(texture)
     if texture.SetTexCoord then texture:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
@@ -506,6 +524,13 @@ function Widgets.checkbox(parent, label, checked, callback)
         self.checked = value
         if callback then callback(value == true) end
     end)
+    return box
+end
+
+function Widgets.smallCheckbox(parent, label, checked, callback)
+    local box = Widgets.checkbox(parent, label, checked, callback)
+    box:SetSize(22, 22)
+    if box.label and box.label.SetFont then box.label:SetFont("Fonts/FRIZQT__.TTF", 10, "") end
     return box
 end
 

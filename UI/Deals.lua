@@ -3,9 +3,8 @@ local _, addon = ...
 local DealsUI = { owner = "deals", cacheTime = 0, active = false }
 addon.DealsUI = DealsUI
 
-local WIDTH, ROW_HEIGHT = 360, 20
-local MAX_REQUESTS = 50
-local GREEN, GOLD, PALE, GRAY = { 0.4, 0.9, 0.4 }, { 0.9, 0.72, 0.29 }, { 0.92, 0.82, 0.55 }, { 0.65, 0.65, 0.65 }
+local WIDTH, ROW_HEIGHT, MAX_REQUESTS = 400, 20, 50
+local GREEN, GOLD, PALE, GRAY, RED = { 0.4, 0.9, 0.4 }, { 0.9, 0.72, 0.29 }, { 0.92, 0.82, 0.55 }, { 0.65, 0.65, 0.65 }, { 1, 0.3, 0.25 }
 
 local function call(object, method, ...)
     if not object or type(object[method]) ~= "function" then return nil end
@@ -16,17 +15,12 @@ local function shown(object) return object and call(object, "IsShown") == true e
 local function inCombat() return InCombatLockdown and InCombatLockdown() end
 local function api(path, ...) local ok, a = addon.Compat.call(path, ...); if ok then return a end end
 
-local function truncate(text)
-    text = tostring(text or "?")
-    local chars, cut = 0, 0
-    for index = 1, #text do
-        local byte = string.byte(text, index)
-        if byte < 128 or byte >= 192 then
-            chars = chars + 1
-            if chars == 20 then cut = index end
-            if chars == 22 then return string.sub(text, 1, cut) .. "…" end
-        end
-    end
+local function label(parent, width, justify)
+    local text = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    text:SetFont("Fonts/FRIZQT__.TTF", 10, "")
+    text:SetWordWrap(false)
+    if width then text:SetWidth(width) end
+    if justify then text:SetJustifyH(justify) end
     return text
 end
 
@@ -34,25 +28,34 @@ local function createPanel(parent)
     if DealsUI.frame or not parent or inCombat() then return DealsUI.frame end
     local panel = addon.Widgets.sidePanel(parent, addon.L.DEALS_TITLE, WIDTH)
     if not panel then return nil end
-    panel.age = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    panel.age:SetFont("Fonts/FRIZQT__.TTF", 10, ""); panel.age:SetTextColor(unpack(GRAY))
-    panel.age:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -panel.contentTop)
-    panel.rows = {}
-    for index = 1, 10 do
-        local name = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        name:SetFont("Fonts/FRIZQT__.TTF", 10, ""); name:SetWidth(150); name:SetJustifyH("LEFT"); name:SetWordWrap(false)
-        local price = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        price:SetFont("Fonts/FRIZQT__.TTF", 10, ""); price:SetWidth(72); price:SetJustifyH("RIGHT"); price:SetWordWrap(false)
-        local profit = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        profit:SetFont("Fonts/FRIZQT__.TTF", 10, ""); profit:SetWidth(112); profit:SetJustifyH("RIGHT"); profit:SetWordWrap(false)
-        local button = addon.Widgets.frame("Button", nil, panel)
-        button:SetHighlightTexture("Interface/QuestFrame/UI-QuestTitleHighlight")
-        panel.rows[index] = { name = name, price = price, profit = profit, button = button }
+    panel.age = label(panel)
+    panel.age:SetTextColor(unpack(GRAY))
+    panel.checkbox = addon.Widgets.smallCheckbox(panel, addon.L.DEALS_SMALL, addon.Settings.get("dealsSmall"), function(value)
+        addon.Settings.set("dealsSmall", value)
+    end)
+    panel.live = label(panel, WIDTH - 16)
+    panel.live:SetWordWrap(true)
+    panel.sections = {}
+    for _, kind in ipairs({ "resale", "vendor" }) do
+        local section = { kind = kind, rows = {} }
+        section.title = label(panel)
+        section.title:SetTextColor(unpack(GOLD))
+        section.columns = { label(panel, 74, "RIGHT"), label(panel, 74, "RIGHT"), label(panel, 78, "RIGHT") }
+        section.empty = label(panel)
+        section.empty:SetTextColor(unpack(GRAY))
+        for i = 1, 6 do
+            local row = { name = label(panel, 150, "LEFT"), price = label(panel, 74, "RIGHT"), max = label(panel, 74, "RIGHT"), profit = label(panel, 78, "RIGHT") }
+            row.button = addon.Widgets.frame("Button", nil, panel)
+            row.button:SetHighlightTexture("Interface/QuestFrame/UI-QuestTitleHighlight")
+            section.rows[i] = row
+        end
+        panel.sections[kind] = section
     end
-    panel.empty = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    panel.empty:SetFont("Fonts/FRIZQT__.TTF", 10, ""); panel.empty:SetTextColor(unpack(GRAY))
-    panel.hint = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    panel.hint:SetFont("Fonts/FRIZQT__.TTF", 10, ""); panel.hint:SetWidth(WIDTH - 16); panel.hint:SetWordWrap(true); panel.hint:SetTextColor(unpack(GRAY))
+    panel.stale = label(panel)
+    panel.stale:SetTextColor(unpack(GRAY))
+    panel.hint = label(panel, WIDTH - 16)
+    panel.hint:SetWordWrap(true)
+    panel.hint:SetTextColor(unpack(GRAY))
     panel:Hide(); DealsUI.frame = panel
     return panel
 end
@@ -93,7 +96,7 @@ local function compute(now)
             end
         end
     end
-    return addon.Deals.find(items, { now = now }), latest, fresh
+    return addon.Deals.find(items, { now = now, small = addon.Settings.get("dealsSmall") }), latest, fresh
 end
 
 local function itemName(id)
@@ -139,6 +142,7 @@ local function openItem(row, attempt)
         end
         return
     end
+    DealsUI.opened = { deal = row, key = key, itemID = row.itemID, wasVisible = false }
     if type(auction.SelectBrowseResult) == "function"
         and pcall(auction.SelectBrowseResult, auction, { itemKey = key }) then
         requestPrices(key, 0)
@@ -146,46 +150,86 @@ local function openItem(row, attempt)
         searchByName(auction, name)
     end
 end
+
+local function setPoint(widget, x, y)
+    widget:ClearAllPoints()
+    widget:SetPoint("TOPLEFT", DealsUI.frame, "TOPLEFT", x, y)
+end
+
 local function render()
     if inCombat() then return end
     local auction = _G and _G.AuctionHouseFrame
     local panel = createPanel(auction)
+    local opened = DealsUI.opened
+    local buysVisible = shown(auction and auction.CommoditiesBuyFrame) or shown(auction and auction.ItemBuyFrame)
+    if opened and buysVisible then opened.wasVisible = true end
+    if opened and opened.wasVisible and not buysVisible then DealsUI.opened, DealsUI.live, opened = nil, nil, nil end
     if not panel or not buyVisible(auction) or addon.Settings.get("deals") == false then
         if DealsUI.frame then DealsUI.frame:Hide() end
         DealsUI.active = false
         return
     end
-    local rows = DealsUI.results or {}
-    local now, count = time(), #rows
-    panel.age:ClearAllPoints(); panel.age:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -panel.contentTop)
+    local rows = DealsUI.results or { resale = {}, vendor = {} }
+    local now = time()
     panel.age:SetText(DealsUI.latest and string.format(addon.L.DEALS_AGE, addon.Theme.age(math.max(0, now - DealsUI.latest))) or "")
-    panel.age:Show()
-    for index, widgets in ipairs(panel.rows) do
-        local deal = rows[index]
-        if deal then
-            local name = itemName(deal.itemID)
-            local y = -(panel.contentTop + 18) - (index - 1) * ROW_HEIGHT
-            widgets.name:ClearAllPoints(); widgets.name:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, y)
-            widgets.name:SetText(truncate(name or "...")); widgets.name:SetTextColor(unpack(PALE)); widgets.name:Show()
-            widgets.price:ClearAllPoints(); widgets.price:SetPoint("TOPLEFT", panel, "TOPLEFT", 160, y)
-            widgets.price:SetText(addon.Theme.money(deal.min)); widgets.price:SetTextColor(unpack(PALE)); widgets.price:Show()
-            widgets.profit:ClearAllPoints(); widgets.profit:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -8, y)
-            local text = string.format(addon.L.DEALS_PROFIT, addon.Theme.money(deal.profit))
-            if deal.kind == "resale" then text = text .. string.format(" -%d %%", deal.percent) end
-            widgets.profit:SetText(text); widgets.profit:SetTextColor(unpack(deal.kind == "vendor" and GOLD or GREEN)); widgets.profit:Show()
-            widgets.button:ClearAllPoints(); widgets.button:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, y + 2); widgets.button:SetSize(WIDTH - 8, ROW_HEIGHT)
-            widgets.button:SetScript("OnClick", function() addon.Timer.cancelAll(OPEN_OWNER); openItem(deal, 0) end); widgets.button:Show()
-        else
-            widgets.name:Hide(); widgets.price:Hide(); widgets.profit:Hide(); widgets.button:Hide()
+    panel.age:ClearAllPoints(); panel.age:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -panel.contentTop); panel.age:Show()
+    local y = panel.contentTop + 18
+    panel.checkbox:ClearAllPoints(); panel.checkbox:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -y)
+    if panel.checkbox.SetChecked then panel.checkbox:SetChecked(addon.Settings.get("dealsSmall")) end
+    panel.checkbox:Show(); panel.checkbox.label:Show()
+    y = y + 28
+    if DealsUI.live then
+        panel.live:ClearAllPoints(); panel.live:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
+        panel.live:SetText(DealsUI.live.text); panel.live:SetTextColor(unpack(DealsUI.live.color)); panel.live:Show()
+        y = y + (DealsUI.live.height or 32)
+    else panel.live:Hide() end
+    if not DealsUI.fresh then
+        for _, section in pairs(panel.sections) do
+            section.title:Hide(); for _, col in ipairs(section.columns) do col:Hide() end
+            section.empty:Hide(); for _, row in ipairs(section.rows) do row.name:Hide(); row.price:Hide(); row.max:Hide(); row.profit:Hide(); row.button:Hide() end
         end
+        panel.stale:ClearAllPoints(); panel.stale:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
+        panel.stale:SetText(addon.L.DEALS_STALE); panel.stale:Show(); y = y + 24
+        panel.hint:Hide()
+    else
+        panel.stale:Hide()
+        for _, kind in ipairs({ "resale", "vendor" }) do
+            local section, list = panel.sections[kind], rows[kind] or {}
+            section.title:SetText(kind == "resale" and addon.L.DEALS_SECTION_RESALE or addon.L.DEALS_SECTION_VENDOR)
+            section.title:ClearAllPoints(); section.title:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y); section.title:Show(); y = y + 16
+            for index, key in ipairs({ "price", "max", "profit" }) do
+                section.columns[index]:SetText(index == 1 and addon.L.DEALS_COL_PRICE or index == 2 and addon.L.DEALS_COL_MAX or addon.L.DEALS_COL_PROFIT)
+                section.columns[index]:ClearAllPoints(); section.columns[index]:SetPoint("TOPRIGHT", panel, "TOPLEFT", ({ 238, 312, 392 })[index], -y)
+                section.columns[index]:SetTextColor(unpack(GRAY)); section.columns[index]:Show()
+            end
+            y = y + 16
+            if #list == 0 then
+                section.empty:ClearAllPoints(); section.empty:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
+                section.empty:SetText(addon.L.DEALS_NONE); section.empty:Show(); y = y + ROW_HEIGHT
+                for _, row in ipairs(section.rows) do row.name:Hide(); row.price:Hide(); row.max:Hide(); row.profit:Hide(); row.button:Hide() end
+            else
+                section.empty:Hide()
+                for i, widgets in ipairs(section.rows) do
+                    local deal = list[i]
+                    if deal then
+                        local name = itemName(deal.itemID)
+                        local rowY = -y
+                        setPoint(widgets.name, 8, rowY); widgets.name:SetText(addon.Widgets.truncate(name or "...", 22)); widgets.name:SetTextColor(unpack(PALE)); widgets.name:Show()
+                        setPoint(widgets.price, 160, rowY); widgets.price:SetText(addon.Theme.money(deal.min)); widgets.price:SetTextColor(unpack(PALE)); widgets.price:Show()
+                        setPoint(widgets.max, 238, rowY); widgets.max:SetText(addon.Theme.money(deal.maxPay)); widgets.max:SetTextColor(unpack(PALE)); widgets.max:Show()
+                        setPoint(widgets.profit, 316, rowY); widgets.profit:SetText(addon.Theme.money(deal.profit)); widgets.profit:SetTextColor(unpack(kind == "resale" and GREEN or GOLD)); widgets.profit:Show()
+                        widgets.button:ClearAllPoints(); widgets.button:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, rowY + 2); widgets.button:SetSize(WIDTH - 8, ROW_HEIGHT)
+                        widgets.button:SetScript("OnClick", function() addon.Timer.cancelAll(OPEN_OWNER); DealsUI.opened, DealsUI.live = nil, nil; openItem(deal, 0) end); widgets.button:Show()
+                        y = y + ROW_HEIGHT
+                    else widgets.name:Hide(); widgets.price:Hide(); widgets.max:Hide(); widgets.profit:Hide(); widgets.button:Hide() end
+                end
+            end
+            y = y + 4
+        end
+        panel.hint:ClearAllPoints(); panel.hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
+        panel.hint:SetText(addon.L.DEALS_HINT); panel.hint:Show(); y = y + 32
     end
-    if count == 0 then
-        panel.empty:ClearAllPoints(); panel.empty:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -(panel.contentTop + 22))
-        panel.empty:SetText(DealsUI.fresh and addon.L.DEALS_EMPTY or addon.L.DEALS_STALE); panel.empty:Show()
-    else panel.empty:Hide() end
-    panel.hint:ClearAllPoints(); panel.hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -(panel.contentTop + 20 + count * ROW_HEIGHT + (count == 0 and 20 or 0)))
-    panel.hint:SetText(addon.L.DEALS_HINT); panel.hint:Show()
-    panel:SetHeight(panel.contentTop + 20 + count * ROW_HEIGHT + (count == 0 and 60 or 34))
+    panel:SetHeight(y + 8)
     panel:ClearAllPoints(); panel:SetPoint("TOPLEFT", auction, "TOPRIGHT", 4, -30); panel:Show()
     DealsUI.active = true
 end
@@ -196,9 +240,50 @@ local function recalculate()
     render()
 end
 
+local function liveResults(itemID, isCommodity, itemKey)
+    local listings = {}
+    if isCommodity then
+        local count = math.min(MAX_REQUESTS, tonumber(api("C_AuctionHouse.GetNumCommoditySearchResults", itemID)) or 0)
+        for i = 1, count do
+            local info = api("C_AuctionHouse.GetCommoditySearchResultInfo", itemID, i)
+            if type(info) == "table" then listings[#listings + 1] = { price = info.unitPrice, qty = info.quantity, own = info.numOwnerItems } end
+        end
+    else
+        local count = math.min(MAX_REQUESTS, tonumber(api("C_AuctionHouse.GetNumItemSearchResults", itemKey)) or 0)
+        for i = 1, count do
+            local info = api("C_AuctionHouse.GetItemSearchResultInfo", itemKey, i)
+            if type(info) == "table" then listings[#listings + 1] = { price = info.buyoutAmount, qty = info.quantity, own = info.containsOwnerItem } end
+        end
+    end
+    return addon.Sell.otherMin(listings)
+end
+
+local function updateLive(eventID, eventKey, isCommodity)
+    local opened = DealsUI.opened
+    if not opened then return end
+    local eventItemID = type(eventID) == "table" and eventID.itemID or eventID
+    if eventItemID == nil and type(eventKey) == "table" then eventItemID = eventKey.itemID end
+    if tonumber(eventItemID) ~= tonumber(opened.itemID) then return end
+    local current = liveResults(opened.itemID, isCommodity, opened.key)
+    local name = itemName(opened.itemID) or "..."
+    if current then
+        local result = addon.Deals.check(opened.deal, current)
+        local key = result.good and "DEALS_LIVE_GOOD" or "DEALS_LIVE_BAD"
+        DealsUI.live = { text = string.format(addon.L[key], name, addon.Theme.money(current), addon.Theme.money(result.gain)),
+            color = result.good and GREEN or RED, height = 32 }
+    else
+        DealsUI.live = { text = string.format(addon.L.DEALS_LIVE_GONE, name), color = RED, height = 32 }
+    end
+    render()
+end
+
 local function poll()
     if inCombat() then return true end
     local auction = _G and _G.AuctionHouseFrame
+    local opened = DealsUI.opened
+    local buysVisible = shown(auction and auction.CommoditiesBuyFrame) or shown(auction and auction.ItemBuyFrame)
+    if opened and buysVisible then opened.wasVisible = true end
+    if opened and opened.wasVisible and not buysVisible then DealsUI.opened, DealsUI.live = nil, nil end
     if addon.Settings.get("deals") == false or not buyVisible(auction) then
         if DealsUI.frame then DealsUI.frame:Hide() end
         DealsUI.active = false
@@ -213,9 +298,14 @@ end
 function DealsUI:start()
     if not self.timer then self.timer = addon.Timer.every(0.5, poll, self.owner) end
 end
+function DealsUI:refresh()
+    self.cacheTime = 0
+    if self.active then recalculate() elseif self.frame then render() end
+end
 function DealsUI:hide()
     if inCombat() then return false end
     addon.Timer.cancelAll(self.owner); addon.Timer.cancelAll(OPEN_OWNER); self.timer = nil; self.active = false
+    self.opened, self.live = nil, nil
     if self.frame then self.frame:Hide() end
     return true
 end
@@ -230,10 +320,16 @@ addon.Modules:register("deals", { onEnable = function()
         if DealsUI.active then recalculate() end
     end)
     addon.Events:subscribe("deals", "ITEM_DATA_LOAD_RESULT", function(id)
-        if DealsUI.active then for _, row in ipairs(DealsUI.results or {}) do if row.itemID == id then render(); break end end end
+        if DealsUI.active then for _, kind in ipairs({ "resale", "vendor" }) do for _, row in ipairs((DealsUI.results or {})[kind] or {}) do if row.itemID == id then render(); break end end end end
     end)
+    addon.Events:subscribe("deals", "COMMODITY_SEARCH_RESULTS_UPDATED", function(itemID) updateLive(itemID, nil, true) end)
+    addon.Events:subscribe("deals", "ITEM_SEARCH_RESULTS_UPDATED", function(itemKey) updateLive(itemKey, itemKey, false) end)
     addon.Events:subscribe("deals", "GOLDPILOT_SETTING_CHANGED", function(key, value)
-        if key == "deals" then if value then DealsUI:start() else DealsUI:hide() end end
+        if key == "deals" then if value then DealsUI:start() else DealsUI:hide() end
+        elseif key == "dealsSmall" and DealsUI.frame then
+            if DealsUI.frame.checkbox.SetChecked then DealsUI.frame.checkbox:SetChecked(value == true) end
+            if DealsUI.active then render() end
+        end
     end)
 end })
 return DealsUI

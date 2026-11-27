@@ -4,6 +4,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.21.0] - 2026-11-27
+
+### Añadido
+- Gangas: secciones de reventa y de vendedor, precio máximo a pagar, comprobación en vivo del objeto abierto y casilla para incluir las ganancias pequeñas.
+
+### Cambiado
+- Gangas ya no muestra por defecto beneficios de menos de 50 cobres.
+
+### Corregido
+- «hace hace» en la antigüedad de los precios y caracteres rotos al recortar nombres con acentos.
+
 ## [0.20.1] - 2026-11-27
 
 ### Corregido

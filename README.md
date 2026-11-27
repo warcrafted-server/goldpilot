@@ -37,7 +37,7 @@ Comandos disponibles: `/gpilot` abre o cierra la ventana principal, `/gpilot win
 
 ## Desarrollo
 
-Gangas señala objetos baratos en la pestaña Comprar de la subasta y permite abrirlos con un clic.
+Gangas separa las oportunidades de reventa y de venta al vendedor, muestra cuánto pagar como máximo y comprueba el precio al abrir el objeto. Por defecto solo señala beneficios de al menos 50 cobres; Ajustes permite incluir ganancias pequeñas.
 
 La copia de pruebas del juego es un junction `AddOns\GoldPilotDev` que apunta a la raíz del repo, con su propio `GoldPilotDev.toc` (generado con `python tools/toc_dev.py`, ignorado por git; vuelve a ejecutarlo si cambia la lista de archivos del TOC). Convive con la copia publicada de CurseForge (`AddOns\GoldPilot`), pero solo una de las dos debe estar activa a la vez porque comparten SavedVariables. Montarla o desmontarla exige el juego cerrado. Pruebas: `python tests/run.py`.
 
