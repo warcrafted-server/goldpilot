@@ -46,11 +46,11 @@ return {
     ["zonas se registra entre libro y ajustes y se abre"] = function(addon)
         addon.Main:show()
         local bar = addon.Main.tabsBar
-        assert(#bar.buttons == 5)
+        assert(#bar.buttons == 6)
         assert(bar.buttons[1].name == "now" and bar.buttons[2].name == "inventory")
-        assert(bar.buttons[3].name == "ledger" and bar.buttons[4].name == "zones"
-            and bar.buttons[5].name == "settings")
-        bar.buttons[4].scripts.OnClick(bar.buttons[4])
+        assert(bar.buttons[3].name == "ledger" and bar.buttons[4].name == "trading"
+            and bar.buttons[5].name == "zones" and bar.buttons[6].name == "settings")
+        bar.buttons[5].scripts.OnClick(bar.buttons[5])
         assert(addon.Main.activeTab == "zones" and not addon.Main.pages.zones.hidden)
     end,
     ["zonas lista la actual primero, sin repetir, y mide solo lo suficiente"] = function(addon, mock)

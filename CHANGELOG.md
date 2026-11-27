@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.23.0] - 2026-11-27
+
+### Añadido
+- Pestaña Comercio: precio medio de compra y venta de cada objeto, ganancia de reventa, lo que queda sin vender y balance total, con opción de apartar los objetos de uso propio.
+
 ## [0.22.0] - 2026-11-27
 
 ### Añadido

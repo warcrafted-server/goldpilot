@@ -120,6 +120,8 @@ GoldPilotDB = {
 
 `Engine/Deals.lua` evalúa gangas de vendedor y reventa a partir de precios observados e historial diario, sin acceder a la API del juego.
 
+`Engine/Trading.lua` calcula medias de compra y venta, reventa FIFO, existencias y balance del historial del libro, sin acceder a la API del juego.
+
 Proveedores puros `proveedor(State, Store, Data, Settings) -> oportunidades`, como en LoreWake. Oportunidad:
 
 ```lua
@@ -137,6 +139,8 @@ Puntuación: `beneficio esperado × confianza × liquidez × peso del perfil`, c
 `UI/SellAssist.lua` lee las ofertas y el depósito en la subasta, muestra el consejo junto al formulario de venta y rellena el precio solo cuando el jugador pulsa el botón.
 
 `UI/Deals.lua` muestra gangas junto a la pestaña Comprar y abre el objeto seleccionado en la interfaz de Blizzard; no ejecuta compras.
+
+`UI/TradingUI.lua` muestra la pestaña Comercio con el resumen completo del libro, el valor estimado de las existencias y el filtro para apartar objetos personales.
 
 - Tema derivado de `lorewake/Lorewake/UI/Theme.lua` (mismo autor; se copia y adapta, no se comparte en tiempo de ejecución).
 - Componentes reutilizables: ventana con pestañas, lista con secciones + ficha, franja de métricas, insignia de clase de dato, mini tendencia de texto (▲ ▼ ●) en lugar de gráficas.

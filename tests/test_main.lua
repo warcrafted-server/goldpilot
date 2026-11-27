@@ -24,9 +24,10 @@ return {
         assert(#UISpecialFrames == 1 and UISpecialFrames[1] == "GoldPilotMainFrame")
         assert(addon.Main.activeTab == "now")
         addon.Main.tabsBar:select("inventory")
-        assert(addon.Main.tabsBar.buttons[4].name == "zones")
-        assert(addon.Main.tabsBar.buttons[5].name == "settings")
-        addon.Main.tabsBar.buttons[5].scripts.OnClick(addon.Main.tabsBar.buttons[5])
+        assert(addon.Main.tabsBar.buttons[4].name == "trading")
+        assert(addon.Main.tabsBar.buttons[5].name == "zones")
+        assert(addon.Main.tabsBar.buttons[6].name == "settings")
+        addon.Main.tabsBar.buttons[6].scripts.OnClick(addon.Main.tabsBar.buttons[6])
         assert(addon.Main.activeTab == "settings")
         frame.x, frame.y = 120, -45
         frame.scripts.OnDragStop(frame)
@@ -55,9 +56,9 @@ return {
         assert(addon.Main:registerTab("Future", function() end, "Future Label"))
         assert(addon.Main:registerTab("Future", function() built = true end))
         addon.Main:show()
-        assert(addon.Main.pages.Future and addon.Main.tabsBar.buttons[6])
-        assert(addon.Main.tabsBar.buttons[6].value == "Future Label")
-        addon.Main.tabsBar.buttons[6].scripts.OnClick(addon.Main.tabsBar.buttons[6])
+        assert(addon.Main.pages.Future and addon.Main.tabsBar.buttons[7])
+        assert(addon.Main.tabsBar.buttons[7].value == "Future Label")
+        addon.Main.tabsBar.buttons[7].scripts.OnClick(addon.Main.tabsBar.buttons[7])
         assert(built and addon.Main.activeTab == "Future")
     end,
     ["main no se abre ni crea en combate y avisa"] = function(addon, mock)
@@ -68,7 +69,7 @@ return {
     end,
     ["ajustes guardan minimapa y tooltip y tooltip respeta desactivación"] = function(addon, mock)
         addon.Main:show()
-        addon.Main.tabsBar.buttons[5].scripts.OnClick(addon.Main.tabsBar.buttons[5])
+        addon.Main.tabsBar.buttons[6].scripts.OnClick(addon.Main.tabsBar.buttons[6])
         local page = addon.Main.pages.settings
         local minimap, tooltipSetting = page.checkboxes.minimap, page.checkboxes.tooltip
         minimap:SetChecked(false)
