@@ -4,7 +4,6 @@ local SellAssist = { hooked = false, owner = "sell-assist" }
 addon.SellAssist = SellAssist
 
 local WIDTH = 230
-local GOLD = { 0.72, 0.55, 0.2, 0.9 }
 local ROW_HEIGHT = 18
 
 local function inCombat()
@@ -44,26 +43,8 @@ end
 
 local function createPanel(parent)
     if SellAssist.frame or inCombat() or not parent then return SellAssist.frame end
-    local frame = addon.Widgets.frame("Frame", nil, parent, "BackdropTemplate")
-    frame:SetSize(WIDTH, 100)
-    frame:SetFrameStrata("DIALOG")
-    local background = frame:CreateTexture(nil, "BACKGROUND")
-    background:SetAllPoints()
-    background:SetColorTexture(0.08, 0.06, 0.04, 0.96)
-    local function edge(first, second, horizontal)
-        local texture = frame:CreateTexture(nil, "OVERLAY")
-        texture:SetPoint(first, frame, first, 0, 0)
-        texture:SetPoint(second, frame, second, 0, 0)
-        if horizontal then texture:SetHeight(1) else texture:SetWidth(1) end
-        texture:SetColorTexture(unpack(GOLD))
-    end
-    edge("TOPLEFT", "TOPRIGHT", true)
-    edge("BOTTOMLEFT", "BOTTOMRIGHT", true)
-    edge("TOPLEFT", "BOTTOMLEFT", false)
-    edge("TOPRIGHT", "BOTTOMRIGHT", false)
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    frame.title:SetFont("Fonts/FRIZQT__.TTF", 12, "")
-    frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -7)
+    local frame = addon.Widgets.sidePanel(parent, addon.L.SELL_TITLE, WIDTH)
+    if not frame then return nil end
     frame.rows = {}
     for index = 1, 5 do
         local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -72,12 +53,14 @@ local function createPanel(parent)
         label:SetWidth(112)
         label:SetJustifyH("LEFT")
         label:SetTextColor(0.92, 0.86, 0.72)
+        label:SetWordWrap(false)
         local value = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         value:SetFont("Fonts/FRIZQT__.TTF", index == 3 and 13 or 11, "")
         value:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -8, -26 - (index - 1) * ROW_HEIGHT)
         -- Ancho completo: con oro, plata, cobre y la confianza no cabría en media columna.
         value:SetWidth(WIDTH - 16)
         value:SetJustifyH("RIGHT")
+        value:SetWordWrap(false)
         frame.rows[index] = { label = label, value = value }
     end
     frame.warning = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -153,7 +136,6 @@ end
 
 local function render(frame, value, minPrice, suggestion, depositValue)
     local function money(amount) return addon.Theme.money(amount) end
-    frame.title:SetText(addon.L.SELL_TITLE)
     local refClass = value.ref and tostring(value.ref.class or ""):upper()
     local confidence = refClass == "GAME" and addon.L.SELL_CONF_GAME
         or refClass == "OBS" and addon.L.SELL_CONF_OBS
@@ -166,7 +148,7 @@ local function render(frame, value, minPrice, suggestion, depositValue)
         { addon.L.SELL_NET, suggestion and money(suggestion.net) or addon.L.SELL_NONE },
     }
     if depositValue then rows[#rows + 1] = { addon.L.SELL_DEPOSIT, money(depositValue) } end
-    local y = 26
+    local y = frame.contentTop
     for index, row in ipairs(frame.rows) do
         local data = rows[index]
         if data then

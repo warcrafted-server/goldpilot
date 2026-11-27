@@ -14,7 +14,7 @@ function CreateFrame(kind, name, parent, template)
     function frame:SetPoint(...) self.point = { ... }; local point = self.point; self.x, self.y = point[4], point[5] end
     function frame:ClearAllPoints() end
     function frame:SetAllPoints() end
-    function frame:SetFrameStrata() end
+    function frame:SetFrameStrata(value) self.frameStrata = value end
     function frame:SetFrameLevel(value) self.level = value end
     function frame:GetFrameLevel() return self.level or 0 end
     function frame:SetMovable() end

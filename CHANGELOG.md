@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.19.1] - 2026-11-27
+
+### Cambiado
+- Los recuadros de venta y de Mis subastas tienen el mismo estilo que la ventana de GoldPilot, y Mis subastas muestra cada subasta en una sola línea.
+
+### Corregido
+- Mis subastas mostraba «?» en lugar de acentos y signos.
+
 ## [0.19.0] - 2026-11-27
 
 ### Añadido

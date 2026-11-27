@@ -3,8 +3,8 @@ local _, addon = ...
 local MyAuctions = { owner = "my-auctions", queried = false, active = false }
 addon.MyAuctions = MyAuctions
 
-local WIDTH, ROW_HEIGHT = 260, 24
-local GOLD = { 0.72, 0.55, 0.2, 0.9 }
+local WIDTH, ROW_HEIGHT = 340, 20
+local GOLD = { 0.9, 0.72, 0.29 }
 local RED, GREEN, PALE, GRAY = { 1, 0.3, 0.25 }, { 0.4, 0.9, 0.4 }, { 0.92, 0.82, 0.55 }, { 0.65, 0.65, 0.65 }
 
 local function call(object, method, ...)
@@ -22,33 +22,21 @@ end
 
 local function createPanel(parent)
     if MyAuctions.frame or not parent or inCombat() then return MyAuctions.frame end
-    local frame = addon.Widgets.frame("Frame", nil, parent, "BackdropTemplate")
-    frame:SetSize(WIDTH, 100)
-    frame:SetFrameStrata("DIALOG")
-    local bg = frame:CreateTexture(nil, "BACKGROUND")
-    bg:SetAllPoints(); bg:SetColorTexture(0.08, 0.06, 0.04, 0.96)
-    local function edge(first, second, horizontal)
-        local line = frame:CreateTexture(nil, "OVERLAY")
-        line:SetPoint(first, frame, first, 0, 0); line:SetPoint(second, frame, second, 0, 0)
-        if horizontal then line:SetHeight(1) else line:SetWidth(1) end
-        line:SetColorTexture(unpack(GOLD))
-    end
-    edge("TOPLEFT", "TOPRIGHT", true); edge("BOTTOMLEFT", "BOTTOMRIGHT", true)
-    edge("TOPLEFT", "BOTTOMLEFT", false); edge("TOPRIGHT", "BOTTOMRIGHT", false)
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    frame.title:SetFont("Fonts/FRIZQT__.TTF", 12, "")
-    frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -7)
+    local frame = addon.Widgets.sidePanel(parent, addon.L.MYAUCTIONS_TITLE, WIDTH)
+    if not frame then return nil end
     frame.summary = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.summary:SetFont("Fonts/FRIZQT__.TTF", 11, "")
-    frame.summary:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -25)
+    frame.summary:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -frame.contentTop)
     frame.rows = {}
     for i = 1, 8 do
         local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        label:SetFont("Fonts/FRIZQT__.TTF", 10, ""); label:SetWidth(85); label:SetJustifyH("LEFT")
+        label:SetFont("Fonts/FRIZQT__.TTF", 10, ""); label:SetWidth(120); label:SetJustifyH("LEFT")
+        label:SetWordWrap(false)
         local value = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        value:SetFont("Fonts/FRIZQT__.TTF", 10, ""); value:SetWidth(87); value:SetJustifyH("RIGHT")
+        value:SetFont("Fonts/FRIZQT__.TTF", 10, ""); value:SetWidth(60); value:SetJustifyH("RIGHT")
+        value:SetWordWrap(false)
         local button = addon.Widgets.frame("Button", nil, frame, "UIPanelButtonTemplate")
-        button:SetSize(70, 20)
+        button:SetSize(66, 18)
         frame.rows[i] = { label = label, value = value, button = button }
     end
     frame.more = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -57,6 +45,7 @@ local function createPanel(parent)
     frame.more:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -1)
     frame.hint = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.hint:SetFont("Fonts/FRIZQT__.TTF", 10, ""); frame.hint:SetWidth(WIDTH - 16)
+    frame.hint:SetWordWrap(true)
     frame.hint:SetTextColor(unpack(GRAY)); frame.hint:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -1)
     frame:Hide(); MyAuctions.frame = frame
     return frame
@@ -138,26 +127,37 @@ local function render()
         return price and { min = price.min, t = price.t, ref = value.ref and value.ref.price,
             vendor = value.vendor and value.vendor.price } or nil
     end, time())
-    panel.title:SetText(addon.L.MYAUCTIONS_TITLE)
     panel.summary:SetText(string.format(addon.L.MYAUCTIONS_SUMMARY, summary.undercut, summary.ok, summary.sold))
     panel.summary:SetTextColor(unpack(summary.undercut > 0 and RED or PALE))
     local count = math.min(8, #rows)
     for index, widgets in ipairs(panel.rows) do
         local row = rows[index]
         if row then
-            local y = -43 - (index - 1) * ROW_HEIGHT
+            local y = -(panel.contentTop + 20) - (index - 1) * ROW_HEIGHT
             widgets.label:ClearAllPoints(); widgets.label:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, y)
+            widgets.label:SetWidth(120)
             widgets.label:SetText(truncate(row.auction.name)); widgets.label:SetTextColor(unpack(PALE)); widgets.label:Show()
-            widgets.value:ClearAllPoints(); widgets.value:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -82, y)
+            widgets.value:ClearAllPoints(); widgets.value:SetPoint("TOPLEFT", panel, "TOPLEFT", 130, y)
             local state, color, text
             if row.state == "undercut" then state, color, text = addon.L.MYAUCTIONS_UNDERCUT, RED,
                 string.format(addon.L.MYAUCTIONS_UNDERCUT, addon.Theme.money(row.min))
             elseif row.state == "ok" then state, color, text = addon.L.MYAUCTIONS_OK, GREEN, ""
             elseif row.state == "sold" then state, color, text = addon.L.MYAUCTIONS_SOLD, GOLD, addon.L.MYAUCTIONS_SOLD
             else state, color, text = addon.L.MYAUCTIONS_UNKNOWN, GRAY, addon.L.MYAUCTIONS_UNKNOWN end
-            widgets.value:SetText(addon.Theme.money(row.auction.unitPrice) .. " · " .. (text ~= "" and text or state))
-            widgets.value:SetTextColor(unpack(color)); widgets.value:Show()
-            widgets.button:ClearAllPoints(); widgets.button:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -7, y + 3)
+            widgets.value:SetText(addon.Theme.money(row.auction.unitPrice))
+            widgets.value:SetTextColor(unpack(PALE)); widgets.value:Show()
+            widgets.state = widgets.state or panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            if widgets.state.SetFont then widgets.state:SetFont("Fonts/FRIZQT__.TTF", 10, "") end
+            if widgets.state.SetJustifyH then widgets.state:SetJustifyH("RIGHT") end
+            if widgets.state.SetWordWrap then widgets.state:SetWordWrap(false) end
+            widgets.state:ClearAllPoints()
+            widgets.state:SetPoint("TOPRIGHT", panel, "TOPRIGHT", row.state == "undercut" and -76 or -8, y)
+            if widgets.state.SetWidth then widgets.state:SetWidth(row.state == "undercut" and 70 or 80) end
+            widgets.state:SetText(text ~= "" and text or state)
+            widgets.stateKind = row.state
+            if widgets.state.SetTextColor then widgets.state:SetTextColor(unpack(color)) end
+            widgets.state:Show()
+            widgets.button:ClearAllPoints(); widgets.button:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -8, y + 1)
             if row.state == "undercut" then
                 -- Se redibuja cada 0,5 s: mientras espera la confirmación debe conservar el «¿Seguro?».
                 local confirming = MyAuctions.confirmID == row.auction.auctionID and MyAuctions.confirmText
@@ -178,21 +178,21 @@ local function render()
                     end
                 end)
             else widgets.button:Hide() end
-        else widgets.label:Hide(); widgets.value:Hide(); widgets.button:Hide() end
+        else widgets.label:Hide(); widgets.value:Hide(); widgets.button:Hide(); if widgets.state then widgets.state:Hide() end end
     end
     if #rows > count then
-        panel.more:ClearAllPoints(); panel.more:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -43 - count * ROW_HEIGHT)
+        panel.more:ClearAllPoints(); panel.more:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -(panel.contentTop + 20) - count * ROW_HEIGHT)
         panel.more:SetText(string.format(addon.L.MYAUCTIONS_MORE, #rows - count)); panel.more:Show()
     else panel.more:Hide() end
-    if summary.undercut > 0 then
-        panel.hint:ClearAllPoints(); panel.hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -43 - count * ROW_HEIGHT - (#rows > count and 17 or 0))
+    if summary.undercut > 0 or summary.sold > 0 then
+        panel.hint:ClearAllPoints(); panel.hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -(panel.contentTop + 20) - count * ROW_HEIGHT - (#rows > count and 17 or 0))
         panel.hint:SetText(addon.L.MYAUCTIONS_HINT); panel.hint:Show()
     else panel.hint:Hide() end
     local lines = math.max(1, count) * ROW_HEIGHT
     if #rows == 0 then
         panel.rows[1].label:SetText(addon.L.MYAUCTIONS_EMPTY); panel.rows[1].label:SetTextColor(unpack(GRAY)); panel.rows[1].label:Show()
-        panel:SetHeight(64)
-    else panel:SetHeight(43 + lines + (#rows > count and 18 or 0) + (summary.undercut > 0 and 20 or 8)) end
+        panel:SetHeight(panel.contentTop + 28)
+    else panel:SetHeight(panel.contentTop + 20 + lines + (#rows > count and 18 or 0) + ((summary.undercut > 0 or summary.sold > 0) and 30 or 8)) end
     panel:ClearAllPoints(); panel:SetPoint("TOPLEFT", auction, "TOPRIGHT", 4, -30); panel:Show()
     MyAuctions.active = true
 end

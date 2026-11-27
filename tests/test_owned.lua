@@ -46,6 +46,12 @@ return {
         assert(not (addon.SellAssist.frame and addon.SellAssist.frame:IsShown()))
         mock.fire("OWNED_AUCTIONS_UPDATED")
         assert(addon.MyAuctions.frame.summary:GetText():find("1 undercut", 1, true))
+        local sawUndercut, sawSold = false, false
+        for _, row in ipairs(addon.MyAuctions.frame.rows) do
+            if row.stateKind == "undercut" then sawUndercut = true; assert(not row.button.hidden) end
+            if row.stateKind == "sold" then sawSold = true; assert(row.button.hidden) end
+        end
+        assert(sawUndercut and sawSold)
         assert(enqueued > 0)
         local button = addon.MyAuctions.frame.rows[1].button
         button.scripts.OnClick(); assert(canceled == nil)

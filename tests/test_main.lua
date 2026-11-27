@@ -6,6 +6,15 @@ local function tooltip()
 end
 
 return {
+    ["sidePanel dibuja icono, titulo y separador con el desplazamiento comun"] = function(addon, mock)
+        mock.combat = false
+        local parent = CreateFrame("Frame")
+        local panel = addon.Widgets.sidePanel(parent, "Venta", 230)
+        assert(panel.title:GetText() == "Venta" and panel.icon.texture == addon.Theme.iconPath())
+        assert(panel.contentTop == 36 and panel.width == 230)
+        assert(panel.template == "BackdropTemplate" and panel.frameStrata == "DIALOG")
+        assert(panel.separator.color[1] == 0.5 and panel.separator.color[4] == 0.6)
+    end,
     ["main crea ventana perezosa con pestañas, Escape y posición por personaje"] = function(addon, mock)
         assert(not addon.Main.frame)
         SlashCmdList.GOLDPILOT("")

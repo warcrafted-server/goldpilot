@@ -176,6 +176,27 @@ function Widgets.panel(parent, level)
     return panel
 end
 
+function Widgets.sidePanel(parent, title, width)
+    if inCombat() or not parent then return nil end
+    local panel = frame("Frame", nil, parent, "BackdropTemplate")
+    panel:SetSize(width, 100)
+    panel:SetFrameStrata("DIALOG")
+    backdrop(panel, { 0.09, 0.07, 0.05, 0.97 })
+    panel.icon = panel:CreateTexture(nil, "ARTWORK")
+    panel.icon:SetSize(16, 16)
+    panel.icon:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -8)
+    panel.icon:SetTexture(addon.Theme.iconPath())
+    panel.title = text(panel, title, 12, { 0.9, 0.72, 0.29 })
+    panel.title:SetPoint("LEFT", panel.icon, "RIGHT", 6, 0)
+    panel.separator = panel:CreateTexture(nil, "ARTWORK")
+    panel.separator:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -30)
+    panel.separator:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -8, -30)
+    panel.separator:SetHeight(1)
+    panel.separator:SetColorTexture(0.5, 0.4, 0.26, 0.6)
+    panel.contentTop = 36
+    return panel
+end
+
 -- Selector de vista o filtro: oscuro y con flecha, para no confundirlo con un botón de acción.
 function Widgets.selector(parent, width)
     local button = frame("Button", nil, parent)
