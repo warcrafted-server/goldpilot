@@ -13,7 +13,7 @@ local function call(object, method, ...)
 end
 local function shown(object) return object and call(object, "IsShown") == true end
 local function inCombat() return InCombatLockdown and InCombatLockdown() end
-local function api(path, ...) local ok, a = addon.Compat.call(path, ...); if ok then return a end end
+local function api(path, ...) local ok, a = addon.Compat.call(path, ...); if ok then return a end; return nil end
 
 local function label(parent, width, justify)
     local text = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -23,6 +23,8 @@ local function label(parent, width, justify)
     if justify then text:SetJustifyH(justify) end
     return text
 end
+
+local render
 
 -- Las columnas no admiten oro, plata y cobre a la vez: se quita la fracción que no cambia la decisión.
 -- El precio se redondea hacia arriba y el resto hacia abajo, para no prometer de más.
@@ -39,6 +41,12 @@ local function createPanel(parent)
     if not panel then return nil end
     panel.age = label(panel)
     panel.age:SetTextColor(unpack(GRAY))
+    panel.viewDeals = addon.Widgets.frame("Button", nil, panel, "UIPanelButtonTemplate")
+    panel.viewList = addon.Widgets.frame("Button", nil, panel, "UIPanelButtonTemplate")
+    panel.viewDeals:SetSize(92, 22); panel.viewList:SetSize(92, 22)
+    panel.viewDeals:SetText(addon.L.DEALS_VIEW_DEALS); panel.viewList:SetText(addon.L.DEALS_VIEW_LIST)
+    panel.viewDeals:SetScript("OnClick", function() GoldPilotCharDB = GoldPilotCharDB or {}; GoldPilotCharDB.dealsView = "deals"; render() end)
+    panel.viewList:SetScript("OnClick", function() GoldPilotCharDB = GoldPilotCharDB or {}; GoldPilotCharDB.dealsView = "list"; render() end)
     panel.checkbox = addon.Widgets.smallCheckbox(panel, addon.L.DEALS_SMALL, addon.Settings.get("dealsSmall"), function(value)
         addon.Settings.set("dealsSmall", value)
     end)
@@ -68,6 +76,7 @@ local function createPanel(parent)
     panel.hint = label(panel, WIDTH - 16)
     panel.hint:SetWordWrap(true)
     panel.hint:SetTextColor(unpack(GRAY))
+    panel.shoppingRows = {}
     panel:Hide(); DealsUI.frame = panel
     return panel
 end
@@ -127,6 +136,7 @@ local function itemName(id)
     addon.Compat.call("C_Item.RequestLoadItemDataByID", id)
     return nil, key
 end
+DealsUI.itemName = itemName
 
 local OPEN_OWNER, OPEN_RETRIES = "deals-open", 12
 
@@ -163,6 +173,7 @@ local function openItem(row, attempt)
         return
     end
     DealsUI.opened = { deal = row, key = key, itemID = row.itemID, wasVisible = false }
+    DealsUI.activeItem = row.itemID
     if type(auction.SelectBrowseResult) == "function"
         and pcall(auction.SelectBrowseResult, auction, { itemKey = key }) then
         requestPrices(key, 0)
@@ -176,7 +187,7 @@ local function setPoint(widget, x, y)
     widget:SetPoint("TOPLEFT", DealsUI.frame, "TOPLEFT", x, y)
 end
 
-local function render()
+render = function()
     if inCombat() then return end
     local auction = _G and _G.AuctionHouseFrame
     local panel = createPanel(auction)
@@ -191,23 +202,48 @@ local function render()
     end
     local rows = DealsUI.results or { resale = {}, vendor = {} }
     local now = time()
+    GoldPilotCharDB = GoldPilotCharDB or {}
+    if GoldPilotCharDB.dealsView ~= "list" and GoldPilotCharDB.dealsView ~= "deals" then GoldPilotCharDB.dealsView = "deals" end
+    local view = GoldPilotCharDB.dealsView
     panel.age:SetText(DealsUI.latest and string.format(addon.L.DEALS_AGE, addon.Theme.age(math.max(0, now - DealsUI.latest))) or "")
     panel.age:ClearAllPoints(); panel.age:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -panel.contentTop); panel.age:Show()
     local y = panel.contentTop + 18
-    panel.checkbox:ClearAllPoints(); panel.checkbox:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -y)
-    if panel.checkbox.SetChecked then panel.checkbox:SetChecked(addon.Settings.get("dealsSmall")) end
-    panel.checkbox:Show(); panel.checkbox.label:Show()
-    y = y + 22
-    panel.affordableCheckbox:ClearAllPoints(); panel.affordableCheckbox:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -y)
-    if panel.affordableCheckbox.SetChecked then panel.affordableCheckbox:SetChecked(addon.Settings.get("dealsAffordable")) end
-    panel.affordableCheckbox:Show(); panel.affordableCheckbox.label:Show()
-    y = y + 28
+    panel.viewDeals:ClearAllPoints(); panel.viewDeals:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
+    panel.viewList:ClearAllPoints(); panel.viewList:SetPoint("TOPLEFT", panel.viewDeals, "TOPRIGHT", 4, 0)
+    -- La vista activa queda resaltada como un botón pulsado.
+    for name, button in pairs({ deals = panel.viewDeals, list = panel.viewList }) do
+        local method = view == name and button.LockHighlight or button.UnlockHighlight
+        if method then method(button) end
+    end
+    panel.viewDeals:Show(); panel.viewList:Show(); y = y + 26
+    if view == "list" then
+        panel.checkbox:Hide(); panel.checkbox.label:Hide(); panel.affordableCheckbox:Hide(); panel.affordableCheckbox.label:Hide()
+    else
+        panel.checkbox:ClearAllPoints(); panel.checkbox:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -y)
+        if panel.checkbox.SetChecked then panel.checkbox:SetChecked(addon.Settings.get("dealsSmall")) end
+        panel.checkbox:Show(); panel.checkbox.label:Show()
+        y = y + 22
+        panel.affordableCheckbox:ClearAllPoints(); panel.affordableCheckbox:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -y)
+        if panel.affordableCheckbox.SetChecked then panel.affordableCheckbox:SetChecked(addon.Settings.get("dealsAffordable")) end
+        panel.affordableCheckbox:Show(); panel.affordableCheckbox.label:Show()
+        y = y + 28
+    end
     if DealsUI.live then
         panel.live:ClearAllPoints(); panel.live:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
         panel.live:SetText(DealsUI.live.text); panel.live:SetTextColor(unpack(DealsUI.live.color)); panel.live:Show()
         y = y + (DealsUI.live.height or 32)
     else panel.live:Hide() end
-    if not DealsUI.fresh then
+    if view == "list" then
+        for _, section in pairs(panel.sections) do
+            section.title:Hide(); for _, col in ipairs(section.columns) do col:Hide() end
+            section.empty:Hide(); for _, row in ipairs(section.rows) do row.name:Hide(); row.price:Hide(); row.max:Hide(); row.profit:Hide(); row.button:Hide() end
+        end
+        panel.stale:Hide(); panel.hint:Hide()
+        y = addon.ShoppingView.render(panel, y, openItem)
+    else
+        addon.ShoppingView.hide(panel)
+    end
+    if view ~= "list" and not DealsUI.fresh then
         for _, section in pairs(panel.sections) do
             section.title:Hide(); for _, col in ipairs(section.columns) do col:Hide() end
             section.empty:Hide(); for _, row in ipairs(section.rows) do row.name:Hide(); row.price:Hide(); row.max:Hide(); row.profit:Hide(); row.button:Hide() end
@@ -215,7 +251,7 @@ local function render()
         panel.stale:ClearAllPoints(); panel.stale:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
         panel.stale:SetText(addon.L.DEALS_STALE); panel.stale:Show(); y = y + 24
         panel.hint:Hide()
-    else
+    elseif view ~= "list" then
         panel.stale:Hide()
         for _, kind in ipairs({ "resale", "vendor" }) do
             local section, list = panel.sections[kind], rows[kind] or {}
@@ -253,9 +289,105 @@ local function render()
         panel.hint:ClearAllPoints(); panel.hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
         panel.hint:SetText(addon.L.DEALS_HINT); panel.hint:Show(); y = y + 32
     end
+    local active = DealsUI.activeItem
+    if active then
+        local name = itemName(active)
+        local entry = addon.Shopping.get(GoldPilotDB or {}, active)
+        local valuation = addon.Valuation.value(GoldPilotDB or {}, addon.AuctionHouse.houseKey(), active, now)
+        local initial = entry and entry.max or (valuation.ref and valuation.ref.price)
+            or (DealsUI.activePriceItem == active and DealsUI.currentPrice) or 0
+        local editor = panel.editor or { boxes = {} }; panel.editor = editor
+        if editor.itemID ~= active then editor.itemID = active; editor.dirty = false end
+        local title = editor.title or label(panel, WIDTH - 16); editor.title = title
+        title:ClearAllPoints(); title:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y); title:SetText(name or ("#" .. active)); title:Show(); y = y + 18
+        local fields = { { key = "gold", divisor = 10000, cap = 999999, label = addon.L.SHOP_G },
+            { key = "silver", divisor = 100, cap = 99, label = addon.L.SHOP_S }, { key = "copper", divisor = 1, cap = 99, label = addon.L.SHOP_C } }
+        editor.filling = true
+        for i, field in ipairs(fields) do
+            local box = editor.boxes[i]
+            if not box then
+                box = addon.Widgets.frame("EditBox", nil, panel, "InputBoxTemplate")
+                box:SetSize(48, 20); box:SetNumeric(true); box:SetAutoFocus(false)
+                box:SetScript("OnTextChanged", function(_, userInput) if userInput ~= false and not editor.filling then editor.dirty = true end end)
+                box:SetScript("OnEnterPressed", function() DealsUI:saveEditor() end)
+                box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+                editor.boxes[i] = box
+            end
+            local caption = editor.labels and editor.labels[i]
+            if not caption then editor.labels = editor.labels or {}; caption = label(panel, 12); editor.labels[i] = caption end
+            caption:ClearAllPoints(); caption:SetPoint("TOPLEFT", panel, "TOPLEFT", 8 + (i - 1) * 70, -y); caption:SetText(field.label); caption:Show()
+            box:ClearAllPoints(); box:SetPoint("TOPLEFT", panel, "TOPLEFT", 22 + (i - 1) * 70, -y)
+            if not editor.dirty then
+                local amount = math.floor(initial or 0)
+                local value = i == 1 and math.floor(amount / 10000) or i == 2 and math.floor(amount / 100) % 100 or amount % 100
+                box:SetText(tostring(math.min(value, field.cap)))
+            end
+            box:Show()
+        end
+        editor.filling = false
+        y = y + 24
+        local action = editor.action or addon.Widgets.frame("Button", nil, panel); editor.action = action
+        action:SetSize(entry and 112 or 128, 22); action:ClearAllPoints(); action:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
+        action:SetText(entry and addon.L.SHOP_UPDATE or addon.L.SHOP_ADD)
+        action:SetScript("OnClick", function() DealsUI:saveEditor() end); action:Show()
+        if entry then
+            local remove = editor.remove or addon.Widgets.frame("Button", nil, panel); editor.remove = remove
+            remove:SetSize(90, 22); remove:ClearAllPoints(); remove:SetPoint("LEFT", action, "RIGHT", 6, 0)
+            remove:SetText(addon.L.SHOP_REMOVE); remove:SetScript("OnClick", function()
+                addon.Shopping.remove(GoldPilotDB, active); editor.dirty = false; DealsUI:refresh()
+            end); remove:Show()
+        elseif editor.remove then editor.remove:Hide() end
+        y = y + 26
+    elseif panel.editor then
+        if panel.editor.title then panel.editor.title:Hide() end
+        for _, box in ipairs(panel.editor.boxes) do box:Hide() end
+        for _, caption in ipairs(panel.editor.labels or {}) do caption:Hide() end
+        if panel.editor.action then panel.editor.action:Hide() end
+        if panel.editor.remove then panel.editor.remove:Hide() end
+    end
     panel:SetHeight(y + 8)
     panel:ClearAllPoints(); panel:SetPoint("TOPLEFT", auction, "TOPRIGHT", 4, -30); panel:Show()
     DealsUI.active = true
+end
+
+function DealsUI:saveEditor()
+    local editor = self.frame and self.frame.editor
+    if not editor or not editor.itemID then return false end
+    local gold, silver, copper = tonumber(editor.boxes[1]:GetText()) or 0, tonumber(editor.boxes[2]:GetText()) or 0, tonumber(editor.boxes[3]:GetText()) or 0
+    local amount = math.min(999999, gold) * 10000 + math.min(99, silver) * 100 + math.min(99, copper)
+    GoldPilotDB = GoldPilotDB or {}
+    if not addon.Shopping.add(GoldPilotDB, editor.itemID, amount) then return false end
+    editor.dirty = false; self:refresh(); return true
+end
+
+local function alertShopping()
+    DealsUI.alerted = DealsUI.alerted or {}
+    DealsUI.alertCount = DealsUI.alertCount or 0
+    local now = time()
+    for _, entry in ipairs(addon.Shopping.list(GoldPilotDB or {})) do
+        if DealsUI.alertCount >= 5 then break end
+        if not DealsUI.alerted[entry.itemID] then
+            local result = addon.Shopping.evaluate(entry, addon.Prices.get(GoldPilotDB or {}, addon.AuctionHouse.houseKey(), entry.itemID), now)
+            if result.state == "buy" then
+                local name = itemName(entry.itemID) or ("#" .. entry.itemID)
+                addon.Log:info(string.format(addon.L.SHOP_ALERT, name, money(result.price, true), money(entry.max)))
+                DealsUI.alerted[entry.itemID] = true; DealsUI.alertCount = DealsUI.alertCount + 1
+            end
+        end
+    end
+end
+
+local function queueShoppingPrices()
+    DealsUI.alerted, DealsUI.alertCount = {}, 0
+    local now, house, count = time(), addon.AuctionHouse.houseKey(), 0
+    for _, entry in ipairs(addon.Shopping.list(GoldPilotDB or {})) do
+        local price = addon.Prices.get(GoldPilotDB or {}, house, entry.itemID)
+        if not price or not price.t or now - price.t > 3600 then
+            count = count + 1
+            if count <= 20 then addon.AuctionHouse:enqueue(entry.itemID, true) end
+        end
+    end
+    alertShopping()
 end
 
 local function recalculate()
@@ -283,6 +415,15 @@ local function liveResults(itemID, isCommodity, itemKey)
 end
 
 local function updateLive(eventID, eventKey, isCommodity)
+    local incoming = type(eventID) == "table" and eventID.itemID or eventID
+    if incoming == nil and type(eventKey) == "table" then incoming = eventKey.itemID end
+    local auction = _G and _G.AuctionHouseFrame
+    if tonumber(incoming) and (shown(auction and auction.CommoditiesBuyFrame) or shown(auction and auction.ItemBuyFrame)) then
+        DealsUI.activeItem, DealsUI.activeWasVisible = tonumber(incoming), true
+        local current = liveResults(tonumber(incoming), isCommodity, eventKey)
+        DealsUI.activePriceItem, DealsUI.currentPrice = tonumber(incoming), current
+        render()
+    end
     local opened = DealsUI.opened
     if not opened then return end
     local eventItemID = type(eventID) == "table" and eventID.itemID or eventID
@@ -314,12 +455,15 @@ local function poll()
     local buysVisible = shown(auction and auction.CommoditiesBuyFrame) or shown(auction and auction.ItemBuyFrame)
     if opened and buysVisible then opened.wasVisible = true end
     if opened and opened.wasVisible and not buysVisible then DealsUI.opened, DealsUI.live = nil, nil end
+    local clearedActive = not buysVisible and DealsUI.activeItem ~= nil
+    if clearedActive then DealsUI.activeItem, DealsUI.activeWasVisible, DealsUI.activePriceItem, DealsUI.currentPrice = nil, nil, nil, nil end
     if addon.Settings.get("deals") == false or not buyVisible(auction) then
         if DealsUI.frame then DealsUI.frame:Hide() end
         DealsUI.active = false
         return true
     end
-    if not DealsUI.active then
+    if clearedActive then render()
+    elseif not DealsUI.active then
         if time() - DealsUI.cacheTime > 60 then recalculate() else render() end
     end
     return true
@@ -335,13 +479,13 @@ end
 function DealsUI:hide()
     if inCombat() then return false end
     addon.Timer.cancelAll(self.owner); addon.Timer.cancelAll(OPEN_OWNER); self.timer = nil; self.active = false
-    self.opened, self.live = nil, nil
+    self.opened, self.live, self.activeItem, self.activeWasVisible, self.alerted = nil, nil, nil, nil, nil
     if self.frame then self.frame:Hide() end
     return true
 end
 
 addon.Modules:register("deals", { onEnable = function()
-    addon.Events:subscribe("deals", "AUCTION_HOUSE_SHOW", function() DealsUI:start() end)
+    addon.Events:subscribe("deals", "AUCTION_HOUSE_SHOW", function() DealsUI:start(); queueShoppingPrices() end)
     addon.Events:subscribe("deals", "AUCTION_HOUSE_CLOSED", function() DealsUI:hide() end)
     addon.Events:subscribe("deals", "PLAYER_REGEN_ENABLED", poll)
     addon.Events:subscribe("deals", "PLAYER_MONEY", function()
@@ -350,11 +494,18 @@ addon.Modules:register("deals", { onEnable = function()
     end)
     addon.Events:subscribe("deals", "GOLDPILOT_SCAN_PROGRESS", function(progress)
         if progress ~= nil then return end
+        alertShopping()
         DealsUI.cacheTime = 0
         if DealsUI.active then recalculate() end
     end)
     addon.Events:subscribe("deals", "ITEM_DATA_LOAD_RESULT", function(id)
-        if DealsUI.active then for _, kind in ipairs({ "resale", "vendor" }) do for _, row in ipairs((DealsUI.results or {})[kind] or {}) do if row.itemID == id then render(); break end end end end
+        if not DealsUI.active then return end
+        if DealsUI.activeItem == id or (GoldPilotCharDB and GoldPilotCharDB.dealsView == "list") then render(); return end
+        for _, kind in ipairs({ "resale", "vendor" }) do
+            for _, row in ipairs((DealsUI.results or {})[kind] or {}) do
+                if row.itemID == id then render(); return end
+            end
+        end
     end)
     addon.Events:subscribe("deals", "COMMODITY_SEARCH_RESULTS_UPDATED", function(itemID) updateLive(itemID, nil, true) end)
     addon.Events:subscribe("deals", "ITEM_SEARCH_RESULTS_UPDATED", function(itemKey) updateLive(itemKey, itemKey, false) end)

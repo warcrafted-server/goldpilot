@@ -138,7 +138,7 @@ Puntuación: `beneficio esperado × confianza × liquidez × peso del perfil`, c
 
 `UI/SellAssist.lua` lee las ofertas y el depósito en la subasta, muestra el consejo junto al formulario de venta y rellena el precio solo cuando el jugador pulsa el botón.
 
-`UI/Deals.lua` muestra gangas junto a la pestaña Comprar y abre el objeto seleccionado en la interfaz de Blizzard; no ejecuta compras.
+`UI/Deals.lua` muestra gangas o «Mi lista» junto a la pestaña Comprar, abre el objeto seleccionado en la interfaz de Blizzard y avisa de precios que cumplen el máximo guardado; no ejecuta compras. `Store/Shopping.lua` conserva los máximos por objeto en `GoldPilotDB.shopping` y evalúa observaciones recientes.
 
 `UI/TradingUI.lua` muestra la pestaña Comercio con el resumen completo del libro, el valor estimado de las existencias y el filtro para apartar objetos personales.
 

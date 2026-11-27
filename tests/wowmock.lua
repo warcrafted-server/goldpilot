@@ -29,6 +29,10 @@ function CreateFrame(kind, name, parent, template)
     function frame:SetScrollChild(child) self.scrollChild = child end
     function frame:SetText(value) self.value = value end
     function frame:SetEnabled(value) self.enabled = value end
+    function frame:SetNumeric(value) self.numeric = value end
+    function frame:SetAutoFocus(value) self.autoFocus = value end
+    function frame:SetFocus() self.focused = true end
+    function frame:ClearFocus() self.focused = false end
     function frame:GetText() return self.value end
     function frame:SetChecked(value) self.checked = value == true end
     function frame:GetChecked() return self.checked end
