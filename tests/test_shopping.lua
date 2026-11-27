@@ -59,6 +59,9 @@ return {
         assert(auction.selected and auction.selected.itemKey.itemID == 77)
         panel.shopping.rows[1].remove.scripts.OnClick(panel.shopping.rows[1].remove)
         assert(not addon.Shopping.get(GoldPilotDB, 77))
+        local view = panel.shopping
+        assert(view.rows[1].name.hidden and view.rows[1].remove.hidden and view.rows[1].now.hidden, "no quedan restos de la fila quitada")
+        assert(view.now.hidden and not view.empty.hidden, "lista vacía sin cabeceras")
         assert(bought == 0)
         addon.Shopping.add(GoldPilotDB, 77, 12345)
         mock.fire("AUCTION_HOUSE_CLOSED"); mock.fire("AUCTION_HOUSE_SHOW"); mock.flushTimers()

@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.25.2] - 2026-11-27
+
+### Corregido
+- Mi lista: al quitar el último objeto, la fila antigua quedaba superpuesta al mensaje de lista vacía.
+
 ## [0.25.1] - 2026-11-27
 
 ### Corregido

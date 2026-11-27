@@ -29,14 +29,16 @@ function View.render(panel, y, openItem)
         return a.itemID < b.itemID
     end)
     panel.shopping = panel.shopping or { rows = {} }
+    -- Los widgets se reutilizan: se ocultan todos y solo se vuelve a mostrar lo que toca.
+    View.hide(panel)
     local view = panel.shopping
     view.now = view.now or label(panel, 78, "RIGHT")
     view.max = view.max or label(panel, 74, "RIGHT")
     view.now:ClearAllPoints(); view.now:SetPoint("TOPRIGHT", panel, "TOPLEFT", 238, -y)
     view.max:ClearAllPoints(); view.max:SetPoint("TOPRIGHT", panel, "TOPLEFT", 316, -y)
     view.now:SetText(addon.L.SHOP_COL_NOW); view.max:SetText(addon.L.SHOP_COL_MAX)
-    view.now:SetTextColor(unpack(GRAY)); view.max:SetTextColor(unpack(GRAY)); view.now:Show(); view.max:Show()
-    y = y + 18
+    view.now:SetTextColor(unpack(GRAY)); view.max:SetTextColor(unpack(GRAY))
+    if #entries > 0 then view.now:Show(); view.max:Show(); y = y + 18 end
     if #entries == 0 then
         view.empty = view.empty or label(panel, 380)
         view.empty:ClearAllPoints(); view.empty:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -y)
