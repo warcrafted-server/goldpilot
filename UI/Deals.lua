@@ -105,22 +105,47 @@ local function itemName(id)
     return nil, key
 end
 
-local function openItem(row)
-    if inCombat() then return end
-    local auction = _G and _G.AuctionHouseFrame
-    if not auction then return end
-    local name, key = itemName(row.itemID)
-    local info = key and api("C_AuctionHouse.GetItemKeyInfo", key)
-    if info and type(auction.SelectBrowseResult) == "function" then
-        local ok = pcall(auction.SelectBrowseResult, auction, { itemKey = key })
-        if ok then return end
+local OPEN_OWNER, OPEN_RETRIES = "deals-open", 12
+
+-- SelectBrowseResult solo enseña la ficha del objeto: los precios hay que pedirlos aparte.
+local function requestPrices(key, attempt)
+    local ok, ready = addon.Compat.call("C_AuctionHouse.IsThrottledMessageSystemReady")
+    if ok and ready == false and attempt < OPEN_RETRIES then
+        addon.Timer.after(0.25, function() requestPrices(key, attempt + 1) end, OPEN_OWNER)
+        return
     end
-    if name and auction.SearchBar and auction.SearchBar.SearchBox and type(auction.SearchBar.SearchBox.SetText) == "function" then
-        pcall(auction.SearchBar.SearchBox.SetText, auction.SearchBar.SearchBox, name)
+    addon.Compat.call("C_AuctionHouse.SendSearchQuery", key, {}, false)
+end
+
+local function searchByName(auction, name)
+    local bar = auction.SearchBar
+    if not (name and bar and bar.SearchBox and type(bar.SearchBox.SetText) == "function") then return end
+    pcall(bar.SearchBox.SetText, bar.SearchBox, name)
+    local button = bar.SearchButton
+    if not (button and type(button.Click) == "function" and pcall(button.Click, button)) then
         addon.Log:info(addon.L.DEALS_SEARCH)
     end
 end
 
+local function openItem(row, attempt)
+    if inCombat() then return end
+    local auction = _G and _G.AuctionHouseFrame
+    if not shown(auction) then return end
+    local name, key = itemName(row.itemID)
+    -- Sin los datos del objeto cargados no se puede abrir ni buscar: se espera a que lleguen.
+    if not name then
+        if attempt < OPEN_RETRIES then
+            addon.Timer.after(0.25, function() openItem(row, attempt + 1) end, OPEN_OWNER)
+        end
+        return
+    end
+    if type(auction.SelectBrowseResult) == "function"
+        and pcall(auction.SelectBrowseResult, auction, { itemKey = key }) then
+        requestPrices(key, 0)
+    else
+        searchByName(auction, name)
+    end
+end
 local function render()
     if inCombat() then return end
     local auction = _G and _G.AuctionHouseFrame
@@ -149,7 +174,7 @@ local function render()
             if deal.kind == "resale" then text = text .. string.format(" -%d %%", deal.percent) end
             widgets.profit:SetText(text); widgets.profit:SetTextColor(unpack(deal.kind == "vendor" and GOLD or GREEN)); widgets.profit:Show()
             widgets.button:ClearAllPoints(); widgets.button:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, y + 2); widgets.button:SetSize(WIDTH - 8, ROW_HEIGHT)
-            widgets.button:SetScript("OnClick", function() openItem(deal) end); widgets.button:Show()
+            widgets.button:SetScript("OnClick", function() addon.Timer.cancelAll(OPEN_OWNER); openItem(deal, 0) end); widgets.button:Show()
         else
             widgets.name:Hide(); widgets.price:Hide(); widgets.profit:Hide(); widgets.button:Hide()
         end
@@ -190,7 +215,7 @@ function DealsUI:start()
 end
 function DealsUI:hide()
     if inCombat() then return false end
-    addon.Timer.cancelAll(self.owner); self.timer = nil; self.active = false
+    addon.Timer.cancelAll(self.owner); addon.Timer.cancelAll(OPEN_OWNER); self.timer = nil; self.active = false
     if self.frame then self.frame:Hide() end
     return true
 end

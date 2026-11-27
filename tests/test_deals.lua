@@ -28,11 +28,12 @@ return {
         local auction, browse = CreateFrame("Frame"), CreateFrame("Frame")
         browse:Show(); auction.BrowseResultsFrame = browse; auction.SelectBrowseResult = function(self, value) self.selected = value end
         _G.AuctionHouseFrame = auction
-        local bought = 0
+        local bought, searched = 0, nil
         C_AuctionHouse = {
             MakeItemKey = function(id) return { itemID = id } end,
             GetItemKeyInfo = function(key) return { itemName = "Bargain " .. key.itemID, isCommodity = true } end,
             PlaceBid = function() bought = bought + 1 end,
+            SendSearchQuery = function(key) searched = key.itemID end,
             StartCommoditiesPurchase = function() bought = bought + 1 end,
             ConfirmCommoditiesPurchase = function() bought = bought + 1 end,
         }
@@ -46,6 +47,7 @@ return {
         local button = addon.DealsUI.frame.rows[1].button
         button.scripts.OnClick()
         assert(auction.selected and auction.selected.itemKey.itemID == 42 and bought == 0)
+        assert(searched == 42, "al abrir el objeto se piden sus precios")
         browse:Hide(); auction.CommoditiesSellFrame = CreateFrame("Frame"); auction.CommoditiesSellFrame:Show()
         mock.flushTimers(); assert(not addon.DealsUI.frame:IsShown())
         browse:Show(); addon.Settings.set("deals", false); mock.flushTimers(); assert(not addon.DealsUI.frame:IsShown())

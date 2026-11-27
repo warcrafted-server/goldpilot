@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.20.1] - 2026-11-27
+
+### Corregido
+- Gangas: al hacer clic en un objeto se cargan sus precios; si hace falta usar el buscador, la búsqueda se lanza sola.
+
 ## [0.20.0] - 2026-11-27
 
 ### Añadido
