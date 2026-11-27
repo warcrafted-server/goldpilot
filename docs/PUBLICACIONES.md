@@ -38,6 +38,7 @@ El CI (`release.yml`) empaqueta exactamente ese commit y sube a CurseForge las n
 | 0.24.0 | c6eeb0f | Ventas a vendedor de lo comprado en subasta | no | no |
 | 0.25.0 | 40ef396 | Mi lista de la compra con precio máximo y avisos | no | no |
 | 0.25.1 | 64795c2 | Mi lista: botones visibles | no | no |
+| 0.25.2 | f07257e | Mi lista: sin restos al quitar el último objeto | no | no |
 
 Sugerencia: no publicar una versión hasta que esté probada en el juego. Si se encuentra un fallo en una versión preparada pero aún sin publicar, se corrige en la siguiente y se publican juntas, o se salta la defectuosa sin tag. Ninguna versión publicada se retira.
 
