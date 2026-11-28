@@ -92,4 +92,52 @@ return {
         _G.AuctionHouseFrame, hooksecurefunc, C_AuctionHouse = oldAuction, oldHook, oldAuctionAPI
         C_Item.GetItemID, addon.Valuation.value = oldGetItemID, oldValue
     end,
+    ["sell assistant reads gear listings with the full key and never suggests without them"] = function(addon, mock)
+        local old = { auction = _G.AuctionHouseFrame, hook = hooksecurefunc, api = C_AuctionHouse,
+            getID = C_Item.GetItemID, value = addon.Valuation.value, db = GoldPilotDB }
+        local ok, err = pcall(function()
+            local auction, display, sell = CreateFrame("Frame"), CreateFrame("Button"), CreateFrame("Frame")
+            display.GetItem = function(self) return self.item end
+            display.SetItem = function(self, item) self.item = item end
+            sell.ItemDisplay, sell.PriceInput = display, { SetAmount = function() end }
+            auction.ItemSellFrame, auction.CommoditiesSellFrame = sell, CreateFrame("Frame")
+            auction.CommoditiesSellFrame:Hide()
+            auction.SetPostItem = function() end
+            _G.AuctionHouseFrame = auction
+            hooksecurefunc = function(object, method, callback)
+                local original = object[method]
+                object[method] = function(self, ...) local result = original(self, ...); callback(); return result end
+            end
+            C_Item.GetItemID = function(item) return type(item) == "table" and item.itemID or item end
+            local full = { itemID = 777, itemLevel = 16, itemSuffix = 12733 }
+            local listed = true
+            C_AuctionHouse = {
+                MakeItemKey = function(id) return { itemID = id } end,
+                GetItemKeyFromItem = function() return full end,
+                GetNumItemSearchResults = function(key) return (listed and key == full) and 1 or 0 end,
+                GetItemSearchResultInfo = function(key, index)
+                    if key == full and index == 1 then return { buyoutAmount = 923, quantity = 1, containsOwnerItem = false } end
+                end,
+            }
+            GoldPilotDB = {}
+            addon.Valuation.value = function() return { ref = { price = 40, class = "OBS" } } end
+            addon.Modules:enableAll()
+            mock.fire("AUCTION_HOUSE_SHOW")
+            display:SetItem({ itemID = 777 })
+            mock.flushTimers()
+            local panel = addon.SellAssist.frame
+            assert(addon.SellAssist.suggestion and addon.SellAssist.suggestion.price == 922)
+            assert(panel.rows[2].value:GetText() == addon.Theme.money(923))
+            assert(GoldPilotDB.diag.venta.minimo == 923 and GoldPilotDB.diag.venta.referencia == 40)
+            listed = false
+            mock.fire("ITEM_SEARCH_RESULTS_UPDATED", full)
+            assert(addon.SellAssist.suggestion == nil, "sin precio en vivo no hay sugerencia")
+            assert(panel.useButton.enabled == false)
+            assert(panel.warning:GetText() == addon.L.SELL_WARN_NOLIVE)
+            mock.fire("AUCTION_HOUSE_CLOSED")
+        end)
+        _G.AuctionHouseFrame, hooksecurefunc, C_AuctionHouse = old.auction, old.hook, old.api
+        C_Item.GetItemID, addon.Valuation.value, GoldPilotDB = old.getID, old.value, old.db
+        assert(ok, err)
+    end,
 }

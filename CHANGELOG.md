@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [Sin publicar]
 
+## [0.25.4] - 2026-11-28
+
+### Corregido
+- Asistente de venta: con equipo de sufijo (por ejemplo «de poder») no leía los anuncios de la subasta y sugería a ciegas un precio guardado que podía ser muy inferior al real. Ahora lee la lista con la clave completa del objeto y nunca sugiere precio sin el mínimo actual de la subasta; si no lo tiene, lo avisa y desactiva «Usar este precio».
+
 ## [0.25.3] - 2026-11-27
 
 ### Corregido

@@ -98,23 +98,29 @@ local function currentItem(sellFrame)
     return item, id, itemKey(item, id)
 end
 
-local function readOtherMin(id, key, commodity)
+-- Blizzard busca el equipo con la clave completa (nivel y sufijo); con la clave base del id los
+-- resultados de la lista no aparecen y el mínimo de otros quedaba vacío.
+local function searchKey(item, id)
+    if type(item) == "table" then
+        local ok, key = addon.Compat.call("C_AuctionHouse.GetItemKeyFromItem", item)
+        if ok and type(key) == "table" then return key end
+    end
+    local ok, key = addon.Compat.call("C_AuctionHouse.MakeItemKey", id)
+    if ok then return key end
+end
+
+local function readOtherMin(item, id, key, commodity)
     local listings = {}
     local countOK, count
+    local auctionKey = not commodity and (searchKey(item, id) or key) or nil
     if commodity then countOK, count = addon.Compat.call("C_AuctionHouse.GetNumCommoditySearchResults", id)
-    else
-        local ok, auctionKey = addon.Compat.call("C_AuctionHouse.MakeItemKey", id)
-        countOK, count = addon.Compat.call("C_AuctionHouse.GetNumItemSearchResults", ok and auctionKey or key)
-    end
+    else countOK, count = addon.Compat.call("C_AuctionHouse.GetNumItemSearchResults", auctionKey) end
     if not countOK then return nil end
     count = math.min(50, math.max(0, tonumber(count) or 0))
     for index = 1, count do
         local ok, info
         if commodity then ok, info = addon.Compat.call("C_AuctionHouse.GetCommoditySearchResultInfo", id, index)
-        else
-            local _, auctionKey = addon.Compat.call("C_AuctionHouse.MakeItemKey", id)
-            ok, info = addon.Compat.call("C_AuctionHouse.GetItemSearchResultInfo", auctionKey or key, index)
-        end
+        else ok, info = addon.Compat.call("C_AuctionHouse.GetItemSearchResultInfo", auctionKey, index) end
         if ok and type(info) == "table" then
             if commodity then
                 listings[#listings + 1] = { price = info.unitPrice, qty = info.quantity, own = info.numOwnerItems or 0 }
@@ -170,7 +176,8 @@ local function render(frame, value, minPrice, suggestion, depositValue)
         end
     end
     local warning = suggestion and suggestion.warning
-    local warningText = warning == "vendor" and addon.L.SELL_WARN_VENDOR or warning == "crashed" and addon.L.SELL_WARN_CRASHED or ""
+    local warningText = warning == "vendor" and addon.L.SELL_WARN_VENDOR or warning == "crashed" and addon.L.SELL_WARN_CRASHED
+        or not minPrice and addon.L.SELL_WARN_NOLIVE or ""
     frame.warning:SetText(warningText)
     if warningText ~= "" then
         frame.warning:ClearAllPoints()
@@ -217,10 +224,18 @@ local function update()
     local depositValue = deposit(item, id, commodity, duration, quantity) or tonumber(call(sellFrame.Deposit, "GetAmount"))
     local db = GoldPilotDB or {}
     local value = addon.Valuation.value(db, addon.AuctionHouse:houseKey(), key, time())
-    local minPrice = readOtherMin(id, key, commodity)
-    local suggestion = addon.Sell.suggest({ min = minPrice, ref = value.ref and value.ref.price,
+    local minPrice = readOtherMin(item, id, key, commodity)
+    -- Sin el precio actual de la subasta no se sugiere nada: una referencia guardada puede ser de
+    -- otra variante o estar desfasada, y aplicarla a ciegas hace perder oro.
+    local suggestion = minPrice and addon.Sell.suggest({ min = minPrice, ref = value.ref and value.ref.price,
         refClass = value.ref and value.ref.class, vendor = value.vendor and value.vendor.price,
-        quantity = quantity, deposit = depositValue })
+        quantity = quantity, deposit = depositValue }) or nil
+    GoldPilotDB = GoldPilotDB or {}
+    GoldPilotDB.diag = GoldPilotDB.diag or {}
+    local okLink, link = addon.Compat.call("C_Item.GetItemLink", item)
+    GoldPilotDB.diag.venta = { fecha = time(), itemID = id, clave = tostring(key), enlace = okLink and link or nil,
+        material = commodity == true, referencia = value.ref and value.ref.price, clase = value.ref and value.ref.class,
+        visto = value.ref and value.ref.t, minimo = minPrice }
     SellAssist.sellFrame, SellAssist.item, SellAssist.itemID, SellAssist.commodity = sellFrame, item, id, commodity
     SellAssist.suggestion = suggestion
     SellAssist.active = true

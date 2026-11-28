@@ -141,6 +141,7 @@ addon.LocaleRegister("esES", {
     SELL_CONF_EXT = "de la aplicación",
     SELL_WARN_VENDOR = "Vender al vendedor rinde más",
     SELL_WARN_CRASHED = "Precio muy por debajo de lo normal: mejor esperar",
+    SELL_WARN_NOLIVE = "Sin el precio actual de la subasta: mira la lista antes de poner precio",
     SELL_USE = "Usar este precio",
     COMBAT_BLOCKED = "GoldPilot no puede abrir la ventana durante el combate.",
     INVENTORY_SCOPE_CHARACTER = "Personaje actual",
